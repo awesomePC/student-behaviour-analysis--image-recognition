@@ -1,0 +1,41 @@
+Recognize.py script execution:
+
+1) load serialized  face detector from disk
+	cv2.dnn.readNetFromCaffe():
+
+	Reads a network model stored in Caffe framework's format.
+
+	Parameters
+	prototxt	-- path to the .prototxt file with text description of the network architecture.
+	caffeModel	-- path to the .caffemodel file with learned network.
+
+
+2) load serialized face embedding model from disk :
+
+	embedder = cv2.dnn.readNetFromTorch(embeddings_model)
+	
+	Reads a network model stored in Torch7 framework's format.
+
+	Parameters
+	model	path to the file, dumped from Torch by using torch.save() function.
+
+
+3) load the actual face recognition model along with the label encoder.
+
+4) load the image
+
+5) construct a blob from the image and apply OpenCV's deep learning-based face detector to localize
+   faces in the input image
+
+6) loop over the detections
+	
+	i) extract the confidence (i.e., probability) associated with the prediction
+	ii) filter out weak detections
+	iii) compute the (x, y)-coordinates of the bounding box for the face
+	iv) extract the face ROI
+	v) construct a blob for the face ROI, then pass the blob through pre-trained face embedding model to obtain the 128-d quantification of the face
+
+	vi) perform classification to recognize the face
+	vii) draw the bounding box of the face along with the associated probability
+
+7) show the output image

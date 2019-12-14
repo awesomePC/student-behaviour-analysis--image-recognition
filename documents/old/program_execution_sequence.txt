@@ -1,0 +1,63 @@
+
+Train Algorithm on our dataset:
+
+1) load serialized  face detector from disk
+	cv2.dnn.readNetFromCaffe():
+
+	Reads a network model stored in Caffe framework's format.
+
+	Parameters
+	prototxt	-- path to the .prototxt file with text description of the network architecture.
+	caffeModel	-- path to the .caffemodel file with learned network.
+
+
+2) load serialized face embedding model from disk :
+
+	embedder = cv2.dnn.readNetFromTorch(embeddings_model)
+	
+	Reads a network model stored in Torch7 framework's format.
+
+	Parameters
+	model	path to the file, dumped from Torch by using torch.save() function.
+
+
+3) grab the paths to the input images in dataset:
+	
+	imagePaths = list(paths.list_images(dir_dataset_with_path))
+
+4) loop over the image paths:
+	i) Load and resize image
+	ii) construct a blob from the image:
+	    cv2.dnn.blobFromImage():
+	    It will perform:
+		  Mean subtraction
+		  Scaling
+		  And optionally channel swapping
+
+	iii) Apply OpenCV's deep learning-based face detector to localize faces in the input image
+		
+		detector.setInput(imageBlob)
+		detections = detector.forward()
+
+	iv) Ensure at least one face was found
+
+	v) compute the (x, y)-coordinates of the bounding box for the face
+
+	vi) extract the face ROI and grab the ROI dimensions
+
+	vii) construct a blob for the face ROI, then pass the blob through our face embedding model 
+	     to obtain the 128-d quantification of the face.
+
+		 faceBlob = cv2.dnn.blobFromImage(face)
+		 embedder.setInput(faceBlob)
+		 vec = embedder.forward()
+
+	viii) add the name of the person + corresponding face in lists
+
+5) dump the facial embeddings + names to disk as "embeddings.pickle"
+
+   data = {"embeddings": knownEmbeddings, "names": knownNames}
+
+6) Fit the SVM model according to the given training data.
+
+7) write the actual face recognition model and label encoder to disk

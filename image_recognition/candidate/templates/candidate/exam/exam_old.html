@@ -1,0 +1,277 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+<!-- custom template tags -->
+{% load custom_extra_tags %}
+
+{% block title %} Exam {% endblock %}
+
+{% block navbar %}{% endblock %}
+{% block sidebar %}{% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+
+    <div class="hidden_Camera" style="display:none;">
+        <div id="camera">
+        </div>
+    </div>
+
+    <!-- exam-->
+    <div class="col-md-12" id="exam">
+        <div class="panel panel-flat">
+            <div class="panel-heading p-10">
+                <h6 class="panel-title">{{ candidate.exam.name }}</h6>
+            </div>
+
+            <div class="panel-body">
+
+                <div class="row col-eq">
+                    <div class="col-md-9 col-border-grey pad-lr-30">
+                        <p>
+                            <span>Exam Name</span>
+                            <span class="colon">:<span>
+                            <span></span>
+                        </p>
+                        <p>
+                            <span>Candidate Name</span>
+                            <span class="colon">:<span>
+                            <span>{{ candidate.candidate.first_name }}</span>
+                            <span>{{ candidate.candidate.last_name }}</span>
+                        </p>
+                    </div>
+                    <div class="col-md-3 col-border-grey">
+                        <p>
+                            <span>Time Left - </span>
+                            <div class='timer' data-seconds-left="10"></div>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="row col-eq">
+                    <div class="col-md-9 col-border-grey min-height-400 pad-lr-30">
+                        <div id="question" data-id class="question-text pt-20 pb-20">
+                            <span>
+                                <span>Q.</span><span id="question-number"></span><span class="colon">)</span>
+                            <span>
+                            <span id="question-title"></span>
+                        </div>
+                        <div id="question-options" class="question-options">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" checked="checked">
+                                    <span>High level language</span>
+                                </label>
+                            </div>
+
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox">
+                                    <span>Low level language</span>
+                                </label>
+                            </div>
+
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="radio-styled-color" class="control-warning">
+                                    Warning radio
+                                </label>
+                            </div>
+
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="radio-styled-color" class="control-info">
+                                    Info radio
+                                </label>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-border-grey min-height-400">
+                        <div class="question-badges">
+                            <p>
+                                <a>
+                                    <span class="badge badge-flat question-visited">63</span>
+                                    <span>Visited</span>
+                                </a>
+
+                                <a class="pl-10">
+                                    <span class="badge badge-flat border-grey text-grey-600">63</span>
+                                    <span>Not-Visited</span>
+                                </a> 
+                            </p>
+
+                            <p>
+                                <a>
+                                    <span class="badge badge-success">63</span>
+                                    <span>Answered</span>
+                                </a>
+
+                                <a class="pl-10">
+                                    <span class="badge badge-info">63</span>
+                                    <span>Flagged</span>
+                                </a> 
+                            </p>
+                        </div>
+
+                        <div class="container-question-numbers">
+                            <p class="question-numbers">Questions</p>
+                            <div>
+                                <a href="#" class="label label-flat label-rounded label-icon border-teal text-teal-600"><span>34</span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-9 col-border-grey">
+                        <div class="col-md-9">
+                            <button 
+                                id="clear-response"
+                                type="button"
+                                class="btn btn-warning legitRipple">
+                                <i class="icon-pen position-left"></i> 
+                                Clear Response
+                            </button>
+                            <button 
+                                type="button"
+                                class="btn btn-info legitRipple ml-20">
+                                <i class="icon-pen position-left"></i> 
+                                Mark for Review & Next
+                            </button>
+                        </div>                        
+                        <div class="col-md-3">
+                            <button 
+                                id="save-and-next"
+                                type="button"
+                                class="btn btn-success legitRipple">
+                                <i class="icon-pen position-left"></i> 
+                                Save & Next
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-border-grey">
+                        <button 
+                            id="submit-exam"
+                            type="button"
+                            class="btn btn-success legitRipple">
+                            <i class="icon-pen position-left"></i> 
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /exam-->
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<style>
+#exam .panel-heading
+{
+    background: #26323808;
+}
+
+#exam .panel-title
+{
+    color: #333333;
+    font-size: 17px;
+}
+</style>
+
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+<script type="text/javascript"> 
+   var exam_id = parseInt("{{ candidate.exam.id }}");
+   var exam_candidate_id = parseInt("{{ candidate.id }}");
+</script>
+
+<link href="{% static 'candidate/list-exam.css' %}?v=1.0" type="text/css" rel="stylesheet">
+
+<!-- form -->
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/styling/uniform.min.js' %}"></script>
+<script type="text/javascript">
+    $(function () {
+        // Custom color
+        $("input").uniform({
+            radioClass: 'choice',
+            wrapperClass: 'border-info-600 text-info-800'
+        });
+        
+    });
+</script>
+
+<!-- jQuery Plugin For Responsive Bootstrap Equal Height Columns - ColEqualizer -->
+<script type="text/javascript" src="{% static 'candidate/plugin/Bootstrap-Equal-Height-Colums/bootstrap-colequalizer.js' %}"></script>
+<script type="text/javascript">
+    // global variables
+    var stop_exam = false;
+    var authenticity_status = [];
+    var exam_capture_time = 10 * 1000; // in seconds
+
+    $(document).ready(function () {
+        $('.col-eq').colequalizer();
+    });
+</script>
+
+
+<!-- Webcam.min.js
+<script src="{% static 'candidate/plugin/webcam/webcam.js' %}?v=1.0"></script>
+<script type="text/javascript" src="{% static 'candidate/js/capture_exam_live_photo.js' %}"></script>
+-->
+
+<script type="text/javascript" src="{% static 'candidate/js/exam.js' %}"></script>
+
+<script src="{% static 'candidate/plugin/Simple-Timer/jquery.simple.timer.js' %}"></script>
+<style>
+  .timer div {
+      float: left !important;
+  }
+
+  .timer, .timer-done, .timer-loop {
+    font-size: 23px;
+    color: black;
+    font-weight: bold;
+    padding: 10px;
+  }
+
+  .jst-clearDiv {
+    clear: both;
+  }
+  .jst-timeout {
+    color: red;
+  }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.timer').startTimer({
+             onComplete: function(element){
+                element.addClass('is-complete');
+
+                // $("#submit-exam").trigger("click");
+            }
+        });
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

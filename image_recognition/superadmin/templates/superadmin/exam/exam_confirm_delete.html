@@ -1,0 +1,69 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %} Delete Exam {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam list -->
+    <div class="col-md-12">
+
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title text-danger">Delete exam</h6>
+                <div class="heading-elements">
+                </div>
+            </div>
+            <div class="panel-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <p class="txt-error">
+                        Are you sure to delete "{{ object }}" ?
+                    </p>
+                    <button type="submit" class="btn btn-warning legitRipple mt-20">
+                        Sure
+                    </button>
+                    <a href="{% url 'superadmin:exam_list' %}">
+                        <button type="button" class="btn btn-success legitRipple mt-20 ml-20">
+                            Go back
+                        </button>
+                    </a>
+                </form>
+            </div>
+
+        </div>
+
+    </div>  
+    <!--/ exam list-->  
+
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

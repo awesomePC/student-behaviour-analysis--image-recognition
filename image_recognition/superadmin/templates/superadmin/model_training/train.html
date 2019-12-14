@@ -1,0 +1,118 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Train Model {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-heading">
+                <h6 class="panel-title">Train Model</h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                Train Deep learning model to recognize candidate photo.
+
+                <div class="mt-20">
+                    <button id="btn-train-model" class="btn btn-primary" type="button">
+                        <div id="normal-state"><span>Train Model </span></div>
+                        <div id="loading-state" style="display:none;">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Training ...<span>
+                        </div>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#training").addClass("active");
+        $("#model_training").addClass("active");
+    });
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    
+    var btn_train_model = $("#btn-train-model").get(0);
+
+    $(btn_train_model).on("click", function(){
+
+        $(this).prop('disabled', true);
+        $(this).find("#normal-state").css("display", "none");
+        $(this).find("#loading-state").css("display", "inline-block");
+
+
+        $.ajax({
+            /*
+            data: {
+                "url_citation": url_citation,
+            },
+            */
+            method: "POST",
+            url: '/recognize/start_embedding_training_model/'
+
+        }).done(function(data) {
+            // If successful
+            console.log(data);
+
+            $(btn_train_model).prop('disabled', false);
+            $(btn_train_model).find("#normal-state").css("display", "inline-block");
+            $(btn_train_model).find("#loading-state").css("display", "none");
+
+            if(data.message.type == "success")
+            {
+                new PNotify({
+                    title: 'Success',
+                    text: 'Model Training completed successfully.',
+                    addclass: 'alert alert-styled-left alert-arrow-left',
+                    type: 'success'
+                });
+            }
+            else
+            {
+                new PNotify({
+                    title: 'Error',
+                    text: 'Error while training model.',
+                    addclass: 'alert alert-styled-left alert-arrow-left',
+                    type: 'error'
+                });
+            }
+
+          }).fail(function(jqXHR, textStatus, errorThrown) {
+              // If fail
+              console.log(textStatus + ': ' + errorThrown);
+          });
+       
+
+    });
+})
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

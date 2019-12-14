@@ -1,0 +1,159 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Exam {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam result -->
+    <div class="col-md-12">
+        <div class="panel panel-white">
+            <div class="panel-heading">
+                <h6 class="panel-title">Exam Result</h6>
+            </div>
+            
+            <div class="panel-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        
+                        <tbody>
+                            <tr>
+                                <td><span>Exam Name:</span><span class="pl-5">{{ exam.name }}</span></td>
+                                <td><span>Date:</span><span class="pl-5">{{ exam.created_at }}</span></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span>Candidate Name:</span>
+                                    <span class="pl-5">{{ exam_candidate.candidate.first_name }}</span>
+                                    <span class="pl-5">{{ exam_candidate.candidate.last_name }}</span>
+                                </td>
+                                <td><span>Score:</span><span class="pl-5"> {{ total_score }}</span></td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- /exam result -->
+
+    <!-- visualization exam result -->
+    <div class="col-md-12" id="exam-instructions">
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title"></h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+
+                <!-- HTML -->
+                <div id="chartdiv"></div>
+
+            </div>
+        </div>
+    </div>
+    <!-- /visualization exam result -->
+    
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+<link href="{% static 'candidate/list-exam.css' %}?v=1.0" type="text/css" rel="stylesheet">
+
+<!-- Styles -->
+<style>
+#chartdiv {
+  width: 100%;
+  height: 500px;
+}
+
+</style>
+
+<!-- Resources -->
+<script src="{% static 'assets/js/charts/amcharts/core.js' %}?v=1.0"></script>
+<script src="{% static 'assets/js/charts/amcharts/charts.js' %}?v=1.0"></script>
+<script src="{% static 'assets/js/charts/amcharts/animated.js' %}?v=1.0"></script>
+
+<!-- Chart code -->
+<script>
+
+$(document).ready(function(){
+
+    am4core.ready(function() {
+
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+
+    var chart = am4core.create("chartdiv", am4charts.PieChart3D);
+    chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+    chart.legend = new am4charts.Legend();
+
+    /*
+    chart.data = [
+        {
+            title: "Lithuania",
+            total: 501.9
+        },
+        {
+            title: "Czech Republic",
+            total: 301.9
+        },
+        {
+            title: "Ireland",
+            total: 201.1
+        },
+    ];
+    */
+
+console.log($.parseJSON('{{ graph_data_question_status|safe}}'));
+
+    chart.data = $.parseJSON('{{ graph_data_question_status|safe}}');
+    
+    var series = chart.series.push(new am4charts.PieSeries3D());
+    series.dataFields.value = "total";
+    series.dataFields.category = "title";
+
+    series.colors.list = [
+        am4core.color("#4CAF50"),
+        am4core.color("#FF6F91"),
+        am4core.color("#D65DB1"),
+        am4core.color("#FF9671"),
+        am4core.color("#FFC75F"),
+        am4core.color("#F9F871"),
+    ];
+
+    }); // end am4core.ready()
+});
+
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

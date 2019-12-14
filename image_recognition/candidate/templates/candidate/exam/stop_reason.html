@@ -1,0 +1,114 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Exam stop reason{% endblock %}
+
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam stopped reason -->
+    <div class="col-md-12">
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">Exam Status</h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div>
+                    <h4 class="text-danger-700">Exam stopped due to suspicious activity.</h4>
+                </div>
+                <div class="activity">
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /exam stopped reason -->   
+</div>
+
+<!-- Accordion with right control button -->
+<h6 class="content-group text-semibold">More details</h6>
+
+<div class="panel-group panel-group-control panel-group-control-right content-group-lg" id="accordion-control-right">
+    {% for exam_candidate_photo in exam_candidate_photos %}
+    <div class="panel panel-white">
+        <div class="panel-heading">
+            <h6 class="panel-title">
+                <a data-toggle="collapse" data-parent="#accordion-control-right" href="#accordion-control-right-group{{forloop.counter}}">Activity #{{forloop.counter}}</a>
+                {% if exam_candidate_photo.is_suspicious %}
+                <span class="text-danger">suspicious</span>
+                {% endif %}
+            </h6>
+            
+        </div>
+        <div id="accordion-control-right-group{{forloop.counter}}" class="panel-collapse collapse {% if forloop.counter == 1 %}in{% endif %}">
+            <div class="panel-body">
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <p class="mt-10"> Captured Image:</p>
+                        <img class="mt-10" src="{{ exam_candidate_photo.photo.url }}" />
+                    </div>
+                    <div class="col-md-12">
+                        {% if exam_candidate_photo.detected_persons_list %}
+                        <p class="mt-10"> Detected Persons:</p>
+                        <p>{{ exam_candidate_photo.detected_persons_list }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-12">
+                        {% if exam_candidate_photo.reason%}
+                        <p class="mt-10 text-danger">
+                            <span>Reason:</span>
+                            <span>{{ exam_candidate_photo.reason }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-12">
+                        <p class="mt-10 text-info">
+                            <span>Time : </span>
+                            <span>{{ exam_candidate_photo.created_at }}</span>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p> No images found </p>
+    {% endfor %}
+
+</div>
+<!-- /accordion with right control button -->
+
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

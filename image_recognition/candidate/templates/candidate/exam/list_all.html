@@ -1,0 +1,157 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Exam {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam list -->
+    <div class="col-md-12">
+
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">Exam</h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="jui-tabs-hover">
+                    <ul>
+                        <li><a href="#tabs-active-exam">Active</a></li>
+                        <li><a href="#tabs-completed-exam">Completed</a></li>
+                        <li><a href="#tabs-exam-analysis">Analysis</a></li>
+                    </ul>
+                    <div id="tabs-active-exam">
+                        <p class="mt-15 mb-15">Currently active exams list:</p>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-framed">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Exam Name</th>
+                                        <th>Total Marks</th>
+                                        <th>Time(In minutes)</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for candidate_exam in active_exams%}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ candidate_exam.exam.name }}</td>
+                                        <td>{{ candidate_exam.exam.total_mark }}</td>
+                                        <td>{{ candidate_exam.exam.total_time }}</td>
+                                        <td>
+                                            <a href="{% url 'candidate:exam_validate_user' candidate_exam.exam.id %}">
+                                                <button type="button" class="btn btn-info btn-xs legitRipple">
+                                                    <i class="icon-pen position-left"></i>
+                                                    Take Exam
+                                                </button>
+                                            </a>  
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                        <tr>
+                                            <td colspan=5>
+                                                <p class="txt-center">No record found ...</p>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="tabs-completed-exam">
+                        <p>Completed exam list </p>
+                        <table class="table table-bordered table-framed">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Exam Name</th>
+                                    <th>Total Marks</th>
+                                    <th>Time(In minutes)</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for candidate_exam in completed_exams %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ candidate_exam.exam.name }}</td>
+                                    <td>{{ candidate_exam.exam.total_mark }}</td>
+                                    <td>{{ candidate_exam.exam.total_time }}</td>
+                                    <td>
+                                        <a href="#" title="'candidate:view_result' candidate_exam.exam.id">
+                                            <button type="button" class="btn btn-info btn-xs legitRipple">
+                                                <i class="icon-pen position-left"></i>
+                                                View Result
+                                            </button>
+                                        </a>  
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan=5>
+                                            <p class="txt-center">No record found ...</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="tabs-exam-analysis">
+                        <p>Analysis of completed exams</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>  
+    <!--/ exam list-->  
+
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+<link href="{% static 'candidate/list-exam.css' %}?v=1.0" type="text/css" rel="stylesheet">
+
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/interactions.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/widgets.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/effects.min.js' %}"></script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // Open tab on hover
+        $(".jui-tabs-hover").tabs({
+            event: 'mouseover'
+        });
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

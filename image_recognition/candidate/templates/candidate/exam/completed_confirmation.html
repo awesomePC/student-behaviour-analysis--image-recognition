@@ -1,0 +1,56 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Exam Successfully Completed {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam instructions-->
+    <div class="col-md-12">
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">Exam Status</h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div>
+                    <h3 class="text-success">Exam Submitted successfully.</h3>
+                </div>
+                <div>
+                    <p class="">Result will be sent to your registered email shortly.</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /exam instructions-->   
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#campaign").addClass("active");
+        $("#campaign-create").addClass("active");
+    });
+</script>
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

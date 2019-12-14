@@ -1,0 +1,71 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+<!-- custom template tags -- candidate app -->
+{% load custom_extra_tags %}
+
+{% block title %} Exam {% endblock %}
+
+<!-- no navbar and sidebar -->
+{% block navbar %}{% endblock %}
+{% block sidebar %}{% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam instructions-->
+    <div class="col-md-12" id="exam-instructions">
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">Exam Instructions</h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div id="instructions">
+                    {% if exam.instruction|is_html %}
+                        {{ exam.instruction| safe }}
+                    {% else %}
+                        <p>{{ exam.instruction }}</p>
+                    {% endif %}
+                    
+                </div>
+                <div class="pt-20">
+                    <a href="{% url 'candidate:exam' exam.id %}">
+                        <button type="button" class="btn btn-success btn-xs legitRipple"><i class="icon-pen position-left"></i> Proceed</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /exam instructions-->   
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+<link href="{% static 'candidate/list-exam.css' %}?v=1.0" type="text/css" rel="stylesheet">
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

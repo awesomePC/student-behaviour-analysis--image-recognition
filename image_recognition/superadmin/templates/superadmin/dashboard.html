@@ -1,0 +1,90 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Dashboard {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <div class="col-sm-6 col-md-3">
+        <div class="panel panel-body bg-blue-400 has-bg-image">
+            <div class="media no-margin">
+                <div class="media-body">
+                    <h3 class="no-margin">5</h3>
+                    <span class="text-uppercase text-size-mini">Active Exams</span>
+                </div>
+
+                <div class="media-right media-middle">
+                    <i class="icon-newspaper2 icon-3x opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-md-3">
+        <div class="panel panel-body bg-success-400 has-bg-image">
+            <div class="media no-margin">
+                <div class="media-left media-middle">
+                    <i class="icon-checkmark-circle2 icon-3x opacity-75"></i>
+                </div>
+
+                <div class="media-body text-right">
+                    <h3 class="no-margin">6</h3>
+                    <span class="text-uppercase text-size-mini">Completed Exams</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-md-3">
+        <div class="panel panel-body bg-danger-400 has-bg-image">
+            <div class="media no-margin">
+                <div class="media-body">
+                    <h3 class="no-margin">3</h3>
+                    <span class="text-uppercase text-size-mini">&nbsp;</span>
+                </div>
+
+                <div class="media-right media-middle">
+                    <i class="icon-bag icon-3x opacity-75 hidden"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-6 col-md-3">
+        <div class="panel panel-body bg-indigo-400 has-bg-image">
+            <div class="media no-margin">
+                <div class="media-left media-middle">
+                    <i class="icon-enter6 icon-3x opacity-75 hidden"></i>
+                </div>
+
+                <div class="media-body text-right">
+                    <h3 class="no-margin">3</h3>
+                    <span class="text-uppercase text-size-mini">&nbsp;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#campaign").addClass("active");
+        $("#campaign-create").addClass("active");
+    });
+</script>
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

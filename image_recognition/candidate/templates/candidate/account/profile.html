@@ -1,0 +1,30 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Page title {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+    <!-- write html here -->
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#campaign").addClass("active");
+        $("#campaign-create").addClass("active");
+    });
+</script>
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

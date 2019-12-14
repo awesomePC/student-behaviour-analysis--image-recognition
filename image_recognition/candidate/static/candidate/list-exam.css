@@ -1,0 +1,62 @@
+.row-buttons
+{
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-top: 1px solid #80808066;
+    border-bottom: 1px solid #80808066;
+}
+.col-border-grey
+{
+    border: 1px solid #979b9733;
+    margin-bottom: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.question-visited
+{
+    background: #808080b3;
+}
+
+.question-badges
+{
+    padding-bottom: 8px;
+}
+.question-numbers
+{
+    padding: 6px 5px 4px 4px;
+    background: #efefef;
+    border-top: 1px solid #8080804d;
+    border-bottom: 1px solid #8080804d; 
+}
+
+.min-height-370
+{
+    min-height: 370px;
+}
+
+.radio input[type="radio"], .radio-inline input[type="radio"], .checkbox input[type="checkbox"], .checkbox-inline input[type="checkbox"] {
+    cursor: pointer;
+}
+
+input[type="checkbox"] {
+    margin: 2px 0 0;
+}
+
+.container-question-numbers
+{
+    max-height: 150px;
+    overflow-y: scroll;
+}
+.pad-lr-30
+{
+    padding-right: 30px;
+    padding-left: 30px;
+}
+
+.radio, .checkbox {
+
+    margin-top: 12px;
+    margin-bottom: 12px;
+
+}

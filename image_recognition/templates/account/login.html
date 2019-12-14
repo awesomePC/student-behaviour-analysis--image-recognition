@@ -1,0 +1,48 @@
+{% extends "common/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Log in{% endblock %}
+
+<!-- make empty navbar and sidebar -->
+{% block navbar %}{% endblock %}
+{% block sidebar %}{% endblock %}
+
+{% block content %}
+
+<form action="{% url 'account_login' %}" method="post">
+  {% csrf_token %}
+  <div class="panel panel-body login-form">
+    <div class="text-center">
+      <div class="icon-object border-slate-300 text-slate-300"><i class="icon-reading"></i></div>
+      <h5 class="content-group">Login to your account <small class="display-block">Your credentials</small></h5>
+    </div>
+
+    <div class="form-group">
+    {{ form|crispy }}
+    </div>
+
+    <div class="form-group login-options">
+      <div class="row">
+        <div class="col-sm-6">
+          <label class="checkbox-inline">
+            <input type="checkbox" class="styled">
+            Remember
+          </label>
+        </div>
+
+        <div class="col-sm-6 text-right">
+          <a href="{% url 'account_reset_password' %}">Forgot password?</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <button type="submit" class="btn bg-success-400 btn-block">Login <i class="icon-arrow-right14 position-right"></i></button>
+    </div>
+
+    <div class="content-divider text-muted form-group"><span>Don't have an account?</span></div>
+    <a href="{% url 'candidate:sign_up' %}" class="btn btn-default btn-block content-group">Sign up</a>
+  </div>
+</form>
+
+{% endblock content %}

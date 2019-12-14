@@ -1,0 +1,302 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+{% load widget_tweaks %}
+
+{% block title %} Sign Up {% endblock %}
+
+<!-- // empty navbar  -->
+{% block navbar %}
+{% endblock %}
+
+<!-- // empty sidebar  -->
+{% block sidebar %}
+{% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<!-- Wizard with validation -->
+    <form method="POST" class="stepy-validation" action="{% url 'candidate:sign_up' %}">
+        {% csrf_token %}
+
+        <input type="hidden" name="user_type" id="id_user_type" value="candidate">
+
+        {{ form.non_field_errors }}
+
+        {% for hidden_field in form.hidden_fields %}
+            {{ hidden_field.errors }}
+            {{ hidden_field }}
+        {% endfor %}
+
+        <fieldset title="1">
+            <legend class="text-semibold">Account data</legend>
+
+            <div class="row pt-15 pb-15">
+                <div class="col-md-6">
+                    <label>User name<span class="text-danger">*</span></label>
+                    {% render_field form.username|attr:"required:required" class+="form-control" placeholder="Please enter username" %}
+                    {{ form.username.errors }}
+                </div>
+
+                <div class="col-md-6">
+                    <label>Email<span class="text-danger">*</span></label>
+                    {% render_field form.email|attr:"required:required" class+="form-control" placeholder="Please enter email" %}
+                    {{ form.email.errors }}
+                </div>
+            </div>
+
+            <div class="row pt-15 pb-15">
+                <div class="col-md-6">
+                    <label>Password<span class="text-danger">*</span></label>
+                    {% render_field form.password1|attr:"required:required" class+="form-control" %}
+                    {{ form.password1.errors }}
+                </div>
+
+                <div class="col-md-6">
+                    <label>Confirm Password<span class="text-danger">*</span></label>
+                    {% render_field form.password2|attr:"required:required" class+="form-control" %}
+                    {{ form.password2.errors }}
+                </div>
+            </div>
+
+        </fieldset>
+
+        <fieldset title="2">
+            <legend class="text-semibold">Personal Details</legend>
+            
+            <div class="row pt-15 pb-15">
+                <div class="col-md-6">
+                    <label>First name</label>
+                    {% render_field form.first_name class+="form-control" placeholder="Please enter first name" %}
+                </div>
+
+                <div class="col-md-6">
+                    <label>Last name</label>
+                    {% render_field form.last_name class+="form-control" placeholder="Please enter last name" %}
+                </div>
+            </div>
+            
+            <div class="row pt-15 pb-15">
+                <div class="col-md-6">
+                    <label>Phone</label>
+                    {% render_field form.phone class+="form-control" placeholder="Please enter phone number" %}
+                </div>
+            </div>
+
+        </fieldset>
+
+        <fieldset title="3">
+            <legend class="text-semibold">Additional info</legend>
+            
+            <div class="row pt-15 pb-15">
+                <div class="col-md-12">
+                    <label>Images</label>
+                </div>
+
+                <div class="col-lg-12">
+                    <div class="form-group">
+                        <input id="candidate-image" name="candidate-image" type="file" multiple>
+                    </div>
+                </div>
+
+                <div class="col-lg-12 mt-20">
+                    <p class="mb-10">or capture via webcam</p>
+                    <button 
+                        id="add_training_image"
+                        type="button"
+                        class="btn btn-primary heading-btn legitRipple popup-capture-image_open">
+                        Capture via webcam<span class="legitRipple-ripple">
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </fieldset>
+
+
+        <button type="submit" class="btn btn-success stepy-finish">Submit <i class="icon-check position-right"></i></button>
+    </form>
+
+
+<section id="popup-capture-image">
+  <div class="contentarea">
+    <div class="row">
+        <div class="col-md-12" id="container-camera">
+            <div id="camera">
+            </div>
+            <button id="btn-capture">Take photo</button>
+        </div>
+
+        <div class="col-md-12 hidden" id="container-result">
+            <img id="result-snapshot"></img>
+            <div class="container-btn">
+                <button id="btn-upload">Upload photo</button>
+                <button id="btn-cancel">Take Another photo</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+<!-- /wizard with validation -->
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#campaign").addClass("active");
+        $("#campaign-create").addClass("active");
+    });
+
+    var url_save_captured_sign_up_photo = "{% url 'candidate:save_captured_sign_up_photo' %}";
+</script>
+
+<link href="{% static 'candidate/css/sign_up.css' %}?v=1.0" type="text/css" rel="stylesheet">
+
+<!-- form -->
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/wizards/stepy.min.js' %}?v=1.0"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/selects/select2.min.js' %}?v=1.0"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/styling/uniform.min.js' %}?v=1.0"></script>
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jasny_bootstrap.min.js' %}?v=1.0"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/validation/validate.min.js' %}?v=1.0"></script>
+
+<!-- image upload -->
+<!-- sortable.min.js is only needed if you wish to sort / rearrange files in initial preview. 
+    This must be loaded before fileinput.min.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.0.5/js/plugins/sortable.min.js" type="text/javascript"></script>
+<!-- purify.min.js is only needed if you wish to purify HTML content in your preview for 
+    HTML files. This must be loaded before fileinput.min.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.0.5/js/plugins/purify.min.js" type="text/javascript"></script>
+
+<!-- the main fileinput plugin file -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.0.5/js/fileinput.js"></script>
+<!-- optionally if you need a theme like font awesome theme you can include it as mentioned below -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/5.0.5/themes/fa/theme.js"></script>
+
+
+<script type="text/javascript" src="{% static 'candidate/js/signup.js' %}?v=1.0"></script>
+
+<script type="text/javascript">
+    $(document).on("ready", function() {
+
+        var ele_input_img = $("#candidate-image");
+
+        $(ele_input_img).fileinput({
+            uploadUrl: "/candidate/upload_sign_up_images/",
+
+            uploadAsync: false,
+            
+            // showDownload: true,
+            showUpload: false, // hide upload button
+
+            minFileCount: 1,
+            maxFileCount: 5,
+            allowedFileExtensions: ['jpg', 'jpeg', 'png', 'gif'],
+            
+            // initialPreview: [
+            //     "assets/images/placeholder.jpg",
+            //     "assets/images/placeholder.jpg",
+            // ],
+            // initialPreviewConfig: [
+            //     {caption: "Jane.jpg", size: 930321, key: 1, url: '{$url}', showDrag: false},
+            //     {caption: "Anna.jpg", size: 1218822, key: 2, url: '{$url}', showDrag: false}
+            // ],
+            
+            initialPreview: {{ initialPreview|safe }},
+            initialPreviewConfig: {{ initialPreviewConfig|safe }},
+
+            initialPreviewAsData: true,
+            overwriteInitial: false,
+            initialPreviewFileType: 'image', // image is the default and can be overridden in config below
+
+            showBrowse: true,
+            // browseOnZoneClick: true,
+
+            uploadExtraData: function(previewId, index) {
+                var data = {
+                    previewId : previewId,
+                };
+                return data;
+            },
+
+        }).on('fileuploaded', function(event, previewId, index, fileId) {
+            console.log("fileuploaded triggered");
+            console.log('File Uploaded', 'ID: ' + fileId + ', Thumb ID: ');
+            console.log(previewId);
+        
+        }).on('fileuploaderror', function(event, data, msg) {
+            console.log("fileuploaderror triggered");
+            console.log('File Upload Error', 'ID: ' + data.fileId + ', Thumb ID: ');
+            console.log(data);
+            console.log(msg);
+        
+        }).on('filebatchuploadcomplete', function(event, preview, config, tags, extraData) {
+            console.log('File Batch Uploaded', preview, config, tags, extraData);
+        });
+
+        // delete
+        $(ele_input_img).on('filepredelete', function(event, key, jqXHR, data) {
+            console.log("filepredelete triggered");
+            console.log('Key : ' + key);
+            console.log('data : ' + data);
+
+        }).on('fileremoved', function(event, id, index) {
+            // This event is triggered after removal of each thumbnail file 
+            // in the preview and for files which are NOT PART of initialPreview. 
+            console.log("fileremoved triggered");
+            console.log('id = ' + id + ', index = ' + index);
+
+        }).on('filedeleted', function(event, key, jqXHR, data) {
+            // This event is triggered after successful completion of ajax 
+            // request for deletion of each initial preview thumbnail file in the initialPreview content set
+            console.log("filedeleted triggered");
+            console.log('Key = ' + key);
+            console.log('data : ' + data);
+        });
+
+        // get file count
+        // var filesCount = $(ele_input_img).fileinput('getFilesCount');
+        // alert(filesCount);
+
+    });
+</script>
+
+<!--- popup overlay -->
+<script src="{% static 'assets/js/plugins/popupoverlay/jquery.popupoverlay.min.js' %}?v=1.0"></script>
+
+<!-- Webcam.min.js -->
+<script src="{% static 'assets/js/plugins/webcam/webcam.js' %}?v=1.0"></script>
+
+<script type="text/javascript" src="{% static 'candidate/js/signup_capture_photo.js' %}?v=1.0"></script>
+
+
+<script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function() {
+
+    var close_btn_markup = `<button class="popup_close" title="Close"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 10.6L6.6 5.2 5.2 6.6l5.4 5.4-5.4 5.4 1.4 1.4 5.4-5.4 5.4 5.4 1.4-1.4-5.4-5.4 5.4-5.4-1.4-1.4-5.4 5.4z"></path></svg></button>`
+
+    $('#popup-capture-image').popup({
+      color: 'white',
+      opacity: 1,
+      transition: '0.3s',
+      // blur:false prevents closing on click outside the popup.
+      blur: false,
+      closebutton: true,
+      closebuttonmarkup: close_btn_markup
+    });
+
+  });
+
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

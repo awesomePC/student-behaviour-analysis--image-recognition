@@ -1,0 +1,143 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Student list {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam list -->
+    <div class="col-md-12">
+
+        <!-- Collapsible with left control button -->
+        <h6 class="content-group text-semibold">
+         analysis
+         <small class="display-block"><code>exam</code></small></h6>
+
+        <div class="panel-group panel-group-control content-group-lg">
+            
+            {% for candidate_exam in candidate_exams %}
+            <div class="panel panel-white">
+                <div class="panel-heading">
+                    <h6 class="panel-title">
+                        <a data-toggle="collapse" href="#collapsible-control-group{{ forloop.counter }}">Exam `{{ candidate_exam.exam.name }}`</a>
+                    </h6>
+                </div>
+                <div id="collapsible-control-group{{ forloop.counter }}" class="panel-collapse collapse {% if forloop.counter == 1 %} in {% endif %}">
+                    <div class="panel-body">
+
+                        <p>analysis report</p>
+                        
+                        <div class="tabbable pt-20 pb-20">
+                            <ul class="nav nav-tabs nav-tabs-highlight">
+                                <li class="active"><a href="#css-animate-tab1" data-toggle="tab">Emotion analysis</a></li>
+                                <li><a href="#css-animate-tab2" data-toggle="tab">Behaviour Analysis</a></li>
+                                <li><a href="#css-animate-tab3" data-toggle="tab">Detected Objects</a></li>
+                                <li><a href="#css-animate-tab4" data-toggle="tab">Exam report</a></li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <div class="tab-pane animated fadeInUp active" id="css-animate-tab1">
+                                    <div id="chartdiv"></div>
+                                </div>
+
+                                <div class="tab-pane animated fadeInUp" id="css-animate-tab2">
+                                    Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid laeggin.
+                                </div>
+
+                                <div class="tab-pane animated zoomIn" id="css-animate-tab3">
+                                    DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred pitchfork. Williamsburg whatever.
+                                </div>
+
+                                <div class="tab-pane animated flipInX" id="css-animate-tab4">
+                                    Aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud organic, assumenda labore aesthet.
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}  
+        </div>
+        <!-- /collapsible with left control button -->
+
+    </div>  
+    <!--/ exam list-->  
+
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#analysis").addClass("active");
+    });
+</script>
+
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/interactions.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/touch.min.js' %}"></script>
+
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+<style type="text/css" rel="stylesheet">
+    #chartdiv {
+    width: 100%;
+    height: 500px;
+    }
+</style>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // Themes begin
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        var chart = am4core.create("chartdiv", am4charts.PieChart3D);
+        chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+        chart.legend = new am4charts.Legend();
+        
+        /*
+        chart.data = [
+            {
+                sentiment: "Lithuania",
+                count: 501.9
+            },
+            {
+                sentiment: "Czech Republic",
+                count: 301.9
+            },
+            {
+                sentiment: "Ireland",
+                count: 201.1
+            }
+        ];
+        */
+        // alert("{{exam_id}}")
+
+        chart.dataSource.url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        chart.innerRadius = 100;
+
+        var series = chart.series.push(new am4charts.PieSeries3D());
+        series.dataFields.value = "count";
+        series.dataFields.category = "emotion";
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

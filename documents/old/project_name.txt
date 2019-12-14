@@ -1,0 +1,2 @@
+
+Analysis, Recognition of an image to study various authentication patterns of an individual in a closed environment

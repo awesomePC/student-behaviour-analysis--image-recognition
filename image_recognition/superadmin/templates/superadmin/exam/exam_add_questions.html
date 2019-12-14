@@ -1,0 +1,217 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %} Exam add questions {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam list -->
+    <div class="col-md-12">
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">
+                    <p>
+                        <span>Exam Name</span>
+                        <span>:</span>
+                        <span>{{exam.name}}</span>
+                    </p>
+                    <p>
+                        <span>Total Questions</span>
+                        <span>:</span>
+                        <span>{{exam.total_question}}</span>
+                    </p>
+                    <p>
+                        <span>Total Marks</span>
+                        <span>:</span>
+                        <span>{{exam.total_mark }}</span>
+                    </p>
+                </h6>
+                <div class="heading-elements">
+                </div>
+            </div>
+        </div>
+    </div>  
+    <!--/ exam list-->  
+    
+    <div class="hidden col-md-12">
+        <form id="frm-question" method="POST" action="{% url 'superadmin:exam_add_questions' exam.id %}">
+            {% csrf_token %}
+            <!-- fill json on save question button click -->
+            <input id="questions" name="questions" type="hidden" />
+        </form>
+    </div>
+
+    {% for l in lst %}
+    <div class="questions col-md-12">
+        <div class="panel panel-flat border-left-xlg border-left-info">
+            <div class="panel-body">
+            
+                <div class="col-md-12">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <select class="select-search form-control que-type">
+                                <option value="single_choice">Single Choice</option>
+                                <option value="multiple_choice">Multiple Choice</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control que-marks" placeholder="marks" required>
+                    </div>
+                </div>
+
+                <div class="col-md-12 mt-20">
+                    <div class="col-md-9">
+                        <textarea class="que-title form-control" rows="1">Untitled-question</textarea>
+                    </div>
+                </div>
+
+                <div class="container-options">
+                    {% for num in numbers %}
+                    <div class="question-option col-md-12 mt-20">
+                        <div class="col-md-9">
+                            <textarea class="form-control option" rows="1">option</textarea>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="checkbox">
+                                <label>
+                                    <input class="correct" type="checkbox">
+                                    Correct
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}  
+
+                    <div class="col-md-12">
+                        <div class="mt-20"><a id="add_more_option" href="#">add more option</a></div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    {% empty %}
+        <p>Sorry, total questions count is zero. Can't render questions template</p>
+    {% endfor %}  
+    
+    <div class="col-md-12">
+        <button id="save-questions" type="button" class="btn bg-teal-400 btn-labeled legitRipple">
+            <b><i class="icon-plus2"></i></b>
+            Save Question
+            <span class="legitRipple-ripple"></span>
+        </button>
+    </div>
+
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+</script>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select with search
+        $('.select-search').select2();
+        
+        /*
+        $('.select-search').on('select2:select', function (e) {
+            // var data = e.params.data;
+            // console.log(data);
+            var selected_vals = $(this).select2('data');
+            console.log(selected_vals);
+
+        });
+        */
+
+        // on save button click
+        $(document).on("click", "#save-questions", function(){
+            
+            //questions
+            var ele_questions = $(document).find(".questions");
+
+            var all_questions = [];
+
+            $.each(ele_questions, function( index, ele_question ) {
+                // console.log(ele_question)
+
+                // find its values
+                var que_title = $(ele_question).find(".que-title").val();
+                // console.log(que_title);
+
+                var que_type = $(ele_question).find(".que-type").val();
+                // console.log(que_type);
+                
+                var que_marks = $(ele_question).find(".que-marks").val();
+                // console.log(que_marks);
+                
+                // find all options of current question
+                var ele_options = $(ele_question).find(".question-option");
+
+                // options holder 
+                var all_options = [];
+
+                $.each(ele_options, function( idx, ele_option ) {
+                    var option = $(ele_option).find(".option").val();
+                    // console.log(option);
+
+                    var ele_checkbox_correct = $(ele_option).find(".correct").first();
+                    var correct = $(ele_checkbox_correct).is(':checked'); 
+                    // console.log(correct);
+
+                    var option_data = {
+                        option: option,
+                        correct: correct,
+                    };
+                    all_options.push(option_data);
+
+                });
+
+                // store question data
+                var question_data = {
+                    "question-title": que_title,
+                    "question-type": que_type,
+                    "question-marks": que_marks,
+                    "options": all_options
+                }
+                
+                all_questions.push(question_data)
+
+            });
+            // console.log(all_questions);
+
+            var json_questions = JSON.stringify(all_questions);
+            console.log(json_questions);
+
+            // store in form element and trigger form submit
+            var form = $("#frm-question");
+            $(form).find("#questions").val(json_questions);
+            // console.log($(form).find("#questions").val());
+
+            // trigger form submit
+            $(form).trigger('submit');
+
+        });
+
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

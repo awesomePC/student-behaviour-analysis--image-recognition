@@ -1,0 +1,59 @@
+
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>{% block title %}Django{% endblock %}</title>
+
+  <!-- load global stylesheets-->
+  {% include "common/global_css.html" %}
+
+  <!-- load global js-->
+  {% include "common/global_js.html" %}
+
+  <!--====================-->
+  <!-- page level scripts -->
+  {% block page_level_scripts %}
+  {% endblock %}
+
+  <!--
+   - load after setting sidebar li element active
+   - so we dont need to open ul(submenu) from jquery
+   -->
+  <script type="text/javascript" src="{% static 'assets/js/core/app.js' %}"></script>
+	<script type="text/javascript" src="{% static 'assets/js/plugins/ui/ripple.min.js' %}"></script>
+
+</head>
+
+<body>
+
+  <!-- load main navbar-->
+  {% include "common/navbar.html" %}
+
+  <!-- Page container -->
+	<div class="page-container">
+
+		<!-- Page content -->
+		<div class="page-content">
+
+      <!-- load main sidebar // common/sidebar.html -->
+      {% include "common/sidebar.html" %}
+
+      <!-- page level code inserted inside the block -->
+      {% block content %}
+      {% endblock %}
+      <!-- page level code insertion end -->
+
+    </div>
+   <!-- /page content -->
+
+  </div>
+  <!-- /page container -->
+
+</body>
+</html>

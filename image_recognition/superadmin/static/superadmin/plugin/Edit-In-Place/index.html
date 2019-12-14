@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Basic Edit In Place Plugin Demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/flatly/bootstrap.min.css">
+    <style>
+    .container { margin-top:150px;}
+        .input .editable {
+            color:red;
+            box-sizing:border-box;
+        }
+
+        #popup-container {
+            width: 1px;
+            height: 1px;
+            position: fixed;
+            top: 20px;
+            left: 30px;
+        }
+
+        .popup-content {
+            display: flex;
+            align-items: center;
+            line-height: 24px;
+        }
+
+        .popup-content .icon {
+            font-size: 24px;
+        }
+
+        .checkmark {
+            color: #2ecc71;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="popup-container">
+        <div class="popup"></div>
+    </div>
+<div class="container">
+<h1>Basic Edit In Place Plugin Demo</h1>
+<div class="jquery-script-ads" style="margin:30px auto;"><script type="text/javascript"><!--
+google_ad_client = "ca-pub-2783044520727903";
+/* jQuery_demo */
+google_ad_slot = "2780937993";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+src="https://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div>
+            <table class="table table-striped table-bordered">
+
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Username</th>
+      <th><span class="editable">Website</span></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td><span class="editable">Mark</span></td>
+      <td><span class="editable">www.jqueryscript.net</span></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><span class="editable">Jacob</span></td>
+      <td><span class="editable">www.google.com</span></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><span class="editable">Larry</span></td>
+      <td><span class="editable">www.facebook.com</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>
+    <style>
+    body { overflow-x:hidden; background-color: #fafafa;}
+        .hidden {
+            opacity: 0;
+        }
+
+        .ajax-done {
+            margin: 10px;
+            position: absolute;
+            top: 0px;
+
+            animation-name: fadeInAndOut;
+            animation-duration: 2s;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes fadeInAndOut {
+            0%   {opacity: 1; transform: translateY(-30px);}
+            10%  {opacity: 1; transform: translateY(0px);}
+            70%  {opacity: 1;}
+            90%  {opacity: 1; transform: translateY(0px);}
+            100% {opacity: 0; transform: translateY(-30px);}
+        }
+    </style>
+
+    <div class="alert alert-success hidden">
+        <p>
+            <i class="checkmark icon"></i>
+            <span></span>
+        </p>
+    </div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="./src/eip.js"></script>
+	<script>
+		// Callback function
+		const doAjax = (ev) => {
+            const alert = document.querySelector('.alert');
+
+            alert.querySelector('span').innerHTML = `<b>${ev.oldValue}</b> has become <b>${ev.newValue}</b>`;
+
+            alert.classList.toggle('hidden');
+            alert.classList.toggle('ajax-done');
+
+            setTimeout(() => {
+                alert.classList.toggle('ajax-done');
+                alert.classList.toggle('hidden');
+            }, 2000);
+		}
+
+		// Attach the editable function
+		$('.editable').editable({
+			onChange: doAjax
+		});
+	</script>
+</body>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-36251023-1']);
+  _gaq.push(['_setDomainName', 'jqueryscript.net']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</html>

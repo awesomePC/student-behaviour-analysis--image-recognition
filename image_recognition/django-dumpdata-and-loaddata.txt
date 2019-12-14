@@ -1,0 +1,21 @@
+
+** Restore fresh database
+   
+    When you backup whole database by using dumpdata command, it will backup all the database tables
+
+    If you use this database dump to load the fresh database(in another django project), it can be causes IntegrityError (If you loaddata in same database it works fine)
+
+  
+1) To fix this problem, make sure to backup the database by excluding contenttypes and auth.permissions tables
+
+    ex. 
+    python manage.py dumpdata --exclude auth.permission --exclude contenttypes > db.json
+
+
+2) create new fresh database and add configuration in settings.py
+
+3) Create empty database structure:
+   python manage.py migrate
+
+4) Now you can use loaddata command 
+   python manage.py loaddata db.json
