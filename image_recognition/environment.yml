@@ -53,3 +53,4 @@ dependencies:
     - line_profiler
     - mtcnn
     - keras_vggface
+    - django-picklefield

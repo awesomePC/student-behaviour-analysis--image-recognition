@@ -14,11 +14,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='candidateimgdataset',
             name='face',
-            field=models.FileField(blank=True, help_text='face extracted from image by MTCNN face detector', null=True, upload_to=candidate.models.user_face_directory_path),
+            field=models.FileField(blank=True, help_text='face extracted from image by MTCNN face detector', null=True),
         ),
         migrations.AddField(
             model_name='candidateimgdataset',
             name='face_embedding',
-            field=models.FileField(blank=True, help_text='Embedding(feature) extracted by Facenet model in 128d', null=True, upload_to=candidate.models.user_face_embedding_directory_path),
+            field=models.FileField(blank=True, help_text='Embedding(feature) extracted by Facenet model in 128d', null=True),
         ),
     ]

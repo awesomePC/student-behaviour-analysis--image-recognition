@@ -16,3 +16,4 @@ tensorflow==1.15.0
 imutils==0.5.2
 psycopg2
 beautifulsoup4
+django-picklefield

@@ -5,6 +5,6 @@ from . import views
 app_name = 'recognize'
 
 urlpatterns = [
-    path('start_embedding_training_model/', views.start_embedding_training_model, name="start_embedding_training_model"),
+    # path('start_embedding_training_model/', views.start_embedding_training_model, name="start_embedding_training_model"),
     
 ]

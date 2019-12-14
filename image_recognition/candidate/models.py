@@ -1,4 +1,5 @@
 from django.db import models
+from picklefield.fields import PickledObjectField
 
 from users.models import CustomUser
 
@@ -10,17 +11,17 @@ def user_dataset_directory_path(instance, filename):
         instance.user.id, filename
     )
 
-def user_face_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/face/user_<id>/<filename>
-    return 'face/user_{0}/{1}'.format(
-        instance.user.id, filename
-    )
+# def user_face_directory_path(instance, filename):
+#     # file will be uploaded to MEDIA_ROOT/face/user_<id>/<filename>
+#     return 'face/user_{0}/{1}'.format(
+#         instance.user.id, filename
+#     )
 
-def user_face_embedding_directory_path(instance, filename):
-    # file will be uploaded to MEDIA_ROOT/face/user_<id>/<filename>
-    return 'face_embedding/user_{0}/{1}'.format(
-        instance.user.id, filename
-    )
+# def user_face_embedding_directory_path(instance, filename):
+#     # file will be uploaded to MEDIA_ROOT/face/user_<id>/<filename>
+#     return 'face_embedding/user_{0}/{1}'.format(
+#         instance.user.id, filename
+#     )
 
 
 class TempRegistrationImage(models.Model):
@@ -54,8 +55,8 @@ class CandidateImgDataset(models.Model):
         CustomUser, on_delete=models.CASCADE, null=True
     )
     img = models.FileField(upload_to=user_dataset_directory_path)
-    face = models.FileField(upload_to=user_face_directory_path, blank=True, null=True, help_text="face extracted from image by MTCNN face detector")
-    face_embedding = models.FileField(upload_to=user_face_embedding_directory_path, blank=True, null=True, help_text="Embedding(feature) extracted by Facenet model in 128d")
+    face = PickledObjectField(blank=True, null=True, help_text="face extracted from image by MTCNN face detector")
+    face_embedding = PickledObjectField(blank=True, null=True, help_text="Embedding(feature) extracted by Facenet model in 128d")
     is_valid = models.BooleanField(default=True)
     more_info = models.TextField(
         blank=True, null=True

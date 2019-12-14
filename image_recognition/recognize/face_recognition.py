@@ -1,27 +1,32 @@
-
-import tensorflow as tf
-
 import os, random
-import shutil
-from os import listdir
-from os.path import isdir
-
-from keras.utils.np_utils import to_categorical # convert to one-hot-encoding
+import gc # garbage collector
 
 from PIL import Image, ImageFont, ImageDraw, ImageEnhance
-from matplotlib import pyplot as plt
 
-from numpy import load
-from numpy import expand_dims
-from numpy import savez_compressed
 from numpy import asarray
+from numpy import expand_dims
+
+from django.conf import settings
+
+from keras.models import load_model # loading model
+
+from mtcnn.mtcnn import MTCNN
 
 
-root_folder = '/content/gdrive/My Drive/deep_learning/'
-dataset_folder = os.path.join(root_folder, "vgg_2_dataset/")
+detector = MTCNN()
 
-FOLDER_FULL_IMAGES = os.path.join(dataset_folder, "full_images/")
-FOLDER_FACE_ONLY = os.path.join(dataset_folder, "face_only/")
+facenet_model_file = os.path.join(
+    settings.MEDIA_ROOT, 'neural_models/facenet_keras.h5'
+)
+facenet_model = load_model(
+    facenet_model_file, compile=False
+)
+fv_model_file = os.path.join(
+    settings.MEDIA_ROOT, 'neural_models/face-verification-model.h5'
+)
+face_verification_model = load_model(
+    fv_model_file, compile=False
+)
 
 
 def read_image(image_path, method="PIL", rgb=True):
@@ -56,7 +61,8 @@ def read_image(image_path, method="PIL", rgb=True):
         print("Please select proper reading method")
         return (False, False)
 
-def detect_faces_in_image(image_array, detector):
+
+def detect_faces_in_image(image_array):
     """
     Detect faces in image using MTCNN
     
@@ -70,7 +76,7 @@ def detect_faces_in_image(image_array, detector):
     detected_faces = detector.detect_faces(image_array)
     return detected_faces
 
-def detect_extract_faces_from_image(image_array, detector, required_size=(160, 160), convert_2_numpy=True):
+def detect_extract_faces_from_image(image_array, required_size=(160, 160), convert_2_numpy=True):
     """
     Extract faces from image
     
@@ -119,7 +125,7 @@ def extract_save_face(src, dest):
 
     image, pixels = read_image(src)
 
-    _, extracted_faces = detect_extract_faces_from_image(pixels, detector, convert_2_numpy=False)
+    _, extracted_faces = detect_extract_faces_from_image(pixels, convert_2_numpy=False)
 
     if extracted_faces:
         img_single_face = extracted_faces[0]
@@ -132,7 +138,7 @@ def extract_save_face(src, dest):
         return False
 
 
-def get_embedding(model, face_pixels):
+def get_embedding(face_pixels):
     """
     get the face embedding for one face
     
@@ -151,31 +157,33 @@ def get_embedding(model, face_pixels):
     # transform face into one sample
     samples = expand_dims(face_pixels, axis=0)
     # make prediction to get embedding
-    yhat = model.predict(samples)
+    yhat = facenet_model.predict(samples)
     # yhat[0].shape # (128,)
     return yhat[0]
 
 
-def get_faces_and_embeddings_by_img_path(model, img_path):
+def get_faces_and_embeddings_by_img_path(img_path):
     """
     get the faces and embeddings
     
     Args:
-        model (object): Keras loaded model that extract features
         img_path (str): Image path
     Returns:
         tuple: Face embedding (Image may contains two or more persons)
     """
     pil_image, pixels = read_image(img_path)
 
-    detected_faces, extracted_faces = detect_extract_faces_from_image(pixels, detector)
+    detected_faces, extracted_faces = detect_extract_faces_from_image(pixels)
 
     face_embeddings = []
 
     for extracted_face in extracted_faces:
-        embedding = get_embedding(facenet_model, extracted_face)
+        embedding = get_embedding(extracted_face)
         embedding_reshaped = embedding.reshape(-1, 1) # (128, 1)
         face_embeddings.append(embedding_reshaped)
+    
+    # garbage collector
+    gc.collect()
     return (detected_faces, extracted_faces, face_embeddings)
 
 
@@ -184,18 +192,20 @@ def verify_face_matching(known_embedding, real_time_embedding, thresh=0.4):
     known_embedding_reshaped = known_embedding.reshape(1, 128, 1)
     real_time_embedding_reshaped = real_time_embedding.reshape(1, 128, 1)
 
-    y_pred = model.predict([known_embedding_reshaped, real_time_embedding_reshaped])
+    y_pred = face_verification_model.predict(
+        [known_embedding_reshaped, real_time_embedding_reshaped]
+    )
     # print(f"y_pred : {y_pred}")
 
-    distance = y_pred[0][0]
+    distance = y_pred[0][0] # matching_score
 
     probability = 1 - distance
 
-    if matching_score <= thresh:
-        # print('>Image is a Match (%.3f <= %.3f)' % (matching_score, thresh))
+    if distance <= thresh:
+        # print('>Image is a Match (%.3f <= %.3f)' % (distance, thresh))
         is_matched = True
     else:
-        # print('>Not matching (%.3f > %.3f)' % (matching_score, thresh))
+        # print('>Not matching (%.3f > %.3f)' % (distance, thresh))
         is_matched = False
     
     return (is_matched, probability, y_pred, distance)
@@ -247,7 +257,9 @@ def highlight_recognized_faces(pil_image, recognized_faces, outline_color="red",
         draw.rectangle((rect_start, rect_end), outline=outline_color)
 
         # draw text
-        text = "{}: {:.2f}%".format(name, probability * 100)
+        # text = "{}: {:.2f}%".format(name, probability * 100)
+        text = f"{name}: { round(probability * 100, 2) }"
+
         text_y_cordinate = y - 10 if y - 10 > 10 else y + 10
 
         draw.text(

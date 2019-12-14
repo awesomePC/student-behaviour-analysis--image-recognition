@@ -16,20 +16,24 @@ from django.shortcuts import redirect
 # Create your views here.
 def handle_login(request):
     user = request.user
+    print("user.user_type", user.__dict__)
+    try:
+        if user.is_superuser or user.user_type == 'superadmin':
+            return redirect('/superadmin/')
 
-    if user.is_superuser or user.user_type == 'superadmin':
-        return redirect('/superadmin/')
+        if user.user_type == 'candidate':
+            return redirect('/candidate/')
 
-    if user.user_type == 'candidate':
-        return redirect('/candidate/')
-
-    elif user.user_type == 'proctor':
-        return redirect('/proctor/')
-    else:
-        # import pdb;pdb.set_trace()
-        # default
-        print("Error .. Not valid login type ")
-        return redirect('/accounts/logout/')
+        elif user.user_type == 'proctor':
+            return redirect('/proctor/')
+        else:
+            # import pdb;pdb.set_trace()
+            # default
+            print("Error .. Not valid login type ")
+            return redirect('/accounts/logout/')
+    except:
+        print("Not logged in .. redirect to login")
+        return redirect('account_login')   
     # pass
 
     # ## for testing log and notification functionality

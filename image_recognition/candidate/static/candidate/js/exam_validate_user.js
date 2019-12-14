@@ -8,6 +8,9 @@ var capture_count = 0;
 // max_capture count
 var max_capture_count = 3;
 
+// capture image after 3 seconds
+var seconds_2_recapture = 3 * 1000;
+
 
 function get_mode(arr){
   return arr.sort((a,b) =>
@@ -62,8 +65,36 @@ document.addEventListener("DOMContentLoaded", function() {
         const photo = document.querySelector('#result_photo');
         photo.setAttribute('src', obj_data.img);
 
-        // store is valid user
-        recognitions.push(obj_data.is_valid_candidate)
+        if(obj_data.detected_face_count == 1)
+        {
+          // store is valid user
+          recognitions.push(obj_data.is_authorized_candidate_present)
+          console.log(recognitions)
+        }
+        else if(obj_data.detected_face_count > 1)
+        {
+          // push recognition false
+          recognitions.push(false)
+
+          new PNotify({
+              title: "Warning",
+              text: "Multiple persons detected in image",
+              addclass: 'alert alert-styled-left alert-arrow-left',
+              type: "warning"
+          })
+        }
+        else
+        {
+          // push recognition false
+          recognitions.push(false)
+
+          new PNotify({
+              title: "Warning",
+              text: "No any person detected in image",
+              addclass: 'alert alert-styled-left alert-arrow-left',
+              type: "warning"
+          })
+        }
       }
       else
       {
@@ -74,46 +105,45 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
   function validate_user(){
-    if(capture_count < max_capture_count)
-    {
-      setTimeout(function(){
-        take_snapshot();
-        saveRecognizeSnap();
-        
-        // increment counter to stop capturing images
-        capture_count += 1;
 
+    debugger;
+
+    setTimeout(function(){
+      take_snapshot();
+      saveRecognizeSnap();
+      
+      // increment counter to stop capturing images
+      capture_count += 1;
+
+      if(capture_count >= max_capture_count)
+      {
+          console.log("Image capture and recognition completed");
+          console.log(recognitions);
+
+          console.log("Highest repeating value :")
+          var mode = get_mode(recognitions);
+          console.log(mode);
+
+          $(".result-box").addClass("hidden");
+
+          if(mode == true)
+          {
+            // user is valid user
+            // user can proceed to exam
+            $(".valid-candidate").removeClass("hidden");
+          }
+          else
+          {
+            // show error.. not valid user message with reasons
+            $(".in-valid-candidate").removeClass("hidden");
+          }
+      }
+      else
+      {
         // call again
         validate_user();
-
-      }, 3000);
-
-    }
-    else{
-      setTimeout(function(){
-        console.log("Image capture and recognition completed");
-        console.log(recognitions);
-
-        console.log("Highest repeating value :")
-        var mode = get_mode(recognitions);
-        console.log(mode);
-
-        $(".result-box").addClass("hidden");
-
-        if(mode == true)
-        {
-          // user is valid user
-          // user can proceed to exam
-          $(".valid-candidate").removeClass("hidden");
-        }
-        else
-        {
-          // show error.. not valid user message with reasons
-          $(".in-valid-candidate").removeClass("hidden");
-        }
-
-      }, 1000);
-    }
+      }
+    }, seconds_2_recapture);
   }
 
   Webcam.on('live', function() {

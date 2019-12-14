@@ -1,7 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-from .choices import USER_TYPE_CHOICES
+from users.choices import USER_TYPE_CHOICES
+
 
 class CustomUser(AbstractUser):
     # super user only created from command prompt

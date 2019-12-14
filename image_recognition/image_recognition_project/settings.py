@@ -56,9 +56,9 @@ THIRD_PARTY_APPS = (
 OUR_APPS = (
     'users',
     'misc',
+    'exam',
     'candidate',
     'recognize',
-    'exam',
     'superadmin',
     'proctor',
 )
@@ -327,13 +327,13 @@ CELERY_TASK_SERIALIZER = 'json'
 from celery.schedules import crontab, timedelta
 
 CELERY_BEAT_SCHEDULE = {
-    'emotion_recognition': {
-        'task': 'recognize.tasks.do_emotion_recognition',
-        'schedule': timedelta(seconds=120), # Periodic Tasks
+    # 'emotion_recognition': {
+    #     'task': 'recognize.tasks.do_emotion_recognition',
+    #     'schedule': timedelta(seconds=120), # Periodic Tasks
 
-        # If you want more control over when the task is executed, for example, a particular time of day or day of the week, you can use the crontab schedule type:
-        # 'schedule': crontab(hour=1, minute=57), # Crontab schedules
-    },
+    #     # If you want more control over when the task is executed, for example, a particular time of day or day of the week, you can use the crontab schedule type:
+    #     # 'schedule': crontab(hour=1, minute=57), # Crontab schedules
+    # },
 }
 
 # Many of these will be overridden by local settings.
