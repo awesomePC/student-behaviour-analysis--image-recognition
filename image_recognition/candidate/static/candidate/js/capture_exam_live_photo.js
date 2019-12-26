@@ -79,6 +79,12 @@ function handle_suspicious_activity(reason)
   }
 }
 
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
 document.addEventListener("DOMContentLoaded", function() {
 
   var width = 640;    // We will scale the photo width to this
@@ -138,6 +144,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });  
   }
 
+  async function process_recognition()
+  {
+    await sleep(capture_image_time);
+
+    // infinite loop
+    while (true) {
+      takeSaveRecognizeSnap();
+
+      console.log('Taking a break...');
+      await sleep(capture_image_time);
+    }
+  }
+
   /**
    *  Capture and send image to server 
    *  Recognize image
@@ -148,16 +167,8 @@ document.addEventListener("DOMContentLoaded", function() {
     // and user has allowed access
     console.log("webcam started");
 
-    // alert(capture_image_time);
-    // first time call
-    takeSaveRecognizeSnap();
-
-    // setTimeout(function(){
-    setInterval(function(){
-      takeSaveRecognizeSnap();
-
-    }, capture_image_time);
-
+    // start processing
+    process_recognition();
   });
 
   /**

@@ -9,7 +9,7 @@ var capture_count = 0;
 var max_capture_count = 3;
 
 // capture image after 3 seconds
-var seconds_2_recapture = 3 * 1000;
+var seconds_2_wait = 10 * 1000;
 
 
 function get_mode(arr){
@@ -104,46 +104,57 @@ document.addEventListener("DOMContentLoaded", function() {
     });  
   }
 
-  function validate_user(){
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
-    debugger;
+  async function validate_user(){
 
-    setTimeout(function(){
+    await sleep(5000); // before start
+
+    while(capture_count < max_capture_count)
+    {
       take_snapshot();
       saveRecognizeSnap();
-      
+
+      console.log('Taking a break...');
+      // await sleep(10000);seconds_2_wait
+      await sleep(seconds_2_wait);
+
       // increment counter to stop capturing images
       capture_count += 1;
 
-      if(capture_count >= max_capture_count)
+      // check recognition array length size
+      // if its equal to capture_count then proceed else don't increment
+      if (recognitions.length != capture_count)
       {
-          console.log("Image capture and recognition completed");
-          console.log(recognitions);
-
-          console.log("Highest repeating value :")
-          var mode = get_mode(recognitions);
-          console.log(mode);
-
-          $(".result-box").addClass("hidden");
-
-          if(mode == true)
-          {
-            // user is valid user
-            // user can proceed to exam
-            $(".valid-candidate").removeClass("hidden");
-          }
-          else
-          {
-            // show error.. not valid user message with reasons
-            $(".in-valid-candidate").removeClass("hidden");
-          }
+        console.log("recognitions.length != capture_count so decrementing capture count")
+        capture_count -= 1;
       }
-      else
-      {
-        // call again
-        validate_user();
-      }
-    }, seconds_2_recapture);
+    }
+
+    await sleep(7000);
+    console.log("Image capture and recognition completed");
+    console.log(recognitions);
+
+    console.log("Highest repeating value :")
+    var mode = get_mode(recognitions);
+    console.log(mode);
+
+    $(".result-box").addClass("hidden");
+
+    if(mode == true)
+    {
+      // user is valid user
+      // user can proceed to exam
+      $(".valid-candidate").removeClass("hidden");
+    }
+    else
+    {
+      // show error.. not valid user message with reasons
+      $(".in-valid-candidate").removeClass("hidden");
+    }
+
   }
 
   Webcam.on('live', function() {

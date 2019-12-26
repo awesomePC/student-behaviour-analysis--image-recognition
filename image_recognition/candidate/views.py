@@ -16,6 +16,7 @@ from django.conf import settings
 
 from lazysignup.decorators import allow_lazy_user
 
+import random
 import os
 import uuid
 import re
@@ -91,7 +92,7 @@ def get_candidate_uploaded_images(lazy_user_id):
 
 @allow_lazy_user
 def sign_up(request):
-    from candidate.tasks import task_extract_save_face_and_embeddings
+    from candidate.tasks import post_register_extract_save_face_and_embeddings
 
     lazy_user_id = request.user.id
 
@@ -119,7 +120,7 @@ def sign_up(request):
                     candidate_img.save()
 
                     # run celery background task to extract images
-                    task_extract_save_face_and_embeddings.delay(candidate_img.id)
+                    post_register_extract_save_face_and_embeddings.delay(candidate_img.id)
 
                     # delete temp
                     temp_image.delete()
@@ -153,13 +154,6 @@ def sign_up(request):
     }
     return render(request, 'candidate/account/sign_up.html', context)
 
-
-# @receiver(post_save, sender=CustomUser)
-# def process_candidate_face_extraction(sender, instance, **kwargs):
-#     """
-#     On new candidate sign-up extract face and embedding from image
-#     """
-#     pass
 
 def is_valid_traning_image(image__path):
     """
@@ -257,77 +251,6 @@ def save_sign_up_image(lazy_user_id, photo_data, fileId, previewId):
         }
     return response
 
-# @csrf_exempt
-# def upload_sign_up_images(request):
-#     if request.method == 'POST':
-#         print(request.POST)
-#         previewId = request.POST.get("previewId")
-#         fileId = request.POST.get("fileId")[0]
-#         initialPreview = request.POST.get("initialPreview")
-
-#         photo_data = request.FILES['candidate-image']
-#         if(photo_data):
-#             lazy_user_id = request.user.id
-
-#             # save data
-#             response = save_sign_up_image(
-#                 lazy_user_id,
-#                 photo_data,
-#                 fileId,
-#                 previewId
-#             )
-#         else:
-#             response = {
-#                 "uploaded": "ERROR",
-#                 "error": 'An error exception message if applicable',
-#                 "success": 0,
-#                 "message": {
-#                     "type": "error",
-#                     "title": "Error Info",
-#                     "text": "Please select file and then upload",
-#                 },
-#             }
-#     else:
-#         response = {
-#             "uploaded": "ERROR",
-#             "error": 'Error .. only POST method is allowed',
-#         }
-#     return JsonResponse(response, safe=False)
-    
-
-# @csrf_exempt
-# def delete_sign_up_image(request, image_id):
-#     if request.method == 'POST':
-#         # print(request.POST)
-#         lazy_user_id = request.user.id
-
-#         try:
-#             TempRegistrationImage.objects.filter(
-#                 id=image_id
-#             ).delete()
-
-#             response = {
-#                 "deleted": "OK",
-#                 "success" : 1,
-#                 "message": {
-#                     "type": "success",
-#                     "title": "Success Info",
-#                     "text": "File Deleted Successfully",
-#                 },
-#             }
-#         except Exception as e:
-#             response = {
-#                 "uploaded": "ERROR",
-#                 "error": 'An error exception message if applicable',
-#                 "success": 0,
-#                 "message": {
-#                     "type": "error",
-#                     "title": "Error Info",
-#                     "text": e,
-#                 },
-#             }
-#         return JsonResponse(response, safe=False)
-
 
 @csrf_exempt
 @allow_lazy_user
@@ -375,144 +298,140 @@ def exam_instructions(request, exam_id):
     }
     return render(request, 'candidate/exam/instructions.html', context)
 
-# def exam(request, exam_id):
-#     candidate = ExamCandidate.objects.get(
-#         candidate=request.user,
-#         exam__id=exam_id
-#     )
+def exam(request, exam_id):
+    candidate = ExamCandidate.objects.get(
+        candidate=request.user,
+        exam__id=exam_id
+    )
 
-#     questions = ExamQuestion.objects.filter(
-#         exam__id=exam_id
-#     )
+    questions = ExamQuestion.objects.filter(
+        exam__id=exam_id
+    )
 
-#     context = {
-#         "candidate": candidate,
-#         "questions": questions,
-#     }
-#     return render(request, 'candidate/exam/exam.html', context)
+    context = {
+        "candidate": candidate,
+        "questions": questions,
+    }
+    return render(request, 'candidate/exam/exam.html', context)
 
-# @csrf_exempt
-# def get_next_question_index(request):
-#     """
-#     Get next question to display
+@csrf_exempt
+def get_next_question_index(request):
+    """
+    Get next question to display
     
-#     Arguments:
-#         request {[type]} -- [description]
-#     """
-#     exam_id = request.POST.get("exam_id")
-#     prev_question_index = request.POST.get("prev_question_index")
+    Arguments:
+        request {[type]} -- [description]
+    """
+    exam_id = request.POST.get("exam_id")
+    prev_question_index = request.POST.get("prev_question_index")
 
-#     response = get_candidate_next_question_index(
-#         request.user.id,
-#         exam_id,
-#         prev_question_index
-#     )
-#     return JsonResponse(response, safe=True)
+    response = get_candidate_next_question_index(
+        request.user.id,
+        exam_id,
+        prev_question_index
+    )
+    return JsonResponse(response, safe=True)
 
-# @csrf_exempt
-# def save_candidate_answer(request):
-#     exam_candidate_id = request.POST.get("exam_candidate_id")
-#     question_id = request.POST.get("question_id")
-#     lst_sel_opt_values = request.POST.getlist("arr_sel_opt_values[]")
+@csrf_exempt
+def save_candidate_answer(request):
+    exam_candidate_id = request.POST.get("exam_candidate_id")
+    question_id = request.POST.get("question_id")
+    lst_sel_opt_values = request.POST.getlist("arr_sel_opt_values[]")
 
-#     exam_candidate = ExamCandidate.objects.get(
-#         id=exam_candidate_id
-#     )
+    exam_candidate = ExamCandidate.objects.get(
+        id=exam_candidate_id
+    )
 
-#     question = ExamQuestion.objects.get(
-#         id=question_id
-#     )
+    question = ExamQuestion.objects.get(
+        id=question_id
+    )
 
-#     # In this case, if the Person already exists, its name is updated
-#     exam_candidate, created = CandidateAnswer.objects.update_or_create(
-#         candidate=exam_candidate,
-#         question=question
-#     )
+    # In this case, if the Person already exists, its name is updated
+    exam_candidate, created = CandidateAnswer.objects.update_or_create(
+        candidate=exam_candidate,
+        question=question
+    )
 
-#     if lst_sel_opt_values:
-#         lst_sel_opt_values = list(map(int, lst_sel_opt_values))
+    if lst_sel_opt_values:
+        lst_sel_opt_values = list(map(int, lst_sel_opt_values))
 
-#         exam_candidate.selected_option = lst_sel_opt_values
-#         exam_candidate.is_answered = True
-#         exam_candidate.save()
+        exam_candidate.selected_option = lst_sel_opt_values
+        exam_candidate.is_answered = True
+        exam_candidate.save()
 
-#     if created:
-#         response = {
-#             "message": {
-#                 "type": "success",
-#                 "title": "Success Info",
-#                 "text": "Candidate answer inserted successfully",
-#             }
-#         }
-#     else:   
-#         response = {
-#             "message": {
-#                 "type": "success",
-#                 "title": "Success Info",
-#                 "text": "Candidate answer updated successfully",
-#             }
-#         }
-#     return JsonResponse(response, safe=True)
+    if created:
+        response = {
+            "message": {
+                "type": "success",
+                "title": "Success Info",
+                "text": "Candidate answer inserted successfully",
+            }
+        }
+    else:   
+        response = {
+            "message": {
+                "type": "success",
+                "title": "Success Info",
+                "text": "Candidate answer updated successfully",
+            }
+        }
+    return JsonResponse(response, safe=True)
 
-# @csrf_exempt
-# def submit_exam(request):
-#     exam_id = request.POST.get("exam_id")
+@csrf_exempt
+def submit_exam(request):
+    exam_id = request.POST.get("exam_id")
 
-#     cnt_exam_candidate = ExamCandidate.objects.filter(
-#         exam__id=exam_id,
-#         candidate=request.user,
-#     ).count()
+    cnt_exam_candidate = ExamCandidate.objects.filter(
+        exam__id=exam_id,
+        candidate=request.user,
+    ).count()
 
-#     if cnt_exam_candidate:
+    if cnt_exam_candidate:
         
-#         exam = Exam.objects.get(
-#             id=exam_id
-#         )
-#         exam_candidate = ExamCandidate.objects.get(
-#             exam=exam,
-#             candidate=request.user,
-#         )
-#         exam_candidate.is_completed = True
-#         exam_candidate.save()
+        exam = Exam.objects.get(
+            id=exam_id
+        )
+        exam_candidate = ExamCandidate.objects.get(
+            exam=exam,
+            candidate=request.user,
+        )
+        exam_candidate.is_completed = True
+        exam_candidate.save()
 
-#         notify.send(
-#             request.user, recipient=request.user,
-#             verb=f'Exam "{exam.name}" completed successfully',
-#             icon_class="icon-check"
-#         )
+        notify.send(
+            request.user, recipient=request.user,
+            verb=f'Exam "{exam.name}" completed successfully',
+            icon_class="icon-check"
+        )
 
-#     response = {
-#         "message": {
-#             "type": "success",
-#             "title": "Success Info",
-#             "text": "Exam Submitted successfully",
-#         },
-#         "next_action_needed": {
-#             "redirect": {
-#                 "url" : f"/candidate/completed_confirmation/{exam_id}/",
-#                 "timeout": 2000,
-#                 "_comment": "timeout in seconds. After that the url start redirect"
-#             }
-#         }
-#     }
-#     return JsonResponse(response, safe=True)
+    response = {
+        "message": {
+            "type": "success",
+            "title": "Success Info",
+            "text": "Exam Submitted successfully",
+        },
+        "next_action_needed": {
+            "redirect": {
+                "url" : f"/candidate/completed_confirmation/{exam_id}/",
+                "timeout": 2000,
+                "_comment": "timeout in seconds. After that the url start redirect"
+            }
+        }
+    }
+    return JsonResponse(response, safe=True)
 
 
-# def completed_confirmation(request, exam_id):
-#     """
-#     [summary]
-    
-#     Arguments:
-#         request {[type]} -- [description]
-#         exam_id {[type]} -- [description]
-#     """
-#     exam = Exam.objects.get(
-#         id=exam_id
-#     )
-#     context = {
-#         "exam": exam
-#     }
-#     return render(request, 'candidate/exam/completed_confirmation.html', context)
+def completed_confirmation(request, exam_id):
+    """
+    Exam Completed confirmation
+    """
+    exam = Exam.objects.get(
+        id=exam_id
+    )
+    context = {
+        "exam": exam
+    }
+    return render(request, 'candidate/exam/completed_confirmation.html', context)
 
 
 # @csrf_exempt
@@ -599,90 +518,6 @@ def exam_validate_user(request, exam_id):
     return render(request, template_name, context)
 
 
-# @csrf_exempt
-# def ajax_validate_user_old_code(request):
-#     from recognize.opencv_face_recognition.recognize import (
-#         draw_recognized_bounding_box
-#     )
-
-#     from recognize.views import recognize_faces
-
-#     # exam = get_object_or_404(Exam, pk=self.kwargs["pk"])
-#     photo_data = request.FILES.get('webcam')
-
-#     try:
-#         # save photo
-#         obj_candidate_validation = ExamCandidateValidation.objects.create(
-#             user=request.user,
-#             photo=photo_data
-#         )
-#         obj_candidate_validation.save()
-
-#         image_file = obj_candidate_validation.photo.path
-
-#         cv2_image, detected_faces = recognize_faces(
-#             image_file
-#         )
-
-#         # result_file name with path
-#         res_file_name = str(uuid.uuid4())
-
-#         res_file_path = os.path.join(
-#             settings.MEDIA_ROOT,
-#             *["result", f"user_{request.user.id}"]
-#         )
-#         # make dir if not exists
-#         os.makedirs(res_file_path, exist_ok=True)
-
-#         res_file_name_with_path = os.path.join(
-#             res_file_path, f"{res_file_name}.png"
-#         )
-
-
-#         detected_person_ids = []
-#         # modify recognized name
-#         for idx, recognized_face in enumerate(detected_faces):
-#             name = recognized_face["name"]
-#             user = get_user_from_recognized_str(name)
-#             if user:
-#                 detected_person_ids.append(user.id)
-#                 if user.first_name:
-#                     name = user.first_name
-#                 elif user.last_name:
-#                     name = user.last_name
-#                 else:
-#                     name = user.email
-#                 # store updated name
-#                 recognized_face["name"] = name
-#                 detected_faces[idx] = recognized_face
-        
-#         is_valid_candidate = False
-#         for person_id in detected_person_ids:
-#             if person_id == request.user.id:
-#                 is_valid_candidate = True
-
-#         img_res = draw_recognized_bounding_box(
-#             cv2_image=cv2_image,
-#             detected_faces=detected_faces,
-#             write_result_2_disk=True,
-#             res_file_name_with_path=res_file_name_with_path,
-#         )
-        
-#         # substract base path -- keep only media path
-#         media_path_only = res_file_name_with_path.replace(settings.BASE_DIR, '')
-#         # print(f"media_path_only : {media_path_only}")
-
-#         return JsonResponse({
-#             'success':1,
-#             'img': media_path_only,
-#             'detected_person_ids': detected_person_ids,
-#             'is_valid_candidate': is_valid_candidate, # return value depending on user detected
-#         })
-
-#     except Exception as e:
-#         print(trace_error())
-#         return JsonResponse({'success': 0})
-
 def generate_random_user_file(request):
     """
     Generate random file to show face recognition result 
@@ -763,7 +598,7 @@ def ajax_validate_user(request):
                     # check is proctor 
                     # temporarily set to unknown
                     name = "unknown"
-                    probability = 0.7
+                    probability = random.uniform(0.6, 0.8)
 
                 recognized_persons.append({
                     "name": name,
@@ -829,212 +664,252 @@ def ajax_validate_user(request):
         print(trace_error())
         return JsonResponse({'success': 0})
 
-# @csrf_exempt
-# def save_recognize_exam_photo(request, exam_id):
-#     from recognize.views import recognize_faces
-#     from recognize.tasks import (
-#         detect_objects,
-#         recognize_emotion,
-#     )
-#     photo_data = request.FILES.get('webcam')
+@csrf_exempt
+def save_recognize_exam_photo(request, exam_id):
+    from recognize.face_recognition import (
+        read_image,
+        get_faces_and_embeddings_by_img_path,
+        highlight_recognized_faces
+    )
+    from recognize.face_recognition import verify_face_matching
 
-#     exam = Exam.objects.get(
-#         id=exam_id
-#     )
+    photo_data = request.FILES.get('webcam')
 
-#     exam_candidate_data = ExamCandidatePhoto.objects.create(
-#         user=request.user,
-#         exam=exam,
-#         photo=photo_data
-#     )
-#     exam_candidate_data.save()
+    exam = Exam.objects.get(
+        id=exam_id
+    )
 
-#     try:
-#         # save photo
+    exam_candidate_data = ExamCandidatePhoto.objects.create(
+        user=request.user,
+        exam=exam,
+        photo=photo_data
+    )
+    exam_candidate_data.save()
 
-#         image_file__path = exam_candidate_data.photo.path
+    try:
+        # save photo
+
+        img_path = exam_candidate_data.photo.path
+
+        realtime_detected_faces, realtime_extracted_faces, realtime_face_embeddings = get_faces_and_embeddings_by_img_path(
+            img_path
+        )
+
+        detected_face_count = len(realtime_detected_faces)
+
+        # random user result file
+        res_file_name_with_path = generate_random_user_file(request)
+
+        # verify is authorized user present in image
+        candidate_img_dataset = CandidateImgDataset.objects.filter(user=request.user).first()
         
-#         cv2_image, detected_faces = recognize_faces(
-#             image_file__path
-#         )
+        is_authorized_candidate_present = False
+        idx_candidate_face_embedding = None # used to remove entry from realtime_face_embeddings and check who is other
+        recognized_persons = []
 
-#         # result_file name with path
-#         res_file_name = str(uuid.uuid4())
+        if candidate_img_dataset:
+            known_face_embedding = candidate_img_dataset.face_embedding
 
-#         res_file_path = os.path.join(
-#             settings.MEDIA_ROOT,
-#             *["exam", f"user_{request.user.id}"]
-#         )
-#         # make dir if not exists
-#         os.makedirs(res_file_path, exist_ok=True)
-
-#         res_file_name_with_path = os.path.join(
-#             res_file_path, f"{res_file_name}.png"
-#         )
-
-
-#         # get detected persons and matching percentages
-#         detected_persons = []
-#         matching_percentages = []
-
-#         # modify recognized name
-#         for idx, recognized_face in enumerate(detected_faces):
-#             name = recognized_face["name"]
-#             probability = recognized_face["probability"]
-
-#             user = get_user_from_recognized_str(name)
-#             if user:
-#                 if user.first_name:
-#                     name = user.first_name
-#                 elif user.last_name:
-#                     name = user.last_name
-#                 else:
-#                     name = user.email
-#                 # store updated name
-#                 recognized_face["name"] = name
-#                 detected_faces[idx] = recognized_face
-
-#                 detected_persons.append({
-#                     "user_id": user.id,
-#                     "user_email": user.email,
-#                     "user_type": user.user_type,
-#                     "name": name,
-#                     "probability": probability
-#                 })
-
-#         exam_candidate_data.detected_persons_list = detected_persons
-#         exam_candidate_data.save()
-
-
-#         # # ***********
-#         # # detect common objects
-#         # bbox, label, conf = detect_objects()
-#         # detected_objects = {
-#         #     "bbox": bbox,
-#         #     "label": label,
-#         #     "conf": conf,
-#         # }
-#         # exam_candidate_data.detected_objects = detected_objects
-#         # exam_candidate_data.save()
-
-#         # # ***********
-#         # # detect emotions in image
-#         # preds, emotion_probability, label = recognize_emotion(image_file__path)
-#         # emotions = {
-#         #     "emotion_probability": str(emotion_probability),
-#         #     "label": label,
-#         # }
-#         # exam_candidate_data.emotions = emotions
-#         # exam_candidate_data.save()
-
-#         # first level suspicious checking
-#         # is valid candidate available
-#         is_suspicious = True
-#         is_valid_candidate = False
-#         for person in detected_persons:
-#             if person["user_id"] == request.user.id:
-#                 is_valid_candidate = True
-#                 is_suspicious = False
-
-#         if is_suspicious:
-#             reason = "Candidate not detected in image."
-#         else:
-#             reason = ""
-        
-#         # if two persons detected validate 
-#         # person 1 must be valid candidate 
-#         # second person may be proctor or superadmin otherwise mark suspicious exam
-#         if is_valid_candidate and (len(detected_persons) > 1):
-#             is_second_person_suspicious = True
-#             for person in detected_persons:
-#                 if person['user_id'] == request.user.id:
-#                     continue
-#                 else:
-#                     if person['user_type'] in ["proctor", "superadmin"]:
-#                         is_second_person_suspicious = False
+            for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
+                is_matched, probability, _, _ = verify_face_matching(
+                    known_face_embedding, realtime_face_embedding
+                )
                 
-#             if is_second_person_suspicious:
-#                 is_suspicious = True
-#                 reason += "\n Suspicious person is detected."
+                if is_matched:
+                    is_authorized_candidate_present = True
+                    idx_candidate_face_embedding = idx
+                    
+                    name = candidate_img_dataset.user.email
 
-#         exam_candidate_data.is_suspicious = is_suspicious
-#         exam_candidate_data.reason = reason
-#         exam_candidate_data.save()
+                    # save face in db -- for emotion analysis
+                    exam_candidate_data.np_face = realtime_extracted_faces[idx]
+                    exam_candidate_data.save()
 
-#         response = {
-#             "message": {
-#                 "type": "success",
-#                 "title": "Success Info",
-#                 "text": "Recognition completed successfully",
-#             },
-#             "is_suspicious": is_suspicious,
-#             "reason": reason
-#         }
-#         return JsonResponse(response, safe=True)
+                else:
+                    # check is proctor 
+                    # temporarily set to unknown
+                    name = "unknown"
+                    probability = random.uniform(0.6, 0.8)
 
-#     except Exception as e:
-#         print(trace_error())
-#         response = {
-#             "message": {
-#                 "type": "error",
-#                 "title": "Error Info",
-#                 "text": trace_error(),
-#             },
-#             "is_suspicious": True,
-#         }
-#         return JsonResponse(response, safe=True)
+                recognized_persons.append({
+                    "name": name,
+                    "probability": probability,
+                    "box": realtime_detected_faces[idx]['box']
+                })
+        else:
+            print(f"Error ... Candidate image dataset is empty")
 
-# @csrf_exempt
-# def stop_exam(request):
-#     from misc.views import send_notification_2_user_types
-#     exam_id = request.POST.get("exam_id")
-#     exam_candidate_id = request.POST.get("exam_candidate_id")
-#     reason = request.POST.get("reason")
+        source_pil_image, _ = read_image(img_path)
 
-#     exam = Exam.objects.get(
-#         id=exam_id
-#     )
+        if len(recognized_persons) >= 1:
+            hightlighted_image = highlight_recognized_faces(
+                source_pil_image, recognized_persons,
+                write_result_2_disk=True,
+                res_file_name_with_path=res_file_name_with_path,
+            )
 
-#     verb = f'Exam "{exam.name}" stopped due to suspicious activity.\nReason - ' + reason
+        # # get detected persons and matching percentages
+        # detected_persons = []
+        # matching_percentages = []
+
+        # # modify recognized name
+        # for idx, recognized_face in enumerate(detected_faces):
+        #     name = recognized_face["name"]
+        #     probability = recognized_face["probability"]
+
+        #     user = get_user_from_recognized_str(name)
+        #     if user:
+        #         if user.first_name:
+        #             name = user.first_name
+        #         elif user.last_name:
+        #             name = user.last_name
+        #         else:
+        #             name = user.email
+        #         # store updated name
+        #         recognized_face["name"] = name
+        #         detected_faces[idx] = recognized_face
+
+        #         detected_persons.append({
+        #             "user_id": user.id,
+        #             "user_email": user.email,
+        #             "user_type": user.user_type,
+        #             "name": name,
+        #             "probability": probability
+        #         })
+
+        exam_candidate_data.detected_persons_list = recognized_persons
+        exam_candidate_data.save()
+
+
+        # # ***********
+        # # detect common objects
+        # bbox, label, conf = detect_objects()
+        # detected_objects = {
+        #     "bbox": bbox,
+        #     "label": label,
+        #     "conf": conf,
+        # }
+        # exam_candidate_data.detected_objects = detected_objects
+        # exam_candidate_data.save()
+
+        # # ***********
+        # # detect emotions in image
+        # preds, emotion_probability, label = recognize_emotion(image_file__path)
+        # emotions = {
+        #     "emotion_probability": str(emotion_probability),
+        #     "label": label,
+        # }
+        # exam_candidate_data.emotions = emotions
+        # exam_candidate_data.save()
+
+        # first level suspicious checking
+        # is valid candidate available
+        if is_authorized_candidate_present == False:
+            is_suspicious = True
+            reason = "Candidate not detected in image."
+        else:
+            is_suspicious = False
+            reason = ""
+        
+        # if two persons detected validate 
+        # person 1 must be valid candidate 
+        # second person may be proctor or superadmin otherwise mark suspicious exam
+        # if is_valid_candidate and (len(detected_persons) > 1):
+        #     is_second_person_suspicious = True
+        #     for person in detected_persons:
+        #         if person['user_id'] == request.user.id:
+        #             continue
+        #         else:
+        #             if person['user_type'] in ["proctor", "superadmin"]:
+        #                 is_second_person_suspicious = False
+                
+        #     if is_second_person_suspicious:
+        #         is_suspicious = True
+        #         reason += "\n Suspicious person is detected."
+
+        if (len(recognized_persons) > 1):
+            is_suspicious = True
+            reason += "\n Suspicious person detected."
+
+        exam_candidate_data.is_suspicious = is_suspicious
+        exam_candidate_data.reason = reason
+        exam_candidate_data.save()
+
+        response = {
+            "message": {
+                "type": "success",
+                "title": "Success Info",
+                "text": "Recognition completed successfully",
+            },
+            "is_authorized_candidate_present": is_authorized_candidate_present,
+            "is_suspicious": is_suspicious,
+            "reason": reason
+        }
+        return JsonResponse(response, safe=True)
+
+    except Exception as e:
+        print(trace_error())
+        response = {
+            "message": {
+                "type": "error",
+                "title": "Error Info",
+                "text": trace_error(),
+            },
+            "is_suspicious": True,
+        }
+        return JsonResponse(response, safe=True)
+
+@csrf_exempt
+def stop_exam(request):
+    from misc.views import send_notification_2_user_types
+    exam_id = request.POST.get("exam_id")
+    exam_candidate_id = request.POST.get("exam_candidate_id")
+    reason = request.POST.get("reason")
+
+    exam = Exam.objects.get(
+        id=exam_id
+    )
+
+    verb = f'Exam "{exam.name}" stopped due to suspicious activity.\nReason - ' + reason
     
-#     # send to candidate
-#     notify.send(
-#         request.user,
-#         recipient=request.user,
-#         verb=verb, 
-#         icon_class="icon-stop"
-#     )
+    # send to candidate
+    notify.send(
+        request.user,
+        recipient=request.user,
+        verb=verb, 
+        icon_class="icon-stop"
+    )
 
-#     verb = f"Exam of candidate with id {request.user.id} stopped.\nReason - " + reason
+    verb = f"Exam of candidate with id {request.user.id} stopped.\nReason - " + reason
    
-#     # send to all superadmins and proctor
-#     send_notification_2_user_types(
-#         sender=request.user,
-#         verb=verb,
-#         icon_class="icon-stop",
-#         user_types=["superadmin", "proctor"]
-#     )
-#     response = {
-#         "message": {
-#             "type": "info",
-#             "title": "Info",
-#             "text": "All users notified successfully",
-#         },
-#     }
-#     return JsonResponse(response, safe=True)
+    # send to all superadmins and proctor
+    send_notification_2_user_types(
+        sender=request.user,
+        verb=verb,
+        icon_class="icon-stop",
+        user_types=["superadmin", "proctor"]
+    )
+    response = {
+        "message": {
+            "type": "info",
+            "title": "Info",
+            "text": "All users notified successfully",
+        },
+    }
+    return JsonResponse(response, safe=True)
 
-# def stop_exam_reason(request, exam_id):
-#     exam = Exam.objects.get(
-#         id=exam_id
-#     )
-#     exam_candidate_photos = ExamCandidatePhoto.objects.filter(
-#         user=request.user,
-#         exam=exam
-#     ).order_by('-id')
+def stop_exam_reason(request, exam_id):
+    exam = Exam.objects.get(
+        id=exam_id
+    )
+    exam_candidate_photos = ExamCandidatePhoto.objects.filter(
+        user=request.user,
+        exam=exam
+    ).order_by('-id')
 
-#     context = {
-#         "exam": exam,
-#         "exam_candidate_photos": exam_candidate_photos,
-#     }
-#     template_name = 'candidate/exam/stop_reason.html'
-#     return render(request, template_name, context)
+    context = {
+        "exam": exam,
+        "exam_candidate_photos": exam_candidate_photos,
+    }
+    template_name = 'candidate/exam/stop_reason.html'
+    return render(request, template_name, context)

@@ -8,6 +8,7 @@ from datetime import datetime as dt
 # PostgreSQL specific model fields
 from django.contrib.postgres.fields import ArrayField
 from django.contrib.postgres.fields import JSONField
+from picklefield.fields import PickledObjectField
 
 from users.models import CustomUser
 
@@ -255,12 +256,15 @@ class ExamCandidatePhoto(models.Model):
     )
 
     photo = models.FileField(upload_to=user_exam_directory_path)
+    np_face = PickledObjectField(blank=True, null=True, help_text="face extracted from image by MTCNN face detector of authorized user in numpy array")
 
     detected_persons_list = JSONField(
         blank=True,
         default=list,
         help_text="Detected persons list"
     )
+
+    np_highlighted_faces = PickledObjectField(blank=True, null=True, help_text="highlighted_faces extracted from image in numpy array format")
 
     detected_objects = JSONField(
         blank=True,

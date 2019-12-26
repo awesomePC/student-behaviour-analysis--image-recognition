@@ -8,6 +8,9 @@ from numpy import expand_dims
 
 from django.conf import settings
 
+from threading import Lock
+lock = Lock()
+
 from keras.models import load_model # loading model
 
 from mtcnn.mtcnn import MTCNN
@@ -148,18 +151,20 @@ def get_embedding(face_pixels):
     Returns:
         array: one dimensional feature vector
     """
-    # scale pixel values
-    face_pixels = face_pixels.astype('float32')
-    # face_pixels.shape # (160, 160, 3)
-    # standardize pixel values across channels (global)
-    mean, std = face_pixels.mean(), face_pixels.std()
-    face_pixels = (face_pixels - mean) / std
-    # transform face into one sample
-    samples = expand_dims(face_pixels, axis=0)
-    # make prediction to get embedding
-    yhat = facenet_model.predict(samples)
-    # yhat[0].shape # (128,)
-    return yhat[0]
+    # allow only single thread at a time
+    with lock:
+        # scale pixel values
+        face_pixels = face_pixels.astype('float32')
+        # face_pixels.shape # (160, 160, 3)
+        # standardize pixel values across channels (global)
+        mean, std = face_pixels.mean(), face_pixels.std()
+        face_pixels = (face_pixels - mean) / std
+        # transform face into one sample
+        samples = expand_dims(face_pixels, axis=0)
+        # make prediction to get embedding
+        yhat = facenet_model.predict(samples)
+        # yhat[0].shape # (128,)
+        return yhat[0]
 
 
 def get_faces_and_embeddings_by_img_path(img_path):
