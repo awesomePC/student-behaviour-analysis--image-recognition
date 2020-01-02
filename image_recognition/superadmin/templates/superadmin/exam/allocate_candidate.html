@@ -113,6 +113,14 @@ $(document).ready(function(){
     datatable = $('.datatable-button-html5-columns');
 
     $(datatable).dataTable({
+        "fnDrawCallback": function( oSettings ) {
+            // alert( 'DataTables has redrawn the table' );
+            // set whenerver datatable redraws
+            $(".control-info").uniform({
+                radioClass: 'choice',
+                wrapperClass: 'border-info-600 text-info-800'
+            });
+        }
     });
 
     // inspect and type $(datatable).dataTable()

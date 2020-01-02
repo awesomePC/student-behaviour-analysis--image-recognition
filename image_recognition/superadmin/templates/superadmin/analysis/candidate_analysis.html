@@ -9,14 +9,14 @@
     inside block content
 -->
 {% block content %}
-<div class="row">
+<div  class="row">
     <!-- exam list -->
     <div class="col-md-12">
 
         <!-- Collapsible with left control button -->
         <h6 class="content-group text-semibold">
-         analysis
-         <small class="display-block"><code>exam</code></small></h6>
+         Analysis
+         <small class="display-block"><code>report</code></small></h6>
 
         <div class="panel-group panel-group-control content-group-lg">
             
@@ -30,32 +30,81 @@
                 <div id="collapsible-control-group{{ forloop.counter }}" class="panel-collapse collapse {% if forloop.counter == 1 %} in {% endif %}">
                     <div class="panel-body">
 
-                        <p>analysis report</p>
-                        
                         <div class="tabbable pt-20 pb-20">
                             <ul class="nav nav-tabs nav-tabs-highlight">
                                 <li class="active"><a href="#css-animate-tab1" data-toggle="tab">Emotion analysis</a></li>
                                 <li><a href="#css-animate-tab2" data-toggle="tab">Behaviour Analysis</a></li>
-                                <li><a href="#css-animate-tab3" data-toggle="tab">Detected Objects</a></li>
-                                <li><a href="#css-animate-tab4" data-toggle="tab">Exam report</a></li>
                             </ul>
 
                             <div class="tab-content">
                                 <div class="tab-pane animated fadeInUp active" id="css-animate-tab1">
-                                    <div id="chartdiv"></div>
+                                    
+                                    <div class="panel panel-flat border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Overall emotions</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_emotion_all"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Emotion timeline</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_emotion_timeline"></div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="tab-pane animated fadeInUp" id="css-animate-tab2">
-                                    Food truck fixie locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid laeggin.
+
+                                    <div class="panel panel-flat border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Answer correctness over emotion</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_answer_correctness"></div>
+                                        </div>
+                                    </div>
+
+                                    
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Average Answer solving speed</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_answer_solving_speed"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Questions overwriting</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_question_overwriting"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Questions shifting</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_question_shifting"></div>
+                                        </div>
+                                    </div>
+
                                 </div>
 
-                                <div class="tab-pane animated zoomIn" id="css-animate-tab3">
-                                    DIY synth PBR banksy irony. Leggings gentrify squid 8-bit cred pitchfork. Williamsburg whatever.
-                                </div>
-
-                                <div class="tab-pane animated flipInX" id="css-animate-tab4">
-                                    Aliquip jean shorts ullamco ad vinyl cillum PBR. Homo nostrud organic, assumenda labore aesthet.
-                                </div>
                             </div>
                         </div>
 
@@ -92,12 +141,98 @@
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
 <script src="https://www.amcharts.com/lib/4/charts.js"></script>
 <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
 <style type="text/css" rel="stylesheet">
-    #chartdiv {
-    width: 100%;
-    height: 500px;
+    #chart_emotion_timeline {
+        width: 100%;
+        height: 500px;
     }
 </style>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/data.js"></script>
+<script src="https://code.highcharts.com/modules/drilldown.js"></script>
+
+<style type="text/css" rel="stylesheet">
+    #chart_emotion_all {
+        min-width: 310px; 
+        max-width: 600px; 
+        height: 400px; 
+        margin: 0 auto
+    }
+    #chart_answer_correctness {
+        min-width: 310px; 
+        height: 400px; 
+        margin: 0 auto
+    }
+
+    #chart_answer_solving_speed{
+        min-width: 310px; 
+        height: 400px; 
+        margin: 0 auto
+    }
+
+    #chart_question_overwriting
+    {
+        min-width: 310px; 
+        height: 400px; 
+        margin: 0 auto
+    }
+
+    #chart_question_shifting
+    {
+        min-width: 310px; 
+        height: 400px; 
+        margin: 0 auto       
+    }
+</style>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        var options = {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie',
+                renderTo: 'chart_emotion_all', //  div id
+            },
+            title: null,
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                    pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            series: [{
+                name: 'Emotion',
+                colorByPoint: true,
+                data: [{}]
+            }],
+        }
+
+        // var url =  " url 'superadmin:drill-down-demo' %}?student_id={{student_id}}";
+    
+        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log(data);
+            options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
+    
+    });
+</script>
+
 
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
@@ -105,36 +240,474 @@
         am4core.useTheme(am4themes_animated);
         // Themes end
 
-        var chart = am4core.create("chartdiv", am4charts.PieChart3D);
-        chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+        // Create chart instance
+        var chart = am4core.create("chart_emotion_timeline", am4charts.XYChart);
 
-        chart.legend = new am4charts.Legend();
-        
+        // Add data
         /*
-        chart.data = [
-            {
-                sentiment: "Lithuania",
-                count: 501.9
-            },
-            {
-                sentiment: "Czech Republic",
-                count: 301.9
-            },
-            {
-                sentiment: "Ireland",
-                count: 201.1
-            }
-        ];
+        chart.data = [{
+            "y": "1",
+            "x": 1,
+            "text": "[bold]2018 Q1[/]\nThere seems to be some furry animal living in the neighborhood.",
+            "center": "right"
+        }];
         */
-        // alert("{{exam_id}}")
+        chart.dataSource.url = `/superadmin/emotion/timeline/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
 
-        chart.dataSource.url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
 
-        chart.innerRadius = 100;
+        // Create axes
+        var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+        yAxis.dataFields.category = "y";
+        yAxis.renderer.grid.template.disabled = true;
+        yAxis.renderer.labels.template.disabled = true;
+        yAxis.tooltip.disabled = true;
 
-        var series = chart.series.push(new am4charts.PieSeries3D());
-        series.dataFields.value = "count";
-        series.dataFields.category = "emotion";
+        var xAxis = chart.xAxes.push(new am4charts.ValueAxis());
+        xAxis.min = 0;
+        xAxis.max = 1.99;
+        xAxis.renderer.grid.template.disabled = true;
+        xAxis.renderer.labels.template.disabled = true;
+        xAxis.renderer.baseGrid.disabled = true;
+        xAxis.tooltip.disabled = true;
+
+        // Create series
+        var series = chart.series.push(new am4charts.LineSeries());
+        series.dataFields.categoryY = "y";
+        series.dataFields.valueX = "x";
+        series.strokeWidth = 4;
+        series.sequencedInterpolation = true;
+
+        var bullet = series.bullets.push(new am4charts.CircleBullet());
+        bullet.setStateOnChildren = true;
+        bullet.states.create("hover");
+        bullet.circle.radius = 10;
+        bullet.circle.states.create("hover").properties.radius = 15;
+
+        var labelBullet = series.bullets.push(new am4charts.LabelBullet());
+        labelBullet.setStateOnChildren = true;
+        labelBullet.states.create("hover").properties.scale = 1.2;
+        labelBullet.label.text = "{text}";
+        labelBullet.label.maxWidth = 200;
+        labelBullet.label.wrap = true;
+        labelBullet.label.truncate = false;
+        labelBullet.label.textAlign = "middle";
+        labelBullet.label.paddingLeft = 20;
+        labelBullet.label.paddingRight = 20;
+        labelBullet.label.fill = am4core.color("#999");
+        labelBullet.label.states.create("hover").properties.fill = am4core.color("#000");
+
+        labelBullet.label.verticalCenter = "middle";
+        labelBullet.label.propertyFields.horizontalCenter = "center";
+
+
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.lineX.disabled = true;
+        chart.cursor.lineY.disabled = true;
+
+        // Add scrollbar
+        chart.scrollbarY = new am4charts.XYChartScrollbar();
+        chart.scrollbarY.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.thumb.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.startGrip.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.endGrip.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.stroke = am4core.color("#017acd");
+
+    });
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+            
+        var options = {
+            chart: {
+                type: 'column',
+                renderTo: 'chart_answer_correctness', //  div id
+                style: {
+                    fontFamily: 'Helvetica',
+                    fontSize: '15px'
+                }
+            },
+            title: null,
+            subtitle: null,
+            xAxis: {
+                categories: [
+                    'happy',
+                    'sad',
+                    'angry'
+                ],
+                crosshair: true,
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            yAxis: {
+                min: 0,
+                allowDecimals: false,
+                title: {
+                    text: 'count'
+                },
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Correct',
+                data: [4, 2, 2],
+                color: '#43a047'
+
+            }, 
+            {
+                name: 'Wrong',
+                data: [2, 3, 1],
+                color: '#dc1818cc'
+            }],
+        };
+
+        // var url =  " url 'superadmin:drill-down-demo' %}?student_id={{student_id}}";
+    
+        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log(data);
+            // options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
+    
+    });
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+        var options = {
+            chart: {
+                type: 'column',
+                renderTo: 'chart_answer_solving_speed',
+                style: {
+                    fontFamily: 'Helvetica',
+                    fontSize: '15px'
+                }
+            },
+            title: null,
+            subtitle: null,
+            accessibility: {
+                announceNewData: {
+                    enabled: true
+                }
+            },
+            xAxis: {
+                type: 'category',
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            yAxis: {
+                title: {
+                    text: 'time (seconds)'
+                },
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y}'
+                    }
+                }
+            },
+
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y} seconds</b><br/>'
+            },
+
+            series: [
+                {
+                    name: "Solving speed",
+                    colorByPoint: true,
+                    data: [
+                        {
+                            name: "happy",
+                            y: 3.4,
+                        },
+                        {
+                            name: "angry",
+                            y: 10.57,
+                        },
+                        {
+                            name: "sad",
+                            y: 7.23,
+                        }
+                    ]
+                }
+            ],
+        };
+
+        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log(data);
+            // options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
+    });
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+        var options = {
+            chart: {
+                type: 'column',
+                renderTo: 'chart_question_overwriting', // div id
+                style: {
+                    fontFamily: 'Helvetica',
+                    fontSize: '15px'
+                }
+            },
+            title: null,
+            subtitle: null,
+            accessibility: {
+                announceNewData: {
+                    enabled: true
+                }
+            },
+            xAxis: {
+                type: 'category',
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            yAxis: {
+                title: {
+                    text: 'count'
+                },
+                allowDecimals: false,
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y}'
+                    }
+                }
+            },
+
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y} seconds</b><br/>'
+            },
+
+            series: [
+                {
+                    name: "Overwrited questions",
+                    colorByPoint: true,
+                    data: [
+                        {
+                            name: "angry",
+                            y: 8,
+                            color: "rgba(244, 67, 54, 0.87)",
+                        },
+                        {
+                            name: "disgust",
+                            y: 10,
+                            color: "rgba(230, 127, 220, 0.85)",
+                        },
+                        {
+                            name: "fear",
+                            y: 5,
+                            color: "rgb(67, 67, 72)",
+                        },
+                        {
+                            name: "happy",
+                            y: 7,
+                            color: "rgba(49, 183, 54, 0.72)",
+                        },
+                        {
+                            name: "sad",
+                            y: 1,
+                            color: "rgb(247, 163, 92)",
+                        },
+                        {
+                            name: "surprise",
+                            y: 2,
+                            color: "rgb(241, 92, 128)",
+                        },
+                        {
+                            name: "neutral",
+                            y: 15,
+                            color: "rgb(124, 181, 236)",
+                        },
+                    ]
+                }
+            ],
+        };
+
+        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log(data);
+            // options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
+    });
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+        var options = {
+            chart: {
+                type: 'column',
+                renderTo: 'chart_question_shifting', // div id
+                style: {
+                    fontFamily: 'Helvetica',
+                    fontSize: '15px'
+                }
+            },
+            title: null,
+            subtitle: null,
+            accessibility: {
+                announceNewData: {
+                    enabled: true
+                }
+            },
+            xAxis: {
+                type: 'category',
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            yAxis: {
+                title: {
+                    text: 'count'
+                },
+                allowDecimals: false,
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            legend: {
+                enabled: false
+            },
+            plotOptions: {
+                series: {
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.y}'
+                    }
+                }
+            },
+
+            tooltip: {
+                headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y} seconds</b><br/>'
+            },
+
+            series: [
+                {
+                    name: "Shifted questions",
+                    colorByPoint: true,
+                    data: [
+                        {
+                            name: "angry",
+                            y: 8,
+                            color: "rgba(244, 67, 54, 0.87)",
+                        },
+                        {
+                            name: "disgust",
+                            y: 10,
+                            color: "rgba(230, 127, 220, 0.85)",
+                        },
+                        {
+                            name: "fear",
+                            y: 5,
+                            color: "rgb(67, 67, 72)",
+                        },
+                        {
+                            name: "happy",
+                            y: 7,
+                            color: "rgba(49, 183, 54, 0.72)",
+                        },
+                        {
+                            name: "sad",
+                            y: 1,
+                            color: "rgb(247, 163, 92)",
+                        },
+                        {
+                            name: "surprise",
+                            y: 2,
+                            color: "rgb(241, 92, 128)",
+                        },
+                        {
+                            name: "neutral",
+                            y: 15,
+                            color: "rgb(124, 181, 236)",
+                        },
+                    ]
+                }
+            ],
+        };
+
+        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log(data);
+            // options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
     });
 </script>
 

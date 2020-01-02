@@ -200,9 +200,11 @@ class CandidateAnswer(models.Model):
     candidate = models.ForeignKey(
         ExamCandidate, on_delete=models.CASCADE, null=True
     )
+
     question = models.ForeignKey(
         ExamQuestion, on_delete=models.CASCADE, null=True
     )
+
     selected_option = ArrayField(
         models.IntegerField(),
         blank=True,
@@ -258,6 +260,7 @@ class ExamCandidatePhoto(models.Model):
     photo = models.FileField(upload_to=user_exam_directory_path)
     np_face = PickledObjectField(blank=True, null=True, help_text="face extracted from image by MTCNN face detector of authorized user in numpy array")
 
+    
     detected_persons_list = JSONField(
         blank=True,
         default=list,
@@ -276,9 +279,12 @@ class ExamCandidatePhoto(models.Model):
         help_text="Is object detection done"
     )
 
-    emotions = JSONField(
-        blank=True,
-        default=dict,
+    all_emotions = PickledObjectField(
+        blank=True, null=True, 
+        help_text="person face with emotions -- happy, sad, fear"
+    )
+    top_emotion = PickledObjectField(
+        blank=True, null=True, 
         help_text="person face with emotions -- happy, sad, fear"
     )
     is_emotion_calc_done = models.BooleanField(

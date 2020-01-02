@@ -5,42 +5,53 @@ function handle_suspicious_activity(reason)
   // debugger;
 
   var length = arr_suspicious.length;
-  // get 
-  // check array length >= suspicious 
-  if ( length >= suspicious_show_warning_after)
-  {
-    var is_continuous_suspicious = true;
+  // // get 
+  // // check array length >= suspicious 
+  // if ( length >= suspicious_show_warning_after)
+  // {
+  //   var is_continuous_suspicious = true;
     
-    var warning_limit = suspicious_show_warning_after - 1
+  //   var warning_limit = suspicious_show_warning_after - 1
 
-    for (index = warning_limit; index >= 0 ; index--) { 
-        // console.log(arr_suspicious[index]); 
-        if(arr_suspicious[index] == false)
-        {
-          is_continuous_suspicious = false;
-        }
-    } 
+  //   for (index = warning_limit; index >= 0 ; index--) { 
+  //       // console.log(arr_suspicious[index]); 
+  //       if(arr_suspicious[index] == false)
+  //       {
+  //         is_continuous_suspicious = false;
+  //       }
+  //   } 
 
-    if(is_continuous_suspicious)
-    {
-      // show warning
-      new PNotify({
-          title: "Warning",
-          text: "Suspicious activity - " + reason,
-          addclass: 'alert alert-styled-left alert-arrow-left',
-          type: "warning"
-      })
-    }
-  }
+  //   if(is_continuous_suspicious)
+  //   {
+  //     // show warning
+  //     new PNotify({
+  //         title: "Warning",
+  //         text: "Suspicious activity - " + reason,
+  //         addclass: 'alert alert-styled-left alert-arrow-left',
+  //         type: "warning"
+  //     })
+  //   }
+  // }
+
+  // show warning
+  new PNotify({
+      title: "Warning",
+      text: "Suspicious activity - " + reason,
+      addclass: 'alert alert-styled-left alert-arrow-left',
+      type: "warning"
+  })
+  
+  // debugger;
 
   // check limit of suspicious activity to stop exam 
   if ( length >= suspicious_stop_exam_after)
   {
     var is_continuous_suspicious = true;
-    
-    var stop_limit = suspicious_stop_exam_after - 1
 
-    for (index = stop_limit; index >= 0 ; index--) { 
+    last_index = length - 1
+    len_minus_suspicious_stop_exam_after = length - (suspicious_stop_exam_after + 1)
+    
+    for (index = last_index; index >= len_minus_suspicious_stop_exam_after ; index--) { 
         // console.log(arr_suspicious[index]); 
         if(arr_suspicious[index] == false)
         {

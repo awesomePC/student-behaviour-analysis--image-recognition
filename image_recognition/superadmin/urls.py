@@ -21,5 +21,5 @@ urlpatterns = [
     path('analysis/candidate/list/', views.AnalysisCandidateListView.as_view(), name='analysis-candidate-list'),
     path('candidate/<int:pk>/analysis/', views.CandidateAnalysis.as_view(), name='candidate-analysis'),
     path('emotion/analysis/data/', views.EmotionAnalysisData.as_view(), name='emotion-analysis-data'),
-    
+    path('emotion/timeline/data/', views.EmotionTimelineData.as_view(), name='emotion-timeline-data'),
 ]

@@ -12,7 +12,7 @@ import settings
 
 # initialize the Keras REST API endpoint URL along with the input
 # image path
-BASE_API_URL = "http://localhost:5000/"
+BASE_API_URL = "http://localhost:5001/"
 
 
 def test_api_get_face_count(image_path):

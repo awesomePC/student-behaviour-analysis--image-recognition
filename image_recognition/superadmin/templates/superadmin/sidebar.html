@@ -8,7 +8,7 @@
     <div class="sidebar-user-material">
         <div class="category-content">
             <div class="sidebar-user-material-content">
-                <a href="#"><img src="{% static 'assets/images/placeholder.jpg' %}" class="img-circle img-responsive" alt=""></a>
+                <a href="#"><img src="{% static 'assets/images/user/User-dummy-300x300.png' %}" class="img-circle img-responsive" alt=""></a>
                 <h6>
                 {% if user.first_name and user.last_name %}
                      {{ user.first_name }} {{user.last_name}}
@@ -45,16 +45,7 @@
                 <li class="mt-10" id="dashboard">
                     <a href="{% url 'users:handle_login' %}"><i class="icon-home"></i> <span>Dashboard</span></a>
                 </li>
- 
-                <li id="training">
-                    <a href="#"><i class="icon-chip"></i> <span>Model Training</span></a>
-                    <ul>
-                        <li id="model_training">
-                            <a href="{% url 'superadmin:model_training' %}">Train Model</a>
-                        </li>
-                    </ul>
-                </li>
-                
+
                 <li id="exam">
                     <a href="{% url 'superadmin:exam_list' %}">
                         <i class="icon-clippy"></i>

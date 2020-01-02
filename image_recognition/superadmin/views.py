@@ -235,7 +235,7 @@ class CandidateAnalysis(View):
         candidate_id = self.kwargs["pk"]
         candidate_exams = ExamCandidate.objects.filter(candidate__id=candidate_id)
         
-        # temprory for graph
+        # temporary for graph
         if candidate_exams:
             exam_id = candidate_exams[0].exam.id
         else:
@@ -277,6 +277,7 @@ class EmotionAnalysisData(View):
     Emotion analysis data for graph
     """
     def get(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
         candidate_id = request.GET.get("candidate_id")
         exam_id = request.GET.get("exam_id")
         candidate_photos = ExamCandidatePhoto.objects.filter(user__id=candidate_id, exam__id=exam_id)
@@ -284,17 +285,14 @@ class EmotionAnalysisData(View):
         emotions = []
 
         for candidate_photo in candidate_photos:
-            # print(candidate_photo.emotions)
-            if not candidate_photo.emotions:
-                continue
-            
-            if isinstance(candidate_photo.emotions, dict):
-                label = candidate_photo.emotions.get('label')
-                emotion_probability = candidate_photo.emotions.get('emotion_probability')
-                if label:
-                    emotions.append(label)
-                else:
-                    emotions.append("unknown")
+            if isinstance(candidate_photo.top_emotion, list):
+                if len(candidate_photo.top_emotion) == 2:
+                    label = candidate_photo.top_emotion[0]
+                    emotion_probability = candidate_photo.top_emotion[1]
+                    if label:
+                        emotions.append(label)
+                    else:
+                        emotions.append("unknown")
 
         emotion_frequency = count_frequency(emotions)
         # print(emotion_frequency)
@@ -302,7 +300,80 @@ class EmotionAnalysisData(View):
         data = []
         for key, value in emotion_frequency.items():
             data.append({
-                "emotion": key,
-                "count": value
+                "name": key,
+                "y": value
             })
         return JsonResponse(data, safe=False)
+
+
+class EmotionTimelineData(View):
+    """
+    Emotion timeline data for graph
+    """
+    def get(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
+        candidate_id = request.GET.get("candidate_id")
+        exam_id = request.GET.get("exam_id")
+        candidate_photos = ExamCandidatePhoto.objects.filter(
+            user__id=candidate_id, exam__id=exam_id
+        ).order_by('-created_at')
+        
+        emotions_overtime = []
+
+        for idx, candidate_photo in enumerate(candidate_photos):
+            if isinstance(candidate_photo.top_emotion, list):
+                if len(candidate_photo.top_emotion) == 2:
+                    label = candidate_photo.top_emotion[0]
+                    # emotion_probability = candidate_photo.top_emotion[1]
+                    if label:
+                        str_time = candidate_photo.created_at.strftime('%H:%M:%S')
+                    else:
+                        label = "unknown"
+
+                    emotions_overtime.append({
+                        "text": f"{label} \n{str_time}",
+                        "y": idx,
+                        "x": "1",
+                        "center": "left" if (idx % 2 != 0) else "right" # position
+                    })
+
+        print(emotions_overtime)
+
+        return JsonResponse(emotions_overtime, safe=False)
+
+
+class AnswerCorrectnessOverEmotion(View):
+    """
+    Answer correct or not over emotion
+    """
+    # def get_user_answers()
+    def get(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
+        candidate_id = request.GET.get("candidate_id")
+        exam_id = request.GET.get("exam_id")
+        candidate_photos = ExamCandidatePhoto.objects.filter(
+            user__id=candidate_id, exam__id=exam_id
+        ).order_by('-created_at')
+        
+        emotions_overtime = []
+
+        for idx, candidate_photo in enumerate(candidate_photos):
+            if isinstance(candidate_photo.top_emotion, list):
+                if len(candidate_photo.top_emotion) == 2:
+                    label = candidate_photo.top_emotion[0]
+                    # emotion_probability = candidate_photo.top_emotion[1]
+                    if label:
+                        str_time = candidate_photo.created_at.strftime('%H:%M:%S')
+                    else:
+                        label = "unknown"
+
+                    emotions_overtime.append({
+                        "text": f"{label} \n{str_time}",
+                        "y": idx,
+                        "x": "1",
+                        "center": "left" if (idx % 2 != 0) else "right" # position
+                    })
+
+        print(emotions_overtime)
+
+        return JsonResponse(emotions_overtime, safe=False)

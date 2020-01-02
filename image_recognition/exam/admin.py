@@ -6,7 +6,8 @@ from django.apps import apps
 app = apps.get_app_config('exam')
 for model_name, model in app.models.items():
     model_admin = type(model_name + "Admin", (admin.ModelAdmin,), {})
-
+    
+    model_admin.list_per_page = 5 # No of records per page 
     model_admin.list_display = model.admin_list_display if hasattr(model, 'admin_list_display') else tuple([field.name for field in model._meta.fields])
     model_admin.list_filter = model.admin_list_filter if hasattr(model, 'admin_list_filter') else model_admin.list_display
     model_admin.list_display_links = model.admin_list_display_links if hasattr(model, 'admin_list_display_links') else ()

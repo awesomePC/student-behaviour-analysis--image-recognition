@@ -21,12 +21,15 @@ import os
 import uuid
 import re
 
+from PIL import Image
+
+from numpy import array
+
 from notifications.signals import notify
 from helper.utils.error_handling import trace_error
 
 # from django.db.models.signals import post_save
 # from django.dispatch import receiver
-
 
 from candidate.models import CandidateImgDataset, TempRegistrationImage
 
@@ -119,8 +122,11 @@ def sign_up(request):
                     )
                     candidate_img.save()
 
-                    # run celery background task to extract images
-                    post_register_extract_save_face_and_embeddings.delay(candidate_img.id)
+                    # run celery background task to extract face and embeddings
+                    # post_register_extract_save_face_and_embeddings.delay(candidate_img.id)
+                    
+                    # run as normal method
+                    post_register_extract_save_face_and_embeddings(candidate_img.id)
 
                     # delete temp
                     temp_image.delete()
@@ -162,9 +168,10 @@ def is_valid_traning_image(image__path):
     Arguments:
         image__path {[type]} -- [description]
     """
-    from recognize.views import detect_faces
-    faces, confidences = detect_faces(image__path)
-    count = len(faces)
+    from recognize.views import get_face_count
+    
+    count = get_face_count(image__path)
+
     if count == 0:
         is_valid = False
         return (is_valid, "No human face detected. Please upload another image")
@@ -173,8 +180,10 @@ def is_valid_traning_image(image__path):
         is_valid = True
         return (is_valid, "valid image")
     
-    else:
+    elif count > 1:
         return (False, "Multiple faces detected ..")
+    else:
+        return (False, "Request to count face was failed ..")
 
 def save_sign_up_image(lazy_user_id, photo_data, fileId, previewId):
     candidate_image = TempRegistrationImage.objects.create(
@@ -542,16 +551,22 @@ def generate_random_user_file(request):
 
 @csrf_exempt
 def ajax_validate_user(request):
-    from recognize.face_recognition import (
-        read_image,
-        get_faces_and_embeddings_by_img_path,
+    # from recognize.face_recognition import (
+    #     read_image,
+    #     get_faces_and_embeddings_by_img_path,
+    #     highlight_recognized_faces
+    # )
+
+    # from recognize.face_recognition import verify_face_matching
+
+    # import pdb; pdb.set_trace()
+
+    from recognize.views import (
+        get_faces_embeddings,
+        compare_face_embedding,
         highlight_recognized_faces
     )
 
-    from recognize.face_recognition import verify_face_matching
-
-    # import pdb; pdb.set_trace()
-    
     # exam = get_object_or_404(Exam, pk=self.kwargs["pk"])
     photo_data = request.FILES.get('webcam')
 
@@ -565,9 +580,11 @@ def ajax_validate_user(request):
 
         img_path = obj_candidate_validation.photo.path
 
-        realtime_detected_faces, realtime_extracted_faces, realtime_face_embeddings = get_faces_and_embeddings_by_img_path(
+        realtime_detected_faces, realtime_extracted_faces, realtime_face_embeddings = get_faces_embeddings(
             img_path
         )
+
+        # import pdb; pdb.set_trace()
 
         detected_face_count = len(realtime_detected_faces)
 
@@ -583,9 +600,12 @@ def ajax_validate_user(request):
 
         if candidate_img_dataset:
             known_face_embedding = candidate_img_dataset.face_embedding
+            
+            # convert to numpy array
+            # known_face_embedding = array(known_face_embedding)
 
             for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
-                is_matched, probability, _, _ = verify_face_matching(
+                is_matched, probability = compare_face_embedding(
                     known_face_embedding, realtime_face_embedding
                 )
                 
@@ -606,17 +626,19 @@ def ajax_validate_user(request):
                     "box": realtime_detected_faces[idx]['box']
                 })
 
-
-        source_pil_image, _ = read_image(img_path)
-
         if len(recognized_persons) >= 1:
             hightlighted_image = highlight_recognized_faces(
-                source_pil_image, recognized_persons,
-                write_result_2_disk=True,
-                res_file_name_with_path=res_file_name_with_path,
+                img_path, recognized_persons
             )
+
+            # save pil image
+            hightlighted_image.save(res_file_name_with_path, "PNG")
+
         else:
-            # if no face found
+            # if no face found save source file as result
+            # later in javascript handle this situation
+            # if no face detected show current frame from camera
+            source_pil_image = Image.open(img_path).convert("RGB")
             source_pil_image.save(res_file_name_with_path)
 
         # detected_person_ids = []
@@ -666,12 +688,13 @@ def ajax_validate_user(request):
 
 @csrf_exempt
 def save_recognize_exam_photo(request, exam_id):
-    from recognize.face_recognition import (
-        read_image,
-        get_faces_and_embeddings_by_img_path,
+
+    from recognize.views import (
+        get_faces_embeddings,
+        compare_face_embedding,
         highlight_recognized_faces
     )
-    from recognize.face_recognition import verify_face_matching
+    from candidate.tasks import recognize_candidate_emotion
 
     photo_data = request.FILES.get('webcam')
 
@@ -691,7 +714,7 @@ def save_recognize_exam_photo(request, exam_id):
 
         img_path = exam_candidate_data.photo.path
 
-        realtime_detected_faces, realtime_extracted_faces, realtime_face_embeddings = get_faces_and_embeddings_by_img_path(
+        realtime_detected_faces, realtime_extracted_faces, realtime_face_embeddings = get_faces_embeddings(
             img_path
         )
 
@@ -711,7 +734,7 @@ def save_recognize_exam_photo(request, exam_id):
             known_face_embedding = candidate_img_dataset.face_embedding
 
             for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
-                is_matched, probability, _, _ = verify_face_matching(
+                is_matched, probability = compare_face_embedding(
                     known_face_embedding, realtime_face_embedding
                 )
                 
@@ -722,7 +745,8 @@ def save_recognize_exam_photo(request, exam_id):
                     name = candidate_img_dataset.user.email
 
                     # save face in db -- for emotion analysis
-                    exam_candidate_data.np_face = realtime_extracted_faces[idx]
+                    # modify emotion analysis later to work on single face
+                    # exam_candidate_data.np_face = realtime_extracted_faces[idx]
                     exam_candidate_data.save()
 
                 else:
@@ -736,71 +760,24 @@ def save_recognize_exam_photo(request, exam_id):
                     "probability": probability,
                     "box": realtime_detected_faces[idx]['box']
                 })
+
+            # trigger detect emotions background task
+            recognize_candidate_emotion.delay(exam_candidate_data.id)
+            
+            # for testing run directly
+            # recognize_candidate_emotion(exam_candidate_data.id)
+
         else:
             print(f"Error ... Candidate image dataset is empty")
 
-        source_pil_image, _ = read_image(img_path)
+        # source_pil_image, _ = read_image(img_path)
 
         if len(recognized_persons) >= 1:
             hightlighted_image = highlight_recognized_faces(
-                source_pil_image, recognized_persons,
-                write_result_2_disk=True,
-                res_file_name_with_path=res_file_name_with_path,
+                img_path, recognized_persons,
+                # write_result_2_disk=True,
+                # res_file_name_with_path=res_file_name_with_path,
             )
-
-        # # get detected persons and matching percentages
-        # detected_persons = []
-        # matching_percentages = []
-
-        # # modify recognized name
-        # for idx, recognized_face in enumerate(detected_faces):
-        #     name = recognized_face["name"]
-        #     probability = recognized_face["probability"]
-
-        #     user = get_user_from_recognized_str(name)
-        #     if user:
-        #         if user.first_name:
-        #             name = user.first_name
-        #         elif user.last_name:
-        #             name = user.last_name
-        #         else:
-        #             name = user.email
-        #         # store updated name
-        #         recognized_face["name"] = name
-        #         detected_faces[idx] = recognized_face
-
-        #         detected_persons.append({
-        #             "user_id": user.id,
-        #             "user_email": user.email,
-        #             "user_type": user.user_type,
-        #             "name": name,
-        #             "probability": probability
-        #         })
-
-        exam_candidate_data.detected_persons_list = recognized_persons
-        exam_candidate_data.save()
-
-
-        # # ***********
-        # # detect common objects
-        # bbox, label, conf = detect_objects()
-        # detected_objects = {
-        #     "bbox": bbox,
-        #     "label": label,
-        #     "conf": conf,
-        # }
-        # exam_candidate_data.detected_objects = detected_objects
-        # exam_candidate_data.save()
-
-        # # ***********
-        # # detect emotions in image
-        # preds, emotion_probability, label = recognize_emotion(image_file__path)
-        # emotions = {
-        #     "emotion_probability": str(emotion_probability),
-        #     "label": label,
-        # }
-        # exam_candidate_data.emotions = emotions
-        # exam_candidate_data.save()
 
         # first level suspicious checking
         # is valid candidate available

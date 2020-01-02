@@ -1,0 +1,412 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Student list {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam list -->
+    <div class="col-md-12">
+
+        <!-- Collapsible with left control button -->
+        <h6 class="content-group text-semibold">
+         Analysis
+         <small class="display-block"><code>report</code></small></h6>
+
+        <div class="panel-group panel-group-control content-group-lg">
+            
+            {% for candidate_exam in candidate_exams %}
+            <div class="panel panel-white">
+                <div class="panel-heading">
+                    <h6 class="panel-title">
+                        <a data-toggle="collapse" href="#collapsible-control-group{{ forloop.counter }}">Exam `{{ candidate_exam.exam.name }}`</a>
+                    </h6>
+                </div>
+                <div id="collapsible-control-group{{ forloop.counter }}" class="panel-collapse collapse {% if forloop.counter == 1 %} in {% endif %}">
+                    <div class="panel-body">
+
+                        <div class="tabbable pt-20 pb-20">
+                            <ul class="nav nav-tabs nav-tabs-highlight">
+                                <li class="active"><a href="#css-animate-tab1" data-toggle="tab">Emotion analysis</a></li>
+                                <li><a href="#css-animate-tab2" data-toggle="tab">Behaviour Analysis</a></li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <div class="tab-pane animated fadeInUp active" id="css-animate-tab1">
+                                    
+                                    <div class="panel panel-flat border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">Overall emotions</h6>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_emotion_all"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">Emotion timeline</h6>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_emotion_timeline"></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane animated fadeInUp" id="css-animate-tab2">
+
+                                    <div class="panel panel-flat border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">Answer correctness over emotion</h6>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_answer_correctness"></div>
+                                        </div>
+                                    </div>
+
+                                    
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h6 class="panel-title">Average Answer solving speed</h6>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_answer_solving_speed"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}  
+        </div>
+        <!-- /collapsible with left control button -->
+
+    </div>  
+    <!--/ exam list-->  
+
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#analysis").addClass("active");
+    });
+</script>
+
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/interactions.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/touch.min.js' %}"></script>
+
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/charts.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+<style type="text/css" rel="stylesheet">
+    #chart_emotion_all {
+        width: 100%;
+        height: 500px;
+    }
+
+    #chart_emotion_timeline {
+        width: 100%;
+        height: 500px;
+    }
+
+    #chart_answer_correctness {
+        width: 100%;
+        height: 500px;
+    }
+
+    #chart_answer_solving_speed{
+        width: 100%;
+        height: 500px;
+    }
+
+</style>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // Themes begin
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        var chart = am4core.create("chart_emotion_all", am4charts.PieChart3D);
+        chart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+
+        chart.legend = new am4charts.Legend();
+        
+        /*
+        chart.data = [
+            {
+                sentiment: "Lithuania",
+                count: 501.9
+            },
+            {
+                sentiment: "Czech Republic",
+                count: 301.9
+            },
+            {
+                sentiment: "Ireland",
+                count: 201.1
+            }
+        ];
+        */
+        // alert("{{exam_id}}")
+
+        chart.dataSource.url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        chart.innerRadius = 100;
+
+        var series = chart.series.push(new am4charts.PieSeries3D());
+        series.dataFields.value = "count";
+        series.dataFields.category = "emotion";
+    });
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        // Themes begin
+        am4core.useTheme(am4themes_animated);
+        // Themes end
+
+        // Create chart instance
+        var chart = am4core.create("chart_emotion_timeline", am4charts.XYChart);
+
+        // Add data
+        /*
+        chart.data = [{
+            "y": "1",
+            "x": 1,
+            "text": "[bold]2018 Q1[/]\nThere seems to be some furry animal living in the neighborhood.",
+            "center": "right"
+        }];
+        */
+        chart.dataSource.url = `/superadmin/emotion/timeline/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+
+        // Create axes
+        var yAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+        yAxis.dataFields.category = "y";
+        yAxis.renderer.grid.template.disabled = true;
+        yAxis.renderer.labels.template.disabled = true;
+        yAxis.tooltip.disabled = true;
+
+        var xAxis = chart.xAxes.push(new am4charts.ValueAxis());
+        xAxis.min = 0;
+        xAxis.max = 1.99;
+        xAxis.renderer.grid.template.disabled = true;
+        xAxis.renderer.labels.template.disabled = true;
+        xAxis.renderer.baseGrid.disabled = true;
+        xAxis.tooltip.disabled = true;
+
+        // Create series
+        var series = chart.series.push(new am4charts.LineSeries());
+        series.dataFields.categoryY = "y";
+        series.dataFields.valueX = "x";
+        series.strokeWidth = 4;
+        series.sequencedInterpolation = true;
+
+        var bullet = series.bullets.push(new am4charts.CircleBullet());
+        bullet.setStateOnChildren = true;
+        bullet.states.create("hover");
+        bullet.circle.radius = 10;
+        bullet.circle.states.create("hover").properties.radius = 15;
+
+        var labelBullet = series.bullets.push(new am4charts.LabelBullet());
+        labelBullet.setStateOnChildren = true;
+        labelBullet.states.create("hover").properties.scale = 1.2;
+        labelBullet.label.text = "{text}";
+        labelBullet.label.maxWidth = 200;
+        labelBullet.label.wrap = true;
+        labelBullet.label.truncate = false;
+        labelBullet.label.textAlign = "middle";
+        labelBullet.label.paddingLeft = 20;
+        labelBullet.label.paddingRight = 20;
+        labelBullet.label.fill = am4core.color("#999");
+        labelBullet.label.states.create("hover").properties.fill = am4core.color("#000");
+
+        labelBullet.label.verticalCenter = "middle";
+        labelBullet.label.propertyFields.horizontalCenter = "center";
+
+
+        chart.cursor = new am4charts.XYCursor();
+        chart.cursor.lineX.disabled = true;
+        chart.cursor.lineY.disabled = true;
+
+        // Add scrollbar
+        chart.scrollbarY = new am4charts.XYChartScrollbar();
+        chart.scrollbarY.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.thumb.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.startGrip.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.endGrip.background.fill = am4core.color("#017acd");
+        chart.scrollbarY.stroke = am4core.color("#017acd");
+
+    });
+</script>
+
+
+<script type="text/javascript">
+    am4core.ready(function() {
+
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+
+    // Create chart instance
+    var chart = am4core.create("chart_answer_correctness", am4charts.XYChart);
+
+    // Add data
+    chart.data = [ {
+        "emotion": "happy",
+        "correct": 3,
+        "wrong": 3,
+    }, 
+    {
+        "emotion": "sad",
+        "correct": 2,
+        "wrong": 3,
+    }];
+
+    // Create axes
+    var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.dataFields.category = "emotion";
+    categoryAxis.title.text = "Emotions";
+    categoryAxis.renderer.grid.template.location = 0;
+    categoryAxis.renderer.minGridDistance = 20;
+    categoryAxis.renderer.cellStartLocation = 0.3;
+    categoryAxis.renderer.cellEndLocation = 0.8;
+
+    var  valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    valueAxis.min = 0;
+    valueAxis.maxPrecision = 0; // display only integers
+    valueAxis.title.text = "Answer Count";
+
+    const myColors= [
+        "#0000ff",
+        "#ff0000",
+        "#ffff00",
+        "#ff00ff"
+    ];
+
+
+    // Create series
+    function createSeries(field, name, stacked) {
+        var series = chart.series.push(new am4charts.ColumnSeries());
+        series.dataFields.valueY = field;
+        series.dataFields.categoryX = "emotion";
+        series.name = name;
+        series.columns.template.tooltipText = "{name}: [bold]{valueY}[/]";
+        series.columns.template.width = am4core.percent(75);
+        
+        /*
+        series.columns.template.adapter.add("fill", (fill, target) => {
+            return am4core.color(myColors[target.dataItem.index]);
+        });
+        */
+    }
+
+    createSeries("correct", "Correct", false);
+    createSeries("wrong", "Wrong", false);
+
+    // Add legend
+    chart.legend = new am4charts.Legend();
+
+    }); // end am4core.ready()
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
+
+    // Create chart instance
+    var chart = am4core.create("chart_answer_solving_speed", am4charts.XYChart);
+    
+    //chart.scrollbarX = new am4core.Scrollbar();
+
+    // Add data
+    chart.data = [{
+        "emotion": "happy",
+        "avg": 3.2
+    }, 
+    {
+        "emotion": "angry",
+        "avg": 3.8
+    }];
+
+    // Create axes
+    var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.dataFields.category = "emotion";
+    categoryAxis.renderer.grid.template.location = 0;
+    categoryAxis.renderer.minGridDistance = 30;
+    categoryAxis.renderer.cellStartLocation = 0.3;
+    categoryAxis.renderer.cellEndLocation = 0.8;
+    categoryAxis.renderer.labels.template.horizontalCenter = "right";
+    categoryAxis.renderer.labels.template.verticalCenter = "middle";
+
+    categoryAxis.tooltip.disabled = true;
+    categoryAxis.renderer.minHeight = 110;
+
+    var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+    valueAxis.renderer.minWidth = 50;
+    valueAxis.title.text = "Average speed (seconds)";
+
+    // Create series
+    var series = chart.series.push(new am4charts.ColumnSeries());
+    series.sequencedInterpolation = true;
+    series.dataFields.valueY = "avg";
+    series.dataFields.categoryX = "emotion";
+    series.tooltipText = "[{categoryX}: bold]{valueY}[/]";
+    series.columns.template.strokeWidth = 0;
+
+    series.tooltip.pointerOrientation = "vertical";
+
+    series.columns.template.column.cornerRadiusTopLeft = 10;
+    series.columns.template.column.cornerRadiusTopRight = 10;
+    series.columns.template.column.fillOpacity = 0.8;
+
+    // on hover, make corner radiuses bigger
+    var hoverState = series.columns.template.column.states.create("hover");
+    hoverState.properties.cornerRadiusTopLeft = 0;
+    hoverState.properties.cornerRadiusTopRight = 0;
+    hoverState.properties.fillOpacity = 1;
+
+    series.columns.template.adapter.add("fill", function(fill, target) {
+        return chart.colors.getIndex(target.dataItem.index);
+    });
+
+    // Cursor
+    chart.cursor = new am4charts.XYCursor();
+
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

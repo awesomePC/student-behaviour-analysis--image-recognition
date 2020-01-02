@@ -74,6 +74,7 @@ def base64_to_np(img_str, dtype=np.uint8):
     return np_img
 
 
+
 class JsonNumpyEncoder(json.JSONEncoder):
     """
     If obj is isinstance of ndarray then it convert to list to support json
@@ -82,3 +83,32 @@ class JsonNumpyEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return json.JSONEncoder.default(self, obj)
+
+# more advanced encoder - with float and integer
+# implement it later as separate package
+# use - json.dumps(data, cls=MyEncoder)
+class MyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, numpy.integer):
+            return int(obj)
+        elif isinstance(obj, numpy.floating):
+            return float(obj)
+        elif isinstance(obj, numpy.ndarray):
+            return obj.tolist()
+
+        elif isinstance(obj, Decimal):
+            return float(obj)
+        
+        elif isinstance(obj, complex):
+            return {
+                "real": obj.real,
+                "imag": obj.imag,
+                "__class__": "complex"
+            }
+        else:
+            return super(MyEncoder, self).default(obj)
+
+
+# print json.dumps(2 + 1j, cls=ComplexEncoder)
+# OUTPUT
+# {"real": 2.0, "imag": 1.0, "__class__": "complex"}

@@ -333,4 +333,8 @@ if __name__ == "__main__":
     # to stop ValueError: 
     # Tensor Tensor("fc1000/Softmax:0", shape=(?, 1000), dtype=float32) 
     # is not an element of this graph.
-    app.run(debug=False, threaded = False)
+    app.run(
+        debug=False,threaded = False,
+        host="0.0.0.0",
+        port=5001
+    )

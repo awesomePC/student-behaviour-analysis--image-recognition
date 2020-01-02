@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "emotion_api"
+		},
+		{
+			"path": "image_recognition"
+		},
+		{
+			"path": "recognition_api"
+		}
+	]
+}

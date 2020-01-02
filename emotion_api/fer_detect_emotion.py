@@ -1,7 +1,7 @@
 from fer import FER
 import cv2
 
-img = cv2.imread("images/no_face.jpg")
+img = cv2.imread("images/n.jpg")
 detector = FER(mtcnn=True)
 emotions = detector.detect_emotions(img)
 
