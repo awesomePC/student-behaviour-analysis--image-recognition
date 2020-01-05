@@ -6,6 +6,7 @@ from . import views
 app_name = 'users'
 
 urlpatterns = [
-    path('handle_login/', views.handle_login, name='handle_login'),
+    # default will be handle login
+    path('', views.handle_login, name='handle_login'),
 ]
 
