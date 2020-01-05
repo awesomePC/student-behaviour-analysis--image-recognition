@@ -353,3 +353,15 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # CELERY_SEND_TASK_ERROR_EMAILS = True
 # CELERY_WORKER_MAX_TASKS_PER_CHILD = 300
 
+
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="https://e2932749492e4c00af282eb8f12b4282@sentry.io/1871868",
+    integrations=[DjangoIntegration()],
+
+    # If you wish to associate users to errors (assuming you are using
+    # django.contrib.auth) you may enable sending PII data.
+    send_default_pii=True
+)
