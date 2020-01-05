@@ -200,14 +200,14 @@ def get_faces_and_embeddings(image_array):
     return (detected_faces, extracted_faces, face_embeddings)
 
 
-def verify_face_matching(known_embedding, real_time_embedding, thresh=0.4):
+def verify_face_matching(known_embedding, real_time_embedding, thresh=0.22):
     """
     Compare and check is known embeding match to real time embedding
     
     Args:
         known_embedding (array): Face known embedding
         real_time_embedding (array): Face real time embedding
-        thresh (float, optional): Threshold. Defaults to 0.4.
+        thresh (float, optional): Threshold. Defaults to 0.22.
     
     Returns:
         tuple: tuple containing is_matched, probability, y_pred, distance

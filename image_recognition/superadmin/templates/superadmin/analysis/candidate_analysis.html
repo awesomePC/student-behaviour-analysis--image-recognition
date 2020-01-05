@@ -20,20 +20,21 @@
 
         <div class="panel-group panel-group-control content-group-lg">
             
-            {% for candidate_exam in candidate_exams %}
+            {% if candidate_exam %}
             <div class="panel panel-white">
                 <div class="panel-heading">
                     <h6 class="panel-title">
                         <a data-toggle="collapse" href="#collapsible-control-group{{ forloop.counter }}">Exam `{{ candidate_exam.exam.name }}`</a>
                     </h6>
                 </div>
-                <div id="collapsible-control-group{{ forloop.counter }}" class="panel-collapse collapse {% if forloop.counter == 1 %} in {% endif %}">
+                <div id="collapsible-control-group{{ forloop.counter }}" class="panel-collapse collapse in">
                     <div class="panel-body">
 
                         <div class="tabbable pt-20 pb-20">
                             <ul class="nav nav-tabs nav-tabs-highlight">
                                 <li class="active"><a href="#css-animate-tab1" data-toggle="tab">Emotion analysis</a></li>
                                 <li><a href="#css-animate-tab2" data-toggle="tab">Behaviour Analysis</a></li>
+                                <li><a href="#css-animate-tab3" data-toggle="tab">Exam Result</a></li>
                             </ul>
 
                             <div class="tab-content">
@@ -95,11 +96,70 @@
                                     
                                     <div class="panel panel-flat border-top-info border-bottom-info mt-20">
                                         <div class="panel-heading">
-                                            <h5 class="panel-title">Questions shifting</h5>
+                                            <h5 class="panel-title">Overall Suspicious activity</h5>
                                         </div>
                                         
                                         <div class="panel-body">
-                                            <div id="chart_question_shifting"></div>
+                                            <div id="chart_suspicious_activity"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">Overall</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="conclusion">
+
+                                                {% if suspicious_cnt %}
+                                                    <h3> 
+                                                        <span> Activity: </span>
+                                                        <span class="text-danger"> Suspicious </span>
+                                                    </h3>
+                                                    <p> 
+                                                        <span> Suspicious Activity Count: </span>
+                                                        <span> {{ suspicious_cnt }} </span>
+                                                    </p>
+                                                {% else %}
+                                                    <h3> 
+                                                        <span> Activity: </span>
+                                                        <span class="text-success"> Normal </span>
+                                                    </h3>
+                                                {% endif %}
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="tab-pane animated fadeInUp" id="css-animate-tab3">
+
+                                    <div class="panel panel-flat border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title"></h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <p>
+                                                <span> Total score: </span>
+                                                <span>{{ total_score }} </span>
+                                            </p>
+                                            
+                                            <p>
+                                                <span> Total Answered: </span>
+                                                <span>{{ answered }} </span>
+                                            </p>                                            
+                                            <p>
+                                                <span> Not answered: </span>
+                                                <span>{{ not_answered }} </span>
+                                            </p>                                            
+                                            <p>
+                                                <span> Correct Answers: </span>
+                                                <span>{{ correct_answers }} </span>
+                                            </p>
+
                                         </div>
                                     </div>
 
@@ -112,7 +172,7 @@
                     </div>
                 </div>
             </div>
-            {% endfor %}  
+            {% endif %}  
         </div>
         <!-- /collapsible with left control button -->
 
@@ -179,7 +239,7 @@
         margin: 0 auto
     }
 
-    #chart_question_shifting
+    #chart_suspicious_activity
     {
         min-width: 310px; 
         height: 400px; 
@@ -331,11 +391,14 @@
             title: null,
             subtitle: null,
             xAxis: {
+                /*
                 categories: [
                     'happy',
                     'sad',
                     'angry'
                 ],
+                */
+                categories: [],
                 crosshair: true,
                 labels: {
                     style: {
@@ -369,6 +432,7 @@
                     borderWidth: 0
                 }
             },
+            /*
             series: [{
                 name: 'Correct',
                 data: [4, 2, 2],
@@ -380,15 +444,20 @@
                 data: [2, 3, 1],
                 color: '#dc1818cc'
             }],
+            */
+            series: [],
         };
 
         // var url =  " url 'superadmin:drill-down-demo' %}?student_id={{student_id}}";
     
-        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+        var url = `/superadmin/emotion/answer/correctness/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
 
         $.getJSON(url,  function(data) {
             console.log(data);
-            // options.series[0].data = data;  // set as first element
+            // debugger
+            options.series = data.emotions_overtime;
+            options.xAxis.categories = data.emotions_list
+
             console.log(options)
             var chart = new Highcharts.Chart(options);
         });
@@ -456,6 +525,7 @@
                 {
                     name: "Solving speed",
                     colorByPoint: true,
+                    /*
                     data: [
                         {
                             name: "happy",
@@ -470,15 +540,17 @@
                             y: 7.23,
                         }
                     ]
+                    */
+                    data: []
                 }
             ],
         };
 
-        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
-
+        var url = `/superadmin/emotion/answer/speed/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+    
         $.getJSON(url,  function(data) {
             console.log(data);
-            // options.series[0].data = data;  // set as first element
+            options.series[0].data = data;  // set as first element
             console.log(options)
             var chart = new Highcharts.Chart(options);
         });
@@ -546,6 +618,7 @@
                 {
                     name: "Overwrited questions",
                     colorByPoint: true,
+                    /*
                     data: [
                         {
                             name: "angry",
@@ -583,15 +656,18 @@
                             color: "rgb(124, 181, 236)",
                         },
                     ]
+                    */
+                    data: [],
                 }
             ],
         };
 
-        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+        var url = `/superadmin/emotion/answer/overwriting/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
 
         $.getJSON(url,  function(data) {
             console.log(data);
-            // options.series[0].data = data;  // set as first element
+            debugger
+            options.series[0].data = data;  // set as first element
             console.log(options)
             var chart = new Highcharts.Chart(options);
         });
@@ -600,6 +676,7 @@
 
 
 <script type="text/javascript">
+    /*
     document.addEventListener("DOMContentLoaded", function() {
 
         var options = {
@@ -708,6 +785,52 @@
             console.log(options)
             var chart = new Highcharts.Chart(options);
         });
+    });
+    */
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        var options = {
+            chart: {
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                type: 'pie',
+                renderTo: 'chart_suspicious_activity', //  div id
+            },
+            title: null,
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                    pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %'
+                    }
+                }
+            },
+            series: [{
+                name: 'Percentage',
+                colorByPoint: true,
+                data: [{}]
+            }],
+        }
+
+        var url = `/superadmin/overall/suspicious/activity/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log(data);
+            options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
+    
     });
 </script>
 

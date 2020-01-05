@@ -10,6 +10,9 @@ from django.views import View
 
 import json
 
+# to use collections.Counter() 
+import collections 
+
 from exam.models import *
 from exam.forms import *
 from users.models import CustomUser
@@ -170,6 +173,7 @@ class ExamManageCandidateView(View):
             }
         return JsonResponse(response, safe=True)
 
+
 class ExamReportView(View):
     """
     Manage Exam reports
@@ -230,21 +234,137 @@ class AnalysisCandidateListView(ListView):
         return CustomUser.objects.filter(user_type="candidate")
 
 
-class CandidateAnalysis(View):
+class EmotionClasses:
+    """
+    Emotion classes
+    """
+    labels = {
+        0: "angry",
+        1: "disgust",
+        2: "fear",
+        3: "happy",
+        4: "sad",
+        5: "surprise",
+        6: "neutral",
+    }
+
+    color_mapping = {
+        "angry": "rgba(244, 67, 54, 0.87)",
+        "disgust": "rgba(230, 127, 220, 0.85)",
+        "fear": "rgb(67, 67, 72)",
+        "happy": "rgba(49, 183, 54, 0.72)",
+        "sad": "rgb(247, 163, 92)",
+        "surprise": "rgb(241, 92, 128)",
+        "neutral": "rgb(124, 181, 236)",
+    }
+
+    @classmethod
+    def _get_labels(cls):
+        return cls.labels
+
+    @classmethod
+    def _get_labels_list(cls):
+        lst = []
+        for key, value in cls.labels.items():
+            lst.append(value)
+        return lst
+
+    def add_colors(cls, lst_emotions_dict):
+        """
+        lst_emotions_dict = [
+          {
+            "name": "fear"
+          }
+        ]
+
+        call:
+        EmotionClasses().add_colors(lst_emotions_dict)
+        
+        output:
+
+        lst_emotions_dict = [
+          {
+            "name": "fear",
+            'color': 'rgb(67, 67, 72)'
+          }
+        ]
+        """
+        for emotion_info in lst_emotions_dict:
+            emotion_name = emotion_info["name"]
+
+            # get color
+            color = cls.color_mapping.get(emotion_name)
+            if color:
+                emotion_info["color"] = color
+            else:
+                emotion_info["color"] = "rgb(124, 181, 236)"
+
+        return lst_emotions_dict
+
+
+class CandidateExamList(View):
     def get(self, request, *args, **kwargs):
         candidate_id = self.kwargs["pk"]
         candidate_exams = ExamCandidate.objects.filter(candidate__id=candidate_id)
-        
-        # temporary for graph
-        if candidate_exams:
-            exam_id = candidate_exams[0].exam.id
-        else:
-            exam_id = 0
-
+        # print(candidate_exams)
         context = {
             "candidate_exams": candidate_exams,
             "candidate_id": candidate_id,
+        }
+        template_name = 'superadmin/analysis/candidate_exam_list.html'
+        return render(request, template_name, context)
+
+
+class CandidateAnalysis(View):
+    def get(self, request, *args, **kwargs):
+        # get value from url
+        candidate_id = self.kwargs["pk"]
+
+        # get value from param
+        exam_id = request.GET.get("exam_id")
+
+        exam = Exam.objects.get(
+            id=exam_id
+        )
+        candidate_exam = ExamCandidate.objects.filter(
+            exam=exam,
+            candidate__id=candidate_id
+        ).first()
+
+        answer_report = CandidateAnswerEvaluation.get_answer_report(
+            exam, candidate_exam
+        )
+
+        candidate_photos = ExamCandidatePhoto.objects.filter(
+            user__id=candidate_id, exam__id=exam_id
+        ).order_by('-created_at')
+
+        suspicious_cnt, normal_cnt = 0, 0
+
+        for idx, candidate_photo in enumerate(candidate_photos):
+            if candidate_photo.is_suspicious:
+                suspicious_cnt = suspicious_cnt + 1
+            else:
+                normal_cnt = normal_cnt + 1
+
+        answered = 0
+        not_visited = 0
+        not_answered = 0
+        total_score = 0
+        correct_answers = 0
+
+        context = {
+            "candidate_exam": candidate_exam,
+            "candidate_id": candidate_id,
             "exam_id": exam_id,
+            "suspicious_cnt": suspicious_cnt,
+            "normal_cnt": normal_cnt,
+
+            "answered": answer_report.get("answered"),
+            "not_visited": answer_report.get("not_visited"),
+            "not_answered": answer_report.get("not_answered"),
+            "total_score": answer_report.get("total_score"),
+            "correct_answers": answer_report.get("correct_answers"),
         }
         # print(context)
         template_name = 'superadmin/analysis/candidate_analysis.html'
@@ -272,7 +392,7 @@ def count_frequency(my_list):
     return freq
 
 
-class EmotionAnalysisData(View):
+class EmotionOverallAnalysis(View):
     """
     Emotion analysis data for graph
     """
@@ -303,6 +423,10 @@ class EmotionAnalysisData(View):
                 "name": key,
                 "y": value
             })
+
+        # add colors in dict
+        data = EmotionClasses().add_colors(data)
+
         return JsonResponse(data, safe=False)
 
 
@@ -342,6 +466,105 @@ class EmotionTimelineData(View):
         return JsonResponse(emotions_overtime, safe=False)
 
 
+class CandidateAnswerEvaluation:
+    @classmethod
+    def get_answer_report(cls, exam, exam_candidate):
+
+        # get total questions
+        exam_questions = ExamQuestion.objects.filter(exam=exam)
+        total_questions = len(exam_questions)
+
+        # get status of each question
+        answered = 0
+        not_visited = 0
+        not_answered = 0
+        total_score = 0
+        correct_answers = 0
+
+        report = []
+
+        for question in exam_questions:
+            # import pdb; pdb.set_trace()
+            # get all correct options sequences
+            correct_options = QuestionOption.objects.filter(
+                question=question,
+                is_correct=True
+            ).values_list('sequence', flat=True).order_by('sequence')
+
+            # select candidate answers
+            candidate_answer = CandidateAnswer.objects.filter(
+                candidate=exam_candidate,
+                question=question,
+            ).first()
+
+            if candidate_answer:
+                answered += 1
+
+                # str_selected_option = candidate_answer.selected_option
+                # lst_selected_option = list(
+                #     map(
+                #         int, str_selected_option.split(",")
+                #     )
+                # )
+
+                lst_selected_option = candidate_answer.selected_option
+
+                # using collections.Counter() to check if  
+                # lists are equal 
+                if collections.Counter(correct_options) == collections.Counter(lst_selected_option): 
+                    correct_answers += 1
+                    total_score += question.marks
+                    is_correctly_answered = True
+                else: 
+                    is_correctly_answered = False
+                    pass
+
+                report.append({
+                    "candidate_answer_id": candidate_answer.id,
+                    "created_at": candidate_answer.created_at,
+                    "is_correctly_answered": is_correctly_answered,
+                })
+            else:
+                not_answered += 1
+            pass
+        
+        return {
+            "answered": answered,
+            "not_visited": not_visited,
+            "not_answered": not_answered,
+            "total_score": total_score,
+            "correct_answers": correct_answers,
+            "report": report
+        }
+
+
+class CandidateAnswerNearestEmotion:
+    """
+    Candidate last emotion before candidate answers
+    """
+    @classmethod
+    def candidate_answer_last_emotion(cls, exam_id, candidate_id, lst_answers):
+
+        for answer_info in lst_answers:
+            candidate_photo = ExamCandidatePhoto.objects.filter(
+                user__id=candidate_id, exam__id=exam_id
+            ).order_by('-created_at').first()
+
+            emotion_label = "unknown"
+
+            if candidate_photo:
+                if isinstance(candidate_photo.top_emotion, list):
+                    if len(candidate_photo.top_emotion) == 2:
+                        label = candidate_photo.top_emotion[0]
+                        # emotion_probability = candidate_photo.top_emotion[1]
+            else:
+                pass
+            
+            answer_info["emotion"] = label
+
+        return lst_answers
+
+
 class AnswerCorrectnessOverEmotion(View):
     """
     Answer correct or not over emotion
@@ -349,31 +572,200 @@ class AnswerCorrectnessOverEmotion(View):
     # def get_user_answers()
     def get(self, request, *args, **kwargs):
         # import pdb;pdb.set_trace()
-        candidate_id = request.GET.get("candidate_id")
-        exam_id = request.GET.get("exam_id")
+        candidate_id = request.GET.get("candidate_id") # 56
+        exam_id = request.GET.get("exam_id") # 1
+
+        exam = Exam.objects.get(
+            id=exam_id
+        )
+
+        exam_candidate = ExamCandidate.objects.get(
+            exam=exam,
+            candidate__id=candidate_id,
+        )
+
+        answer_report = CandidateAnswerEvaluation.get_answer_report(
+            exam, exam_candidate
+        )
+
+        lst_answers = answer_report["report"]
+
+        lst_answers_with_emotions = CandidateAnswerNearestEmotion.candidate_answer_last_emotion(
+            exam_id, candidate_id, lst_answers
+        )
+
+        # emotions_overtime = lst_answers_with_emotions
+
+        emotions_list = EmotionClasses._get_labels_list()
+
+        # init all emotions count as zero
+        correct_dict = { key: 0 for key in emotions_list }
+        wrong_dict = { key: 0 for key in emotions_list }
+
+        for answer_info in lst_answers_with_emotions:
+            emotion = answer_info["emotion"]
+            is_correctly_answered = answer_info["is_correctly_answered"]
+
+            if is_correctly_answered:
+                correct_dict[emotion] = correct_dict[emotion] + 1
+            else:
+                wrong_dict[emotion] = wrong_dict[emotion] + 1
+        
+        emotions_overtime = [
+            {
+                "name": 'Correct',
+                "data": list(correct_dict.values()),
+                "color": '#43a047'
+
+            }, 
+            {
+                "name": 'Wrong',
+                "data": list(wrong_dict.values()),
+                "color": '#dc1818cc'
+            }
+        ]
+
+        response = {
+            "emotions_list": emotions_list,
+            "emotions_overtime": emotions_overtime
+        }
+        return JsonResponse(response, safe=False)
+
+
+class AnswerSpeedOverEmotion(View):
+    """
+    Answer solving speed over emotion
+    """
+    def get(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
+        candidate_id = request.GET.get("candidate_id") # 56
+        exam_id = request.GET.get("exam_id") # 1
+
+        exam = Exam.objects.get(
+            id=exam_id
+        )
+
+        exam_candidate = ExamCandidate.objects.get(
+            exam=exam,
+            candidate__id=candidate_id,
+        )
+
+        answer_report = CandidateAnswerEvaluation.get_answer_report(
+            exam, exam_candidate
+        )
+
+        lst_answers = answer_report["report"]
+
+        lst_answers_with_emotions = CandidateAnswerNearestEmotion.candidate_answer_last_emotion(
+            exam_id, candidate_id, lst_answers
+        )
+
+        # emotions_overtime = lst_answers_with_emotions
+
+        emotions_list = EmotionClasses._get_labels_list()
+
+        # init
+        emotion_dict = { key: [] for key in emotions_list }
+
+        for idx, answer_info in enumerate(lst_answers_with_emotions):
+            emotion = answer_info["emotion"]
+            is_correctly_answered = answer_info["is_correctly_answered"]
+
+            if idx == 1:
+                answer_time_seconds = 5 # 5 seconds later replace with exam start time
+            else:
+                current_answer_time = answer_info["created_at"]
+                previous_answer_time = lst_answers_with_emotions[idx -1 ]["created_at"]
+                
+                seconds = (previous_answer_time - current_answer_time).total_seconds()
+                answer_time_seconds = int(seconds)
+                pass 
+        
+            emotion_dict[emotion].append(answer_time_seconds)
+
+        response = []
+        for key, time_data in emotion_dict.items():
+            if time_data:
+                avg = sum(time_data) / len(time_data)
+            else:
+                avg = 0.0
+
+            response.append({
+                "name": key,
+                "y": avg
+            })
+
+        response = EmotionClasses().add_colors(response)
+
+        return JsonResponse(response, safe=False)
+
+
+class AnswerOverwritingEmotion(View):
+    """
+    Answer overwriting over emotion
+    """
+    def get(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
+        candidate_id = request.GET.get("candidate_id") # 56
+        exam_id = request.GET.get("exam_id") # 1
+
+        exam = Exam.objects.get(
+            id=exam_id
+        )
+
+        exam_candidate = ExamCandidate.objects.get(
+            exam=exam,
+            candidate__id=candidate_id,
+        )
+
+        emotions_list = EmotionClasses._get_labels_list()
+
+        # init
+        emotion_dict = { key: 0 for key in emotions_list }
+
+        response = []
+        for key, value in emotion_dict.items():
+            response.append({
+                "name": key,
+                "y": value
+            })
+
+        response = EmotionClasses().add_colors(response)
+
+        return JsonResponse(response, safe=False)
+
+
+class OverAllSuspiciousActivity(View):
+    """
+    overall Suspicious activity
+    """
+    def get(self, request, *args, **kwargs):
+        # import pdb;pdb.set_trace()
+        candidate_id = request.GET.get("candidate_id") # 56
+        exam_id = request.GET.get("exam_id") # 1
+
         candidate_photos = ExamCandidatePhoto.objects.filter(
             user__id=candidate_id, exam__id=exam_id
         ).order_by('-created_at')
         
         emotions_overtime = []
 
+        suspicious_cnt, normal_cnt, unknown_cnt = 0, 0, 0
+
         for idx, candidate_photo in enumerate(candidate_photos):
-            if isinstance(candidate_photo.top_emotion, list):
-                if len(candidate_photo.top_emotion) == 2:
-                    label = candidate_photo.top_emotion[0]
-                    # emotion_probability = candidate_photo.top_emotion[1]
-                    if label:
-                        str_time = candidate_photo.created_at.strftime('%H:%M:%S')
-                    else:
-                        label = "unknown"
+            if candidate_photo.is_suspicious:
+                suspicious_cnt = suspicious_cnt + 1
+            else:
+                normal_cnt = normal_cnt + 1
 
-                    emotions_overtime.append({
-                        "text": f"{label} \n{str_time}",
-                        "y": idx,
-                        "x": "1",
-                        "center": "left" if (idx % 2 != 0) else "right" # position
-                    })
-
-        print(emotions_overtime)
-
-        return JsonResponse(emotions_overtime, safe=False)
+        response = [{
+            "name": "Suspicious Activity",
+            "y": suspicious_cnt,
+            "color": "rgba(244, 67, 54, 0.87)"
+        },
+        {
+            "name": "Normal Activity",
+            "y": normal_cnt,
+            "color": "rgba(49, 183, 54, 0.72)"
+        }]
+        return JsonResponse(response, safe=False)

@@ -1,0 +1,147 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Student list {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam list -->
+    <div class="col-md-12">
+
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">Student List</h6>
+            </div>
+
+            <div id="table-container">
+                <!-- table with export options-->
+                <table class="table datatable-button-html5-columns">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Operations</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for candidate_exam in candidate_exams %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ candidate_exam.exam.name }}</td>
+                                <td>
+                                    <a href="{% url 'superadmin:candidate-analysis' candidate_id %}?exam_id={{candidate_exam.exam.id}}">
+                                        Analyis
+                                    </a>
+                                </td>
+
+                            </tr>
+                        {% endfor %}  
+                    </tbody>
+                </table>
+                <!--/table with export options-->
+            </div>
+
+        </div>
+
+    </div>  
+    <!--/ exam list-->  
+
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#analysis").addClass("active");
+    });
+</script>
+
+<!-- datatable -->
+<script type="text/javascript" src="{% static 'assets/js/plugins/tables/datatables/jquery.dataTables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/tables/datatables/extensions/jszip/jszip.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/tables/datatables/extensions/pdfmake/pdfmake.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/tables/datatables/extensions/buttons.min.js' %}"></script>
+
+<script>
+
+var datatable = false;
+
+$(document).ready(function(){
+
+    // Setting datatable defaults
+    $.extend( $.fn.dataTable.defaults, {
+        autoWidth: false,
+        dom: '<"datatable-header"fBl><"datatable-scroll-wrap"t><"datatable-footer"ip>',
+        language: {
+            search: '<span>Filter:</span> _INPUT_',
+            searchPlaceholder: 'Type to filter...',
+            lengthMenu: '<span>Show:</span> _MENU_',
+            paginate: { 'first': 'First', 'last': 'Last', 'next': '&rarr;', 'previous': '&larr;' }
+        }
+    });
+
+    // Column selectors
+    datatable = $('.datatable-button-html5-columns');
+
+    $(datatable).dataTable({
+        buttons: {            
+            buttons: [
+                {
+                    extend: 'copyHtml5',
+                    className: 'btn btn-default',
+                    exportOptions: {
+                        columns: [ 0, ':visible' ]
+                    }
+                },
+                {
+                    extend: 'excelHtml5',
+                    className: 'btn btn-default',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-default',
+                    exportOptions: {
+                        columns: [0, 1, 2, 5]
+                    }
+                },
+                {
+                    extend: 'colvis',
+                    text: '<i class="icon-three-bars"></i> <span class="caret"></span>',
+                    className: 'btn bg-blue btn-icon'
+                }
+            ]
+        }
+    });
+
+    // inspect and type $(datatable).dataTable()
+    // on console to list all apis
+    // $(datatable).dataTable().fnClearTable()
+    // datatable.dataTable().fnAddData([0,1,2,3,4,5])
+    
+});
+</script>
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+
+    });
+</script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

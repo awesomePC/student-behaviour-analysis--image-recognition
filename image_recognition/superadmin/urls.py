@@ -19,7 +19,15 @@ urlpatterns = [
     path("exam/<int:pk>/report/", views.ExamReportView.as_view(), name="exam_report"),
 
     path('analysis/candidate/list/', views.AnalysisCandidateListView.as_view(), name='analysis-candidate-list'),
+    path('analysis/candidate/<int:pk>/exam/list/', views.CandidateExamList.as_view(), name='analysis-candidate-exam-list'),
+
     path('candidate/<int:pk>/analysis/', views.CandidateAnalysis.as_view(), name='candidate-analysis'),
-    path('emotion/analysis/data/', views.EmotionAnalysisData.as_view(), name='emotion-analysis-data'),
+    path('emotion/analysis/data/', views.EmotionOverallAnalysis.as_view(), name='emotion-analysis-data'),
     path('emotion/timeline/data/', views.EmotionTimelineData.as_view(), name='emotion-timeline-data'),
+
+    path('emotion/answer/correctness/', views.AnswerCorrectnessOverEmotion.as_view(), name='emotion-answer-correctness'),
+    path('emotion/answer/speed/', views.AnswerSpeedOverEmotion.as_view(), name='emotion-answer-speed'),
+    path('emotion/answer/overwriting/', views.AnswerOverwritingEmotion.as_view(), name='emotion-answer-overwriting'),
+
+    path('overall/suspicious/activity/', views.OverAllSuspiciousActivity.as_view(), name='overall_suspicious_activity'),
 ]

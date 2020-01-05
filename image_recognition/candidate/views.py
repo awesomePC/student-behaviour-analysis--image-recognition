@@ -890,3 +890,4 @@ def stop_exam_reason(request, exam_id):
     }
     template_name = 'candidate/exam/stop_reason.html'
     return render(request, template_name, context)
+
