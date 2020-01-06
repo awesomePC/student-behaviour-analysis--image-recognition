@@ -50,7 +50,13 @@ dependencies:
     - django-cleanup
     - redis
     - django-celery-beat
-    - line_profiler
+    - django-lazysignup
+    - django-widget-tweaks
+    - django-notifications-hq==1.5.0
     - mtcnn
     - keras_vggface
     - django-picklefield
+
+    - flask
+    - flask-restful
+    - sentry_sdk

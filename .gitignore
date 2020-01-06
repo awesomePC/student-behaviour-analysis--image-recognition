@@ -99,6 +99,9 @@ local_settings.py
 # sqlite database
 db.sqlite3
 
+# media
+image_recognition/media/**
+
 # flask api media
 recognition_api/media/
-image_recognition/media
+

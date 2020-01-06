@@ -34,7 +34,7 @@
                                 <td>{{ forloop.counter }}</td>
                                 <td>{{ candidate_exam.exam.name }}</td>
                                 <td>
-                                    <a href="{% url 'superadmin:candidate-analysis' candidate_id %}?exam_id={{candidate_exam.exam.id}}">
+                                    <a href="{% url 'superadmin:candidate-analysis' candidate_id %}?exam_id={{ candidate_exam.exam.id }}">
                                         Analyis
                                     </a>
                                 </td>

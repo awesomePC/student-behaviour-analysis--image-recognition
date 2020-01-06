@@ -323,6 +323,8 @@ class CandidateAnalysis(View):
         # get value from param
         exam_id = request.GET.get("exam_id")
 
+        # import pdb;pdb.set_trace()
+
         exam = Exam.objects.get(
             id=exam_id
         )
