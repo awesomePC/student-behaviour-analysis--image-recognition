@@ -21,7 +21,7 @@ xdotool key ctrl+shift+t
 wmctrl -i -a $WID
 
 # Activate your virtualenv
-xdotool type --delay 0.5 --clearmodifiers "source $(xclip -o) activate env_face_recognition"
+xdotool type --delay 0.5 --clearmodifiers "conda $(xclip -o) activate env_face_recognition"
 xdotool key Return;
 
 # move inside image_recognition folder
@@ -44,7 +44,7 @@ xdotool key ctrl+shift+t
 wmctrl -i -a $WID
 
 # Activate your virtualenv
-xdotool type --delay 0.5 --clearmodifiers "source $(xclip -o) activate env_face_recognition"
+xdotool type --delay 0.5 --clearmodifiers "conda $(xclip -o) activate env_face_recognition"
 xdotool key Return;
 
 # move inside image_recognition folder
@@ -67,7 +67,7 @@ xdotool key ctrl+shift+t
 wmctrl -i -a $WID
 
 # Activate your virtualenv
-xdotool type --delay 0.5 --clearmodifiers "source $(xclip -o) activate env_face_recognition"
+xdotool type --delay 0.5 --clearmodifiers "conda $(xclip -o) activate env_face_recognition"
 xdotool key Return;
 
 # move inside api_recognition folder
@@ -90,7 +90,7 @@ xdotool key ctrl+shift+t
 wmctrl -i -a $WID
 
 # Activate your virtualenv
-xdotool type --delay 0.8 --clearmodifiers "source $(xclip -o) activate env_face_recognition"
+xdotool type --delay 0.8 --clearmodifiers "conda $(xclip -o) activate env_face_recognition"
 xdotool key Return;
 
 # move inside api_recognition folder

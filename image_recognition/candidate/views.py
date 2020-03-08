@@ -185,6 +185,7 @@ def is_valid_traning_image(image__path):
     else:
         return (False, "Request to count face was failed ..")
 
+
 def save_sign_up_image(lazy_user_id, photo_data, fileId, previewId):
     candidate_image = TempRegistrationImage.objects.create(
         lazy_user_id=lazy_user_id,
@@ -275,6 +276,7 @@ def save_captured_sign_up_photo(request):
         print(trace_error())
         return JsonResponse({'success': 0})
 
+
 def dashboard(request):
     # active_exams, completed_exams = get_user_exams_list(
     #     request.user
@@ -289,6 +291,7 @@ def dashboard(request):
         # "total_completed_exams": total_completed_exams,
     }
     return render(request, 'candidate/dashboard.html', context)
+
 
 def exam_list(request):
     active_exams, completed_exams = get_user_exams_list(
