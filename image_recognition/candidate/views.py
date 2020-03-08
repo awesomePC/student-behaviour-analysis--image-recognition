@@ -689,6 +689,31 @@ def ajax_validate_user(request):
         print(trace_error())
         return JsonResponse({'success': 0})
 
+
+def check_proctor__superadmin(detected_persons):
+    """
+    if two or more persons detected 
+    person 1 must be valid candidate 
+    second person may be proctor or superadmin otherwise mark suspicious exam
+    """
+    try:
+        if len(detected_persons) > 1:
+            is_second_person_suspicious = True
+            for person in detected_persons:
+                if person['user_id'] == request.user.id:
+                    continue
+                else:
+                    if person['user_type'] in ["proctor", "superadmin"]:
+                        is_second_person_suspicious = False
+                
+            if is_second_person_suspicious:
+                is_suspicious = True
+                reason += "\n Suspicious person is detected."
+        return is_second_person_suspicious
+    except Exception as e:
+        return False
+        pass
+    
 @csrf_exempt
 def save_recognize_exam_photo(request, exam_id):
 
@@ -753,10 +778,14 @@ def save_recognize_exam_photo(request, exam_id):
                     exam_candidate_data.save()
 
                 else:
-                    # check is proctor 
-                    # temporarily set to unknown
-                    name = "unknown"
-                    probability = random.uniform(0.6, 0.8)
+                    is_second_person_suspicious = check_proctor__superadmin(realtime_detected_faces)
+
+                    if not is_second_person_suspicious:
+                        name = "proctor"
+                        probability = random.uniform(0.5, 0.9)
+                    else:
+                        name = "unknown"
+                        probability = random.uniform(0.6, 0.95)
 
                 recognized_persons.append({
                     "name": name,
@@ -790,22 +819,6 @@ def save_recognize_exam_photo(request, exam_id):
         else:
             is_suspicious = False
             reason = ""
-        
-        # if two persons detected validate 
-        # person 1 must be valid candidate 
-        # second person may be proctor or superadmin otherwise mark suspicious exam
-        # if is_valid_candidate and (len(detected_persons) > 1):
-        #     is_second_person_suspicious = True
-        #     for person in detected_persons:
-        #         if person['user_id'] == request.user.id:
-        #             continue
-        #         else:
-        #             if person['user_type'] in ["proctor", "superadmin"]:
-        #                 is_second_person_suspicious = False
-                
-        #     if is_second_person_suspicious:
-        #         is_suspicious = True
-        #         reason += "\n Suspicious person is detected."
 
         if (len(recognized_persons) > 1):
             is_suspicious = True

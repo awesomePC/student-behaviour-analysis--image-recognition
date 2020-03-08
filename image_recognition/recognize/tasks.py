@@ -120,6 +120,7 @@ def detect_objects(image__path):
     Returns:
         tuple: (box, label, confidence)
     """
+    print(image__path)
     img = cv2.imread(image__path)
     bbox, label, conf = cv.detect_common_objects(img)
     # output_image = draw_bbox(img, bbox, label, conf)
@@ -145,3 +146,6 @@ def do_object_detection():
         exam_candidate_data.is_object_detection_done = True
         exam_candidate_data.save()
     return True
+
+
+# do_object_detection.delay()
