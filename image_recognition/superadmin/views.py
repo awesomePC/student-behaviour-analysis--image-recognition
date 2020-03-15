@@ -7,6 +7,8 @@ from django.views.generic import ListView, DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 
 from django.views import View
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 import json
 
@@ -20,7 +22,17 @@ from users.models import CustomUser
 # Create your views here.
 
 def dashboard(request):
-    context = {}
+    total_users = CustomUser.objects.all().count()
+    total_exams = Exam.objects.all().count()
+    total_questions = ExamQuestion.objects.all().count()
+    total_options = QuestionOption.objects.all().count()
+
+    context = {
+        "total_users": total_users,
+        "total_exams": total_exams,
+        "total_questions": total_questions,
+        "total_options": total_options,
+    }
     return render(request, 'superadmin/dashboard.html', context)
 
 def model_training(request):
@@ -57,6 +69,7 @@ def exam_delete(request, pk, template_name='superadmin/exam/exam_confirm_delete.
     return render(request, template_name, context)
 
 
+@method_decorator(login_required, name='dispatch')
 class ExamAddQuestionView(View):
     """
     Exam add questions

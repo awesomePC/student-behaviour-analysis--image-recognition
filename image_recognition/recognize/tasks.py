@@ -135,6 +135,7 @@ def do_object_detection():
     all_exam_data = ExamCandidatePhoto.objects.filter(is_object_detection_done=False)
     for exam_candidate_data in all_exam_data:
         image_file__path = exam_candidate_data.photo.path
+        print(f"image_file__path for object detection : {image_file__path}")
         
         bbox, label, conf = detect_objects(image_file__path)
         detected_objects = {

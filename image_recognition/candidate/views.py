@@ -143,7 +143,7 @@ def sign_up(request):
             logout(request) 
 
             # handle log in
-            return redirect("accounts_login")
+            return redirect("/accounts/login")
 
             # delete lazy user
             CustomUser.objects.filter(id=lazy_user_id).delete()
@@ -278,17 +278,22 @@ def save_captured_sign_up_photo(request):
 
 
 def dashboard(request):
-    # active_exams, completed_exams = get_user_exams_list(
-    #     request.user
-    # )
-    # total_active_exams = active_exams.count()
-    # total_completed_exams = completed_exams.count()
+    active_exams, completed_exams = get_user_exams_list(
+        request.user
+    )
+    total_active_exams = active_exams.count()
+    total_completed_exams = completed_exams.count()
+    total_exams = total_active_exams + total_completed_exams
+
+    total_captured_photos = ExamCandidatePhoto.objects.all().count()
 
     context = {
-        # "active_exams": active_exams,
-        # "completed_exams": completed_exams,
-        # "total_active_exams": total_active_exams,
-        # "total_completed_exams": total_completed_exams,
+        "active_exams": active_exams,
+        "completed_exams": completed_exams,
+        "total_active_exams": total_active_exams,
+        "total_completed_exams": total_completed_exams,
+        "total_exams": total_exams,
+        "total_captured_photos": total_captured_photos,
     }
     return render(request, 'candidate/dashboard.html', context)
 

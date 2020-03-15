@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function() {
     height: height,
     image_format: 'jpeg',
     jpeg_quality: 90,
-    // flip_horiz: true, // mirror mode
+    flip_horiz: true, // mirror mode
   });
   Webcam.attach( '#camera' );
 

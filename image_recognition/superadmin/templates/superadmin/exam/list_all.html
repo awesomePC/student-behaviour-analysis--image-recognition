@@ -37,7 +37,6 @@
                             <th>Marks</th>
                             <th>Status</th>
                             <th>Candidates</th>
-                            <th>Result</th>
                             <th>Operations</th>
                         </tr>
                     </thead>
@@ -51,11 +50,6 @@
                                 <td>
                                     <a href="{% url 'superadmin:exam_manage_candidates' exam.id %}">
                                         Manage
-                                    </a>
-                                </td>
-                                <td>
-                                    <a href="{% url 'superadmin:exam_report' exam.id %}">
-                                        view
                                     </a>
                                 </td>
                                 <td>
