@@ -48,6 +48,15 @@
                                         <div class="panel-body">
                                             <div id="chart_emotion_all"></div>
                                         </div>
+                                    </div>                                    <div class="panel panel-flat border-bottom-info mt-20">
+                                    
+                                    <div class="panel-heading">
+                                            <h5 class="panel-title">Overall emotions Bar Graph</h5>
+                                        </div>
+                                        
+                                        <div class="panel-body">
+                                            <div id="chart_emotion_all_bar"></div>
+                                        </div>
                                     </div>
 
                                     <div class="panel panel-flat border-top-info border-bottom-info mt-20">
@@ -214,7 +223,7 @@
 <script src="https://code.highcharts.com/modules/drilldown.js"></script>
 
 <style type="text/css" rel="stylesheet">
-    #chart_emotion_all {
+    #chart_emotion_all, #chart_emotion_all_bar {
         min-width: 310px; 
         max-width: 600px; 
         height: 400px; 
@@ -280,10 +289,94 @@
         }
 
         // var url =  " url 'superadmin:drill-down-demo' %}?student_id={{student_id}}";
-    
+
         var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
 
         $.getJSON(url,  function(data) {
+            console.log(data);
+            options.series[0].data = data;  // set as first element
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+        });
+    
+    });
+</script>
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function() {
+            
+        var options = {
+            chart: {
+                type: 'column',
+                renderTo: 'chart_emotion_all_bar', //  div id
+                style: {
+                    fontFamily: 'Helvetica',
+                    fontSize: '15px'
+                }
+            },
+            title: null,
+            subtitle: null,
+            xAxis: {
+                type: 'category'
+            },
+            yAxis: {
+                min: 0,
+                allowDecimals: false,
+
+                labels: {
+                    style: {
+                        fontSize: '1.02em',
+                    }
+                },
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            /*
+            series: [{
+                name: 'Correct',
+                data: [4, 2, 2],
+                color: '#43a047'
+
+            }, 
+            {
+                name: 'Wrong',
+                data: [2, 3, 1],
+                color: '#dc1818cc'
+            }],
+            */
+            series: [{
+                name: 'Emotion',
+                colorByPoint: true,
+                data: [{}]
+            }],
+        };
+
+        var url = `/superadmin/emotion/analysis/data/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
+
+        $.getJSON(url,  function(data) {
+            console.log("emotions overall bar");
+            console.log(data);
+            // debugger
+            /*
+            options.series = data.emotions_overtime;
+            options.xAxis.categories = data.emotions_list
+
+            console.log(options)
+            var chart = new Highcharts.Chart(options);
+            */
             console.log(data);
             options.series[0].data = data;  // set as first element
             console.log(options)
@@ -666,7 +759,7 @@
 
         $.getJSON(url,  function(data) {
             console.log(data);
-            debugger
+
             options.series[0].data = data;  // set as first element
             console.log(options)
             var chart = new Highcharts.Chart(options);
