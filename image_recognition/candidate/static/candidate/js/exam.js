@@ -280,7 +280,11 @@ $(document).on("click", "#clear-response", function(){
 });
 
 $(document).on("click", "#save-and-next", function(){
-    save_and_next()
+    save_and_next();
+
+    //
+    // save photo
+    takeSaveRecognizeSnap();
 });
 
 $(document).on("click", "#submit-exam", function(){

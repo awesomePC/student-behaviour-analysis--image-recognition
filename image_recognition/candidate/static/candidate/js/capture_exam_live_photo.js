@@ -96,12 +96,56 @@ function sleep(ms) {
 }
 
 
+var width = 640;    // We will scale the photo width to this
+var height = 480;     // This will be computed based on the input stream
+
+var base64image = null;
+
+  // Save Image
+  /*
+  The method takes 3 parameters –
+  
+  Generated base64 value
+  Action URL ( for handling the value and saving to the directory )
+  Callback function ( For handling response )
+  */
+ function takeSaveRecognizeSnap(){
+
+  // take snapshot and get image data
+  Webcam.snap( function(data_uri) {
+    base64image = data_uri
+  });
+  
+  var url = url_save_recognize_exam_photo;
+
+  Webcam.upload( base64image, url, function(code, data) {
+    // console.log(code);
+    console.log(data);
+
+    if(code == 200){
+      var obj_data = jQuery.parseJSON(data);
+      is_suspicious = obj_data.is_suspicious
+
+      arr_suspicious.push(is_suspicious)
+
+      if(is_suspicious == true)
+      {
+        handle_suspicious_activity(
+          obj_data.reason
+        )
+      }
+    }
+    else
+    {
+      console.log(code);
+      console.log("Error ... Problem while uploading file.")
+    }
+  });  
+}
+
 document.addEventListener("DOMContentLoaded", function() {
 
-  var width = 640;    // We will scale the photo width to this
-  var height = 480;     // This will be computed based on the input stream
 
-  var base64image = null;
 
   Webcam.set({
     width: width,
@@ -112,48 +156,6 @@ document.addEventListener("DOMContentLoaded", function() {
   });
   Webcam.attach( '#camera' );
 
-  
-  // Save Image
-  /*
-  The method takes 3 parameters –
-  
-  Generated base64 value
-  Action URL ( for handling the value and saving to the directory )
-  Callback function ( For handling response )
-  */
-  function takeSaveRecognizeSnap(){
-
-    // take snapshot and get image data
-    Webcam.snap( function(data_uri) {
-      base64image = data_uri
-    });
-    
-    var url = url_save_recognize_exam_photo;
-
-    Webcam.upload( base64image, url, function(code, data) {
-      // console.log(code);
-      console.log(data);
-
-      if(code == 200){
-        var obj_data = jQuery.parseJSON(data);
-        is_suspicious = obj_data.is_suspicious
-
-        arr_suspicious.push(is_suspicious)
-
-        if(is_suspicious == true)
-        {
-          handle_suspicious_activity(
-            obj_data.reason
-          )
-        }
-      }
-      else
-      {
-        console.log(code);
-        console.log("Error ... Problem while uploading file.")
-      }
-    });  
-  }
 
   async function process_recognition()
   {
