@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 @task()
-def post_register_extract_save_face_and_embeddings(id_candidate_img):
+def post_register_extract_save_face_and_embeddings(id_candidate_img_dataset_obj):
     # from recognize.face_recognition import (
     #     read_image,
     #     detect_extract_faces_from_image,
@@ -27,14 +27,14 @@ def post_register_extract_save_face_and_embeddings(id_candidate_img):
     from recognize.views import get_faces_embeddings
 
 
-    candidate_img = CandidateImgDataset.objects.filter(
-        id=id_candidate_img
+    candidate_img_dataset = CandidateImgDataset.objects.filter(
+        id=id_candidate_img_dataset_obj
     ).first()
 
     # import pdb; pdb.set_trace()
 
-    if candidate_img:
-        file_candidate_image = candidate_img.img.path
+    if candidate_img_dataset:
+        file_candidate_image = candidate_img_dataset.img.path
 
         detected_faces, extracted_faces, face_embeddings = get_faces_embeddings(
             file_candidate_image
@@ -44,9 +44,9 @@ def post_register_extract_save_face_and_embeddings(id_candidate_img):
             extracted_face = extracted_faces[0]
             face_embedding = face_embeddings[0]
 
-            candidate_img.face = extracted_face
-            candidate_img.face_embedding = face_embedding
-            candidate_img.save()
+            candidate_img_dataset.face = extracted_face
+            candidate_img_dataset.face_embedding = face_embedding
+            candidate_img_dataset.save()
         else:
             # import pdb; pdb.set_trace()
             print("Info ... No face detected in image")

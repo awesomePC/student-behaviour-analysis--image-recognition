@@ -1,0 +1,192 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} Page title {% endblock %}
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Basic legend -->
+            <form class="form-horizontal" action="#">
+                <div class="panel panel-flat">
+
+                    <div class="panel-body">
+                        <fieldset>
+
+                            <div class="form-group">
+                                <label class="col-lg-3 control-label">Category:</label>
+                                <div class="col-lg-5">
+                                    <select id="category" data-placeholder="Select dataset category" class="select">
+                                        <option value="real">Real</option> 
+                                        <option value="fake">Fake</option> 
+                                    </select>
+                                </div>
+                                <div class="col-lg-4">
+                                    <button id="btn_start_capturing" type="button" class="btn btn-primary legitRipple">
+                                        Start capturing<span class="legitRipple-ripple"></span>
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </fieldset>
+
+                    </div>
+                </div>
+            </form>
+            <!-- /basic legend -->
+        </div>
+    </div>
+
+    <div class="row" style="display:none;">
+        <div class="col-md-12">
+            <div class="panel panel-flat">
+                <div class="panel-body">
+                    <div id="my_camera"></div>
+
+                    <input type=button value="Take Snapshot" onClick="take_snapshot()">
+                </div>
+            </div>
+        </div>
+    </div>
+          
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-flat">
+                <div class="panel-body">
+                    <img id="result" class="img-responsive" alt="">
+                </div>
+            </div>
+        </div>
+    </div>
+          
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#campaign").addClass("active");
+        $("#campaign-create").addClass("active");
+    });
+</script>
+
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/selects/select2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/styling/uniform.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/pages/form_layouts.js' %}"></script>
+
+<!-- CSS -->
+<style>
+#my_camera{
+ width: auto;
+ height: auto;
+ margin: auto;
+ border: 1px solid black;
+}
+</style>
+
+<!-- Webcam.min.js -->
+<script src="{% static 'assets/js/webcam.min.js' %}"></script>
+
+<!-- Configure a few settings and attach camera -->
+<script language="JavaScript">
+
+// global variables
+var url = "";
+var is_webcam_live = false;
+var can_capture_photo = false;
+
+$(document).ready(function(){
+
+    $(document).on("click", "#btn_start_capturing", function(){
+        Webcam.set({
+            width: 640,
+            height: 480,
+            image_format: 'jpeg',
+            jpeg_quality: 90,
+            flip_horiz: true,
+        });
+        Webcam.attach( '#my_camera' );
+
+        can_capture_photo = true;
+    });
+});
+
+
+Webcam.on( 'load', function() {
+    // library is loaded
+    console.log("Webcam loaded");
+});
+
+Webcam.on( 'live', function() {
+    // camera is live, showing preview image
+    console.log("Webcam live");
+    is_webcam_live = true;
+
+    /*** set inside loop **/
+    setInterval(function(){
+        if(can_capture_photo)
+        {
+            take_snapshot();
+        }
+    }, 150);
+
+} );
+
+Webcam.on( 'error', function(err) {
+    // an error occurred (see 'err')
+} );
+
+function take_snapshot() {
+    // take snapshot and get image data
+    Webcam.snap( function(data_uri) {
+        console.log("Taking snapshot");
+        //console.log(data_uri);
+        
+        // display results in page
+        // $("#result").attr("src", data_uri);
+
+        // either fake / real
+        var category = $('#category :selected').val();
+        console.log(category)
+
+        var form_data = new FormData();
+        form_data.append("photo", data_uri); // image
+        form_data.append("category", category); // category or class 
+        form_data.append("csrfmiddlewaretoken", '{{ csrf_token }}');
+
+        $.ajax({
+            type: "POST",
+            url: "{% url 'users:save_photo_snap' %}",
+            data: form_data,
+            processData: false,
+            contentType: false,
+        })
+        .done(function (data) {  
+            // success function 
+            console.log("Photo Saved Successfully!");
+            console.log(data);
+            
+             $("#result").attr("src", data.hightlighted_encoded_image);
+        })
+        .fail(function(){
+            // report that there is problem
+        });
+        
+    });
+}
+
+</script>
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

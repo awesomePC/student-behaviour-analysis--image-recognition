@@ -1,0 +1,7 @@
+
+Running Project:
+    1) Run celery by setting loglevel to info and scheduler as beat:
+        celery -A dataset_builder worker -l info -B
+    
+    2) Django server:
+        python manage.py runserver

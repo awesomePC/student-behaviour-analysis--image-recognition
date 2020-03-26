@@ -21,8 +21,8 @@ function get_mode(arr){
 
 document.addEventListener("DOMContentLoaded", function() {
 
-  var width = 1024;    // We will scale the photo width to this
-  var height = 768;     // This will be computed based on the input stream
+  var width = 640;    // We will scale the photo width to this
+  var height = 480;     // This will be computed based on the input stream
 
 
   var ele_result_snapshot = document.getElementById('video-snapshot');
@@ -32,7 +32,6 @@ document.addEventListener("DOMContentLoaded", function() {
     height: height,
     image_format: 'jpeg',
     jpeg_quality: 90,
-    flip_horiz: true,
   });
   Webcam.attach( '#camera' );
   

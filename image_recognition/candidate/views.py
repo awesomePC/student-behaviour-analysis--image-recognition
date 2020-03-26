@@ -116,17 +116,17 @@ def sign_up(request):
             if temp_images:
                 for temp_image in temp_images:
                     base_filename = os.path.basename(temp_image.img.name)
-                    candidate_img = CandidateImgDataset.objects.create(
+                    candidate_img_dataset_obj = CandidateImgDataset.objects.create(
                         user=custom_user,
                         img=File(temp_image.img, base_filename)
                     )
-                    candidate_img.save()
+                    candidate_img_dataset_obj.save()
 
                     # run celery background task to extract face and embeddings
-                    # post_register_extract_save_face_and_embeddings.delay(candidate_img.id)
+                    # post_register_extract_save_face_and_embeddings.delay(candidate_img_dataset_obj.id)
                     
                     # run as normal method
-                    post_register_extract_save_face_and_embeddings(candidate_img.id)
+                    post_register_extract_save_face_and_embeddings(candidate_img_dataset_obj.id)
 
                     # delete temp
                     temp_image.delete()
@@ -600,39 +600,38 @@ def ajax_validate_user(request):
         res_file_name_with_path = generate_random_user_file(request)
 
         # verify is authorized user present in image
-        candidate_img_dataset = CandidateImgDataset.objects.filter(user=request.user).first()
+        candidate_img_dataset = CandidateImgDataset.objects.filter(user=request.user)
         
         is_authorized_candidate_present = False
         idx_candidate_face_embedding = None # used to remove entry from realtime_face_embeddings and check who is other
         recognized_persons = []
 
-        if candidate_img_dataset:
-            known_face_embedding = candidate_img_dataset.face_embedding
-            
-            # convert to numpy array
-            # known_face_embedding = array(known_face_embedding)
+        for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
+            is_matched = False
+            for single_obj in candidate_img_dataset:
+                known_face_embedding = single_obj.face_embedding
 
-            for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
                 is_matched, probability = compare_face_embedding(
                     known_face_embedding, realtime_face_embedding
                 )
-                
                 if is_matched:
-                    is_authorized_candidate_present = True
-                    idx_candidate_face_embedding = idx
-                    
-                    name = candidate_img_dataset.user.email
-                else:
-                    # check is proctor 
-                    # temporarily set to unknown
-                    name = "unknown"
-                    probability = random.uniform(0.6, 0.8)
+                    name = single_obj.user.email
+                    break
+            
+            if is_matched:
+                is_authorized_candidate_present = True
+                idx_candidate_face_embedding = idx
+            else:
+                # check is proctor 
+                # temporarily set to unknown
+                name = "unknown"
+                probability = random.uniform(0.6, 0.8)
 
-                recognized_persons.append({
-                    "name": name,
-                    "probability": probability,
-                    "box": realtime_detected_faces[idx]['box']
-                })
+            recognized_persons.append({
+                "name": name,
+                "probability": probability,
+                "box": realtime_detected_faces[idx]['box']
+            })
 
         if len(recognized_persons) >= 1:
             hightlighted_image = highlight_recognized_faces(
@@ -705,11 +704,10 @@ def check_proctor__superadmin(detected_persons):
         if len(detected_persons) > 1:
             is_second_person_suspicious = True
             for person in detected_persons:
-                if person['user_id'] == request.user.id:
-                    continue
-                else:
-                    if person['user_type'] in ["proctor", "superadmin"]:
-                        is_second_person_suspicious = False
+                # user_id = person['user_id']
+                
+                if person['user_type'] in ["proctor", "superadmin"]:
+                    is_second_person_suspicious = False
                 
             if is_second_person_suspicious:
                 is_suspicious = True
@@ -757,58 +755,51 @@ def save_recognize_exam_photo(request, exam_id):
         res_file_name_with_path = generate_random_user_file(request)
 
         # verify is authorized user present in image
-        candidate_img_dataset = CandidateImgDataset.objects.filter(user=request.user).first()
+        candidate_img_datasets = CandidateImgDataset.objects.filter(user=request.user)
         
         is_authorized_candidate_present = False
         idx_candidate_face_embedding = None # used to remove entry from realtime_face_embeddings and check who is other
         recognized_persons = []
 
-        if candidate_img_dataset:
-            known_face_embedding = candidate_img_dataset.face_embedding
+        for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
+            is_matched = False
+            for single_obj in candidate_img_datasets:
+                known_face_embedding = single_obj.face_embedding
 
-            for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
                 is_matched, probability = compare_face_embedding(
                     known_face_embedding, realtime_face_embedding
                 )
-                
                 if is_matched:
-                    is_authorized_candidate_present = True
-                    idx_candidate_face_embedding = idx
-                    
-                    name = candidate_img_dataset.user.email
+                    name = single_obj.user.email
+                    break
 
-                    # save face in db -- for emotion analysis
-                    # modify emotion analysis later to work on single face
-                    # exam_candidate_data.np_face = realtime_extracted_faces[idx]
-                    exam_candidate_data.save()
-
-                else:
-                    is_second_person_suspicious = check_proctor__superadmin(realtime_detected_faces)
-
-                    if not is_second_person_suspicious:
-                        name = "proctor"
-                        probability = random.uniform(0.5, 0.9)
-                    else:
-                        name = "unknown"
-                        probability = random.uniform(0.6, 0.95)
-
-                recognized_persons.append({
-                    "name": name,
-                    "probability": probability,
-                    "box": realtime_detected_faces[idx]['box']
-                })
-
-            # trigger detect emotions background task
-            recognize_candidate_emotion.delay(exam_candidate_data.id)
+            is_matched, probability = compare_face_embedding(
+                known_face_embedding, realtime_face_embedding
+            )
             
-            # for testing run directly
-            # recognize_candidate_emotion(exam_candidate_data.id)
+            if is_matched:
+                is_authorized_candidate_present = True
+                idx_candidate_face_embedding = idx
 
-        else:
-            print(f"Error ... Candidate image dataset is empty")
+            else:
+                is_second_person_suspicious = check_proctor__superadmin(realtime_detected_faces)
 
-        # source_pil_image, _ = read_image(img_path)
+                if not is_second_person_suspicious:
+                    name = "proctor"
+                    probability = random.uniform(0.5, 0.9)
+                else:
+                    name = "unknown"
+                    probability = random.uniform(0.6, 0.95)
 
+            recognized_persons.append({
+                "name": name,
+                "probability": probability,
+                "box": realtime_detected_faces[idx]['box']
+            })
+
+        # trigger detect emotions background task
+        recognize_candidate_emotion.delay(exam_candidate_data.id)
+        
         if len(recognized_persons) >= 1:
             hightlighted_image = highlight_recognized_faces(
                 img_path, recognized_persons,
@@ -827,7 +818,7 @@ def save_recognize_exam_photo(request, exam_id):
 
         if (len(recognized_persons) > 1):
             is_suspicious = True
-            reason += "\n Suspicious person detected."
+            reason += "\n Multiple persons detected."
 
         exam_candidate_data.is_suspicious = is_suspicious
         exam_candidate_data.reason = reason

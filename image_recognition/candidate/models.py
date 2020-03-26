@@ -56,9 +56,11 @@ class CandidateImgDataset(models.Model):
     )
     img = models.FileField(upload_to=user_dataset_directory_path)
     face = PickledObjectField(blank=True, null=True, help_text="face extracted from image by MTCNN face detector")
-    face_embedding = PickledObjectField(blank=True, null=True, help_text="Embedding(feature) extracted by Facenet model in 128d")
+    face_embedding = PickledObjectField(
+        blank=True, null=True, 
+        help_text="Embedding(feature) extracted by Facenet model in 128d"
+    )
     is_valid = models.BooleanField(default=True)
     more_info = models.TextField(
         blank=True, null=True
     )
-

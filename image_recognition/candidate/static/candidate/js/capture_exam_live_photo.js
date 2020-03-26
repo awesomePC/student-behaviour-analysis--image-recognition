@@ -1,66 +1,36 @@
 var arr_suspicious = [];
 
+// check all values are true - 
+const isAllTrue = (currentValue) => currentValue == true;
+
 function handle_suspicious_activity(reason)
 {
-  // debugger;
+  /**** check suspicious activity for showing warning ***************/
+  // get last elements from arr-suspicious list
+  var sliced_data = arr_suspicious.slice(-suspicious_show_warning_after); // get last two elements
 
-  var length = arr_suspicious.length;
-  // // get 
-  // // check array length >= suspicious 
-  // if ( length >= suspicious_show_warning_after)
-  // {
-  //   var is_continuous_suspicious = true;
-    
-  //   var warning_limit = suspicious_show_warning_after - 1
+  // The every() method tests whether all elements in the array pass the 
+  // test implemented by the provided function. It returns a Boolean value.
+  var result = sliced_data.every(isAllTrue);
 
-  //   for (index = warning_limit; index >= 0 ; index--) { 
-  //       // console.log(arr_suspicious[index]); 
-  //       if(arr_suspicious[index] == false)
-  //       {
-  //         is_continuous_suspicious = false;
-  //       }
-  //   } 
-
-  //   if(is_continuous_suspicious)
-  //   {
-  //     // show warning
-  //     new PNotify({
-  //         title: "Warning",
-  //         text: "Suspicious activity - " + reason,
-  //         addclass: 'alert alert-styled-left alert-arrow-left',
-  //         type: "warning"
-  //     })
-  //   }
-  // }
-
-  // show warning
-  new PNotify({
-      title: "Warning",
-      text: "Suspicious activity - " + reason,
-      addclass: 'alert alert-styled-left alert-arrow-left',
-      type: "warning"
-  })
-  
-  // debugger;
-
-  // check limit of suspicious activity to stop exam 
-  if ( length >= suspicious_stop_exam_after)
+  if (result == true)
   {
-    var is_continuous_suspicious = true;
+    // show warning
+    new PNotify({
+        title: "Warning",
+        text: "Suspicious activity - " + reason,
+        addclass: 'alert alert-styled-left alert-arrow-left',
+        type: "warning"
+    })
+  }
 
-    last_index = length - 1
-    len_minus_suspicious_stop_exam_after = length - (suspicious_stop_exam_after + 1)
-    
-    for (index = last_index; index >= len_minus_suspicious_stop_exam_after ; index--) { 
-        // console.log(arr_suspicious[index]); 
-        if(arr_suspicious[index] == false)
-        {
-          is_continuous_suspicious = false;
-        }
-    } 
 
-    if(is_continuous_suspicious)
-    {
+  // The every() method tests whether all elements in the array pass the 
+  // test implemented by the provided function. It returns a Boolean value.
+  var result = sliced_data.every(isAllTrue);
+  
+  if (result == true)
+  {
       // stop exam
       $.ajax({
           data: {
@@ -85,9 +55,8 @@ function handle_suspicious_activity(reason)
         // similar behavior as an HTTP redirect
         window.location.replace(url_stop_exam_reason);
       }, 2000);
-
-    }
   }
+
 }
 
 
@@ -145,14 +114,11 @@ var base64image = null;
 
 document.addEventListener("DOMContentLoaded", function() {
 
-
-
   Webcam.set({
     width: width,
     height: height,
     image_format: 'jpeg',
     jpeg_quality: 90,
-    flip_horiz: true, // mirror mode
   });
   Webcam.attach( '#camera' );
 

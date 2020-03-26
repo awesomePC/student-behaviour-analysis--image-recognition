@@ -1,0 +1,63 @@
+# ********************************************************
+# Creating an environment from an environment.yml file
+# ********************************************************
+# 1) Create the environment from the environment.yml file.
+#     conda env create -f environment.yml
+#
+# ========================================================
+
+
+# ********************************************************
+# Updating an environment
+# ********************************************************
+# conda env update --file environment.yml
+
+# ********************************************************
+# Removing an environment
+# ********************************************************
+# conda remove --name myenv --all
+
+
+name: env_face_recognition
+channels:
+  - defaults
+  - conda-forge
+
+dependencies:
+  - python=3.7.0
+  - pip=19.2.2
+  - opencv
+  - imutils=0.5.2
+  - scikit-learn
+  - tensorflow
+  - keras
+  - psycopg2
+  - django=2.2
+  - django-extensions
+  - django-debug-toolbar
+  - django-allauth
+  - django-crispy-forms
+  - beautifulsoup4
+  - matplotlib
+  - seaborn
+  - jupyter
+  - celery
+  - redis
+
+  - pip:
+    - cvlib
+    - imageio
+    - progressbar
+    - django-cleanup
+    - redis
+    - django-celery-beat
+    - django-lazysignup
+    - django-widget-tweaks
+    - django-notifications-hq==1.5.0
+    - mtcnn
+    - keras_vggface
+    - django-picklefield
+
+    - flask
+    - flask-restful
+    - sentry_sdk
