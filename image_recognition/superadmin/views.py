@@ -559,24 +559,32 @@ class CandidateAnswerNearestEmotion:
     """
     @classmethod
     def candidate_answer_last_emotion(cls, exam_id, candidate_id, lst_answers):
+        # print(exam_id)
+        # print(candidate_id)
+        # print(lst_answers)
 
         for answer_info in lst_answers:
+            answer_created_at = answer_info["created_at"]
+            # print(f"answer_created_at: {answer_created_at}")
+
             candidate_photo = ExamCandidatePhoto.objects.filter(
-                user__id=candidate_id, exam__id=exam_id
+                user__id=candidate_id, exam__id=exam_id,
+                created_at__gt=answer_created_at
             ).order_by('-created_at').first()
 
             emotion_label = "unknown"
 
+            # print(f"candidate_photo: {candidate_photo}")
+
             if candidate_photo:
                 if isinstance(candidate_photo.top_emotion, list):
                     if len(candidate_photo.top_emotion) == 2:
-                        label = candidate_photo.top_emotion[0]
+                        emotion_label = candidate_photo.top_emotion[0]
                         # emotion_probability = candidate_photo.top_emotion[1]
             else:
                 pass
             
-            answer_info["emotion"] = label
-
+            answer_info["emotion"] = emotion_label
         return lst_answers
 
 
@@ -586,7 +594,7 @@ class AnswerCorrectnessOverEmotion(View):
     """
     # def get_user_answers()
     def get(self, request, *args, **kwargs):
-        # import pdb;pdb.set_trace()
+        
         candidate_id = request.GET.get("candidate_id") # 56
         exam_id = request.GET.get("exam_id") # 1
 
@@ -608,7 +616,8 @@ class AnswerCorrectnessOverEmotion(View):
         lst_answers_with_emotions = CandidateAnswerNearestEmotion.candidate_answer_last_emotion(
             exam_id, candidate_id, lst_answers
         )
-
+        print(f"lst_answers_with_emotions : {lst_answers_with_emotions}")
+        
         # emotions_overtime = lst_answers_with_emotions
 
         emotions_list = EmotionClasses._get_labels_list()
@@ -639,11 +648,12 @@ class AnswerCorrectnessOverEmotion(View):
                 "color": '#dc1818cc'
             }
         ]
-
         response = {
             "emotions_list": emotions_list,
             "emotions_overtime": emotions_overtime
         }
+        # print(f"response : {response}")
+        # import pdb;pdb.set_trace()
         return JsonResponse(response, safe=False)
 
 

@@ -24,12 +24,16 @@ function handle_suspicious_activity(reason)
     })
   }
 
+  /** 2) suspicious stop exam after *******************************/
+  /**** check suspicious activity for stopping exam ***************/
+  // get last elements from arr-suspicious list
+  var sliced_data2 = arr_suspicious.slice(-suspicious_stop_exam_after); // get last two elements
 
   // The every() method tests whether all elements in the array pass the 
   // test implemented by the provided function. It returns a Boolean value.
-  var result = sliced_data.every(isAllTrue);
+  var result2 = sliced_data2.every(isAllTrue);
   
-  if (result == true)
+  if (result2 == true)
   {
       // stop exam
       $.ajax({
