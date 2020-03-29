@@ -94,6 +94,7 @@ def get_candidate_uploaded_images(lazy_user_id):
 
 
 @allow_lazy_user
+@csrf_exempt
 def sign_up(request):
     from candidate.tasks import post_register_extract_save_face_and_embeddings
 
