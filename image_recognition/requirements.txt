@@ -11,16 +11,17 @@ celery==4.3.0
 django-celery-beat==1.5.0
 redis
 
-matplotlib==3.1.1
-nltk==3.4.5
-pandas==0.25.3
-scikit-learn==0.21.3
-seaborn==0.9.0
-tensorflow==1.15.0
 imutils==0.5.2
-psycopg2
 beautifulsoup4
 django-picklefield
-flask
-flask-restful
+
+# matplotlib==3.1.1
+# nltk==3.4.5
+# pandas==0.25.3
+# scikit-learn==0.21.3
+# seaborn==0.9.0
+# tensorflow==1.15.0
+# psycopg2
+# flask
+# flask-restful
 
