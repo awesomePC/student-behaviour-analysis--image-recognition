@@ -109,44 +109,45 @@ def do_emotion_recognition():
         exam_candidate_data.save()
         print(emotion_message)
 
-@task()
-def detect_objects(image__path):
-    """
-    Detect common objects in image
-    
-    Args:
-        image__path (str): Image full path
-    
-    Returns:
-        tuple: (box, label, confidence)
-    """
-    print(image__path)
-    img = cv2.imread(image__path)
-    bbox, label, conf = cv.detect_common_objects(img)
-    # output_image = draw_bbox(img, bbox, label, conf)
-    print(bbox, label, conf)
-    return (bbox, label, conf)
 
-@task()
-def do_object_detection():
-    """
-    Iterate inside table and perform common object detection
-    """
-    all_exam_data = ExamCandidatePhoto.objects.filter(is_object_detection_done=False)
-    for exam_candidate_data in all_exam_data:
-        image_file__path = exam_candidate_data.photo.path
-        print(f"image_file__path for object detection : {image_file__path}")
+# @task()
+# def detect_objects(image__path):
+#     """
+#     Detect common objects in image
+    
+#     Args:
+#         image__path (str): Image full path
+    
+#     Returns:
+#         tuple: (box, label, confidence)
+#     """
+#     print(image__path)
+#     img = cv2.imread(image__path)
+#     bbox, label, conf = cv.detect_common_objects(img)
+#     # output_image = draw_bbox(img, bbox, label, conf)
+#     print(bbox, label, conf)
+#     return (bbox, label, conf)
+
+# @task()
+# def do_object_detection():
+#     """
+#     Iterate inside table and perform common object detection
+#     """
+#     all_exam_data = ExamCandidatePhoto.objects.filter(is_object_detection_done=False)
+#     for exam_candidate_data in all_exam_data:
+#         image_file__path = exam_candidate_data.photo.path
+#         print(f"image_file__path for object detection : {image_file__path}")
         
-        bbox, label, conf = detect_objects(image_file__path)
-        detected_objects = {
-            "bbox": bbox,
-            "label": label,
-            "conf": conf,
-        }
-        exam_candidate_data.detected_objects = detected_objects
-        exam_candidate_data.is_object_detection_done = True
-        exam_candidate_data.save()
-    return True
+#         bbox, label, conf = detect_objects(image_file__path)
+#         detected_objects = {
+#             "bbox": bbox,
+#             "label": label,
+#             "conf": conf,
+#         }
+#         exam_candidate_data.detected_objects = detected_objects
+#         exam_candidate_data.is_object_detection_done = True
+#         exam_candidate_data.save()
+#     return True
 
 
-# do_object_detection.delay()
+# # do_object_detection.delay()

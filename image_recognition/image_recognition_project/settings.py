@@ -333,13 +333,13 @@ CELERY_BEAT_SCHEDULE = {
         # If you want more control over when the task is executed, for example, a particular time of day or day of the week, you can use the crontab schedule type:
         # 'schedule': crontab(hour=1, minute=57), # Crontab schedules
     },
-    'object_detection': {
-        'task': 'recognize.tasks.do_object_detection',
-        'schedule': timedelta(seconds=50), # Periodic Tasks
+    #'object_detection': {
+    #    'task': 'recognize.tasks.do_object_detection',
+    #    'schedule': timedelta(seconds=50), # Periodic Tasks
 
         # If you want more control over when the task is executed, for example, a particular time of day or day of the week, you can use the crontab schedule type:
         # 'schedule': crontab(hour=1, minute=57), # Crontab schedules
-    },
+    #},
 }
 
 # Many of these will be overridden by local settings.

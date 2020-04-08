@@ -14,6 +14,7 @@ from django.shortcuts import redirect
 
 
 # Create your views here.
+@csrf_exempt
 def handle_login(request):
     user = request.user
     print("user.user_type", user.__dict__)
