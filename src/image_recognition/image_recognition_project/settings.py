@@ -210,7 +210,6 @@ DJANGO_NOTIFICATIONS_CONFIG = { 'USE_JSONFIELD': True}
 FACE_RECOGNITION_BASE_API_URL = "http://localhost:5001/"
 EMOTION_DETECTION_BASE_API_URL = "http://localhost:5002/"
 
-
 # celery
 CELERY_BROKER_URL = 'redis://localhost:6379'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
@@ -222,13 +221,6 @@ CELERY_TASK_SERIALIZER = 'json'
 from celery.schedules import crontab, timedelta
 
 CELERY_BEAT_SCHEDULE = {
-    'emotion_recognition': {
-        'task': 'recognize.tasks.do_emotion_recognition',
-        'schedule': timedelta(seconds=1150), # Periodic Tasks
-
-        # If you want more control over when the task is executed, for example, a particular time of day or day of the week, you can use the crontab schedule type:
-        # 'schedule': crontab(hour=1, minute=57), # Crontab schedules
-    },
     #'object_detection': {
     #    'task': 'recognize.tasks.do_object_detection',
     #    'schedule': timedelta(seconds=50), # Periodic Tasks

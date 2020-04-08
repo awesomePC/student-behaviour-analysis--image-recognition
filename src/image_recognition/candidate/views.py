@@ -99,11 +99,8 @@ def sign_up(request):
     from candidate.tasks import post_register_extract_save_face_and_embeddings
 
     lazy_user_id = request.user.id
-
-    initial_preview, initial_preview_config = get_candidate_uploaded_images(
-        lazy_user_id
-    )
-
+    temp_images = []
+    
     form = CustomUserCreationForm(request.POST or None)
     if request.method == 'POST':
         # process form data
@@ -152,12 +149,21 @@ def sign_up(request):
         else:
             print("Error validating form ...")
             print(form.__dict__)
+            
+            temp_images = TempRegistrationImage.objects.filter(
+                lazy_user_id=lazy_user_id,
+                is_valid=True
+            )
 
+    else:
+        temp_images = TempRegistrationImage.objects.filter(
+            lazy_user_id=lazy_user_id,
+            is_valid=True
+        )
 
     context = {
-        "initialPreview": initial_preview,
-        "initialPreviewConfig": initial_preview_config,
         "form": form,
+        "temp_images": temp_images,
     }
     return render(request, 'candidate/account/sign_up.html', context)
 
