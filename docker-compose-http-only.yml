@@ -45,8 +45,8 @@ services:
     env_file:
       - ./envs/postgres/dev.env
     volumes:
-      - local-postgres-data:/var/lib/postgresql/data
-      - local-postgres-data-backups:/backups
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data-backups:/backups
 
   redis:
     image: redis:alpine
