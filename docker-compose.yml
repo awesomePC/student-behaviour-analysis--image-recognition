@@ -8,7 +8,7 @@ services:
       - ./config/nginx/https_ssl:/etc/nginx/conf.d
       - ./config/certbot/conf:/etc/letsencrypt
       - ./config/certbot/www:/var/www/certbot
-      - ./src/social_media_analysis:/src
+      - ./src/image_recognition:/src
     ports:
       - "80:80"
       - "443:443"
@@ -43,7 +43,7 @@ services:
 
   web:
     build:
-      context: ./src/social_media_analysis
+      context: ./src/image_recognition
       dockerfile: ../../compose/django/Dockerfile
     container_name: web
     volumes:
