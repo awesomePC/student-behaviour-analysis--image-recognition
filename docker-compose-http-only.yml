@@ -48,7 +48,9 @@ services:
     volumes:
       - local_postgres_data:/var/lib/postgresql/data
       - local_postgres_data_backups:/backups
-
+    networks:
+      - djangonetwork
+      
   redis:
     image: redis:alpine
     container_name: redis_server
