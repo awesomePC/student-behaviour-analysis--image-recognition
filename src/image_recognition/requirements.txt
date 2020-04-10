@@ -6,6 +6,7 @@ django-extensions==2.2.5
 django-notifications-hq==1.5.0
 django-lazysignup
 django-widget-tweaks
+django_cleanup
 
 celery==4.3.0
 django-celery-beat==1.5.0
@@ -25,5 +26,5 @@ django-picklefield
 # flask
 # flask-restful
 
-
 sentry-sdk==0.14.3
+gunicorn
