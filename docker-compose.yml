@@ -1,5 +1,9 @@
 version: '3'
 
+volumes:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
+
 services:
   nginx:
     image: nginx:1.15-alpine
