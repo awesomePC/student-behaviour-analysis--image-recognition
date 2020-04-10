@@ -220,12 +220,12 @@ DJANGO_NOTIFICATIONS_CONFIG = { 'USE_JSONFIELD': True}
 
 
 # face recognition and emotion detection API base url
-FACE_RECOGNITION_BASE_API_URL = "http://localhost:5001/"
-EMOTION_DETECTION_BASE_API_URL = "http://localhost:5002/"
+FACE_RECOGNITION_BASE_API_URL = os.environ.get("FACE_RECOGNITION_BASE_API_URL", default="http://localhost:5001/")
+EMOTION_DETECTION_BASE_API_URL = os.environ.get("EMOTION_DETECTION_BASE_API_URL", default="http://localhost:5002/")
 
 # celery
-CELERY_BROKER_URL = 'redis://localhost:6379'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL", default="redis://localhost:6379")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND", default='redis://localhost:6379')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
