@@ -1,7 +1,7 @@
 #!/bin/bash
 
-domains=(example.com www.example.com) # replace example.com with actual domain name
-email="" # Add a valid address
+domains=(studentbehaviourrecognition.tech  www.studentbehaviourrecognition.tech) # replace example.com with actual domain name
+email="studentbehaviourrecognition.tech" # Add a valid address
 
 
 if ! [ -x "$(command -v docker-compose)" ]; then

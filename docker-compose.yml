@@ -26,19 +26,37 @@ services:
       - ./config/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
+
+  db:
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: compose/postgres/Dockerfile
+    container_name: db
+    env_file:
+      - ./envs/postgres/dev.env
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data
+      - local_postgres_data_backups:/backups
+    networks:
+      - djangonetwork
+
   web:
     build:
       context: ./src/social_media_analysis
       dockerfile: ../../compose/django/Dockerfile
     container_name: web
     volumes:
-      - ./src/social_media_analysis:/src
+      - ./src/image_recognition:/src
     expose:
       - "443"
     env_file:
       - ./envs/django/dev.env
+    depends_on:
+      - db
     links:
       - redis
+      - db:db
     networks:
       - djangonetwork
 
@@ -51,6 +69,53 @@ services:
       - djangonetwork
     restart: always
 
+  flask_recognition_api:
+    build:
+      context: ./src/recognition_api
+      dockerfile: ../../compose/flask/recognition_api/Dockerfile
+    container_name: flask_recognition_api
+    volumes:
+      - ./src/recognition_api:/recognition_api
+    ports:
+      - "5001:5001"
+    expose:
+      - "5001"
+    env_file:
+      - ./envs/recognition_api/prod.env
+    networks:
+      - djangonetwork
+
+  flask_emotion_api:
+    build:
+      context: ./src/emotion_api
+      dockerfile: ../../compose/flask/emotion_api/Dockerfile
+    container_name: flask_emotion_api
+    volumes:
+      - ./src/emotion_api:/emotion_api
+    ports:
+      - "5002:5002"
+    expose:
+      - "5002"
+    env_file:
+      - ./envs/emotion_api/prod.env
+    networks:
+      - djangonetwork
+
+  flask_fake_detection_api:
+    build:
+      context: ./src/fake_detection_api
+      dockerfile: ../../compose/flask/fake_detection_api/Dockerfile
+    container_name: flask_fake_detection_api
+    volumes:
+      - ./src/fake_detection_api:/fake_detection_api
+    ports:
+      - "5003:5003"
+    expose:
+      - "5003"
+    env_file:
+      - ./envs/flask_fake_detection_api/prod.env
+    networks:
+      - djangonetwork
 
 networks:
   djangonetwork:
