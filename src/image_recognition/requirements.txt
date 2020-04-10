@@ -25,3 +25,5 @@ django-picklefield
 # flask
 # flask-restful
 
+
+sentry-sdk==0.14.3
