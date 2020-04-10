@@ -33,6 +33,7 @@ services:
       - db
     links:
       - redis
+      - db:db
     networks:
       - djangonetwork
 
