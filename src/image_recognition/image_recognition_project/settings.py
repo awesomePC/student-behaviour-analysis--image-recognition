@@ -121,11 +121,11 @@ WSGI_APPLICATION = 'image_recognition_project.wsgi.application'
 DATABASES = {
     'default':{
         'ENGINE':'django.db.backends.postgresql_psycopg2',
-        'NAME':'image_recognition',
-        'USER':'postgres',
-        'PASSWORD':'postgres',
-        'HOST':'localhost',
-        'POST':'5432',
+        'NAME': os.environ.get("DB_NAME", default='image_recognition'),
+        'USER': os.environ.get("DB_USER", default='postgres'),
+        'PASSWORD': os.environ.get("DB_PASSWORD", default='postgres'),
+        'HOST': os.environ.get("DB_HOST", default='localhost'),
+        'PORT': os.environ.get("DB_PORT", default=5432),
         'ATOMATIC_REQUESTS':True,
     }
 }
