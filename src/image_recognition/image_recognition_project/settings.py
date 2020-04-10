@@ -22,8 +22,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '43)%4yx)aa@a=+_c(fn&kf3g29xax+=+a&key9i=!98zyim=8j'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# check is running on django development server
+if(sys.argv[1] == 'runserver'):
+    IS_DEV_SERVER = True
+else:
+    IS_DEV_SERVER = False
+
+if IS_DEV_SERVER:
+    DEBUG = True
+else:
+    # SECURITY WARNING: don't run with debug turned on in production!
+    DEBUG = os.environ.get("DEBUG", default=True)
 
 ALLOWED_HOSTS = ['127.0.0.1', '*']
 
@@ -151,9 +160,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static")
-]
+if IS_DEV_SERVER:
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, "static")
+    ]
+else:
+    STATIC_ROOT = './static/'
 
 # Media files( Uploaded images )
 
