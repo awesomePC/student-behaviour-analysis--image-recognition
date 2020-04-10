@@ -41,7 +41,7 @@ services:
     build:
       context: .
       dockerfile: compose/postgres/Dockerfile
-    container_name: postgres
+    container_name: db
     env_file:
       - ./envs/postgres/dev.env
     volumes:
