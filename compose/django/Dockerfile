@@ -32,4 +32,4 @@ RUN pip install -r $APP_HOME/requirements.txt
 RUN chmod -R 777 $APP_HOME
 
 # CMD will run when this dockerfile is running
-CMD ["sh", "-c", "python manage.py collectstatic --no-input; python manage.py makemigrations; python manage.py migrate; gunicorn image_recognition_project.wsgi -b 0.0.0.0:8000 & celery -A image_recognition_project worker -l info -B"]
+CMD ["sh", "-c", "python manage.py collectstatic --no-input; python manage.py makemigrations; python manage.py migrate; python manage.py loaddata db.json; gunicorn image_recognition_project.wsgi -b 0.0.0.0:8000 & celery -A image_recognition_project worker -l info -B"]
