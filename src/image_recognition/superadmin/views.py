@@ -714,10 +714,7 @@ class AnswerSpeedOverEmotion(View):
         for key, time_data in emotion_dict.items():
             if time_data:
                 avg = sum(time_data) / len(time_data)
-                if avg < 0:
-                    avg = abs(avg)
-                
-                avg = round(avg, 2)
+                avg = round(abs(avg), 2)
             else:
                 avg = 0.0
 
