@@ -259,6 +259,7 @@ class EmotionClasses:
         4: "sad",
         5: "surprise",
         6: "neutral",
+        7: "unknown"
     }
 
     color_mapping = {
