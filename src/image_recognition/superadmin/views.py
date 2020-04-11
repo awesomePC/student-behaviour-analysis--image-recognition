@@ -572,7 +572,7 @@ class CandidateAnswerNearestEmotion:
             candidate_photo = ExamCandidatePhoto.objects.filter(
                 user__id=candidate_id, exam__id=exam_id,
                 created_at__gt=answer_created_at
-            ).order_by('-created_at').first()
+            ).order_by('created_at').first()
 
             emotion_label = "unknown"
 
