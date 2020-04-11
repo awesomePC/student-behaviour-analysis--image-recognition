@@ -270,6 +270,7 @@ class EmotionClasses:
         "sad": "rgb(247, 163, 92)",
         "surprise": "rgb(241, 92, 128)",
         "neutral": "rgb(124, 181, 236)",
+        "unknown": "rgb(144, 124, 124)",
     }
 
     @classmethod
