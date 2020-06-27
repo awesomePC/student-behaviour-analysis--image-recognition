@@ -72,28 +72,26 @@
                                     <div class="checkbox">
                                         <label>
                                             <input type="checkbox" checked="checked">
-                                            <span>High level language</span>
+                                            <span></span>
                                         </label>
                                     </div>
 
                                     <div class="checkbox">
                                         <label>
                                             <input type="checkbox">
-                                            <span>Low level language</span>
+                                            <span></span>
                                         </label>
                                     </div>
 
                                     <div class="radio">
                                         <label>
                                             <input type="radio" name="radio-styled-color" class="control-warning">
-                                            Warning radio
                                         </label>
                                     </div>
 
                                     <div class="radio">
                                         <label>
                                             <input type="radio" name="radio-styled-color" class="control-info">
-                                            Info radio
                                         </label>
                                     </div>
                                     
@@ -109,75 +107,31 @@
                                     <img id="live-img" src="" width="256" height="192"></img>
                                 </div>
                             </div>
-
-                            <!--
-                            <div class="col-md-12 col-border-grey">
-                                <div class="question-badges hidden">
-                                    <p>
-                                        <a>
-                                            <span class="badge badge-flat question-visited">63</span>
-                                            <span>Visited</span>
-                                        </a>
-
-                                        <a class="pl-10">
-                                            <span class="badge badge-flat border-grey text-grey-600">63</span>
-                                            <span>Not-Visited</span>
-                                        </a> 
-                                    </p>
-
-                                    <p>
-                                        <a>
-                                            <span class="badge badge-success">63</span>
-                                            <span>Answered</span>
-                                        </a>
-
-                                        <a class="pl-10">
-                                            <span class="badge badge-info">63</span>
-                                            <span>Flagged</span>
-                                        </a> 
-                                    </p>
-                                </div>
-
-                                <div class="container-question-numbers">
-                                    <p class="question-numbers">Questions</p>
-                                    <div>
-                                        <a href="#" class="label label-flat label-rounded label-icon border-teal text-teal-600"><span>1</span></a>
-                                    </div>
-                                </div>
-                            </div>
-                            -->
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-9 col-border-grey">
-                        <div class="col-md-9">
-                            <button 
-                                id="clear-response"
-                                type="button"
-                                class="btn btn-warning legitRipple">
-                                <i class="icon-pen position-left"></i> 
-                                Clear Response
-                            </button>
-                            <button 
-                                type="button"
-                                class="btn btn-info legitRipple ml-20">
-                                <i class="icon-pen position-left"></i> 
-                                Mark for Review & Next
-                            </button>
-                        </div>                        
-                        <div class="col-md-3">
-                            <button 
-                                id="save-and-next"
-                                type="button"
-                                class="btn btn-success legitRipple">
-                                <i class="icon-pen position-left"></i> 
-                                Save & Next
-                            </button>
-                        </div>
+                    <div class="col-md-4 col-border-grey text-center">
+                        <button 
+                            id="clear-response"
+                            type="button"
+                            class="btn btn-warning legitRipple">
+                            <i class="icon-pen position-left"></i> 
+                            Clear Response
+                        </button>
+                    </div>                        
+                    <div class="col-md-4 col-border-grey text-center">
+                        <button 
+                            id="save-and-next"
+                            type="button"
+                            class="btn btn-success legitRipple">
+                            <i class="icon-pen position-left"></i> 
+                            Save & Next
+                        </button>
                     </div>
-                    <div class="col-md-3 col-border-grey">
+
+                    <div class="col-md-4 col-border-grey text-center">
                         <button 
                             id="submit-exam"
                             type="button"
@@ -271,10 +225,10 @@
 </script>
 
 
-<!-- Webcam.min.js -->
+<!-- Webcam.min.js 
 <script src="{% static 'candidate/plugin/webcam/webcam.js' %}?v=2.2"></script>
 <script type="text/javascript" src="{% static 'candidate/js/capture_exam_live_photo.js' %}?v=2.0"></script>
-
+-->
 
 <script type="text/javascript" src="{% static 'candidate/js/exam.js' %}?v=2.0"></script>
 

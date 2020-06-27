@@ -101,12 +101,6 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("#btn-capture button click event triggered");
     //take snapshot
     take_snapshot();
-    new PNotify({
-      title: 'Photo Captured',
-      text: 'Scroll down to see captured photo.',
-      addclass: 'alert alert-styled-left alert-arrow-left',
-      type: 'info'
-    });
 
     $("#container-camera").fadeOut();
     $("#container-result").removeClass("hidden").addClass("fadeIn")

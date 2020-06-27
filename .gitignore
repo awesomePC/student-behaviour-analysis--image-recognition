@@ -101,6 +101,7 @@ db.sqlite3
 
 # media
 image_recognition/media/**
+**/media/**
 
 # flask api media
 recognition_api/media/
