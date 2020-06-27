@@ -6,6 +6,7 @@ from django.http import HttpResponse, JsonResponse
 
 from django.contrib.auth import logout
 
+from django.urls import reverse
 from django.views import View
 
 from django.utils.decorators import method_decorator
@@ -327,6 +328,10 @@ def exam(request, exam_id):
         candidate=request.user,
         exam__id=exam_id
     )
+
+    # if exam already submitted
+    if candidate.is_completed == True:
+        return redirect(reverse("candidate:exam_list"))
 
     questions = ExamQuestion.objects.filter(
         exam__id=exam_id
