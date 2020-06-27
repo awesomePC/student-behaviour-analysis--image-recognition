@@ -1,0 +1,6 @@
+
+Our solutions:
+
+ Resnet 50 pretrained model on imagenet + svm classifier
+ train score: 1.0
+Test score: 0.9993597951344431

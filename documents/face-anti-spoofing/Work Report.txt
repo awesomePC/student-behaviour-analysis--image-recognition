@@ -1,0 +1,19 @@
+Work Report:
+
+===============================================================================
+Face anti spoofing:
+===============================================================================
+ 1) Testing other 15+ open source solutions and reading some research papers. --- 40 hours
+
+ 2) code developement -- dataset gathering, creating our own dataset builder application, creating multiple solutions using different deep learning techniques.
+
+   our solutions:
+    CNN --- 96% accuracy
+    Transfer learning -- 98.23%
+    Resnet + SVM --- 99.93%
+
+   time --- 100 hours
+===============================================================================
+Total time --- 140 hours
+
+

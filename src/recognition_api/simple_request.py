@@ -82,25 +82,10 @@ def test_api_extract_faces_and_embeddings(image_path):
 
     # # ensure the request was successful
     if response["success"]:
-        print(f"detected_faces : {response['detected_faces']}")
+        detected_faces = response['detected_faces']
+        print(f"detected_faces : {detected_faces}")
 
         extracted_faces = response['extracted_faces']
-
-        # show detected faces
-        i = 1
-        for face in extracted_faces:
-            # convert list type to numpy
-            np_face_array = asarray(face)
-            
-            # plot
-            plt.subplot(2, 2, i)
-            plt.axis('off')
-            plt.imshow(np_face_array)
-
-            # plt.imshow(np_face_array, interpolation='nearest')
-            i += 1
-        plt.show()
-
 
         face_embeddings = response['face_embeddings']
         if face_embeddings:
@@ -111,12 +96,14 @@ def test_api_extract_faces_and_embeddings(image_path):
             )
             # save one embeddings
             savetxt(file_single_face_embedding, first_face_embedding.view(float))
+
+        return (detected_faces, extracted_faces)
     else:
+        return ([], [])
         print("Request failed")
 
 
 def test_api_compare_face_embedding(known_embedding, realtime_embedding):
-    from matplotlib import pyplot as plt
     from numpy import asarray, loadtxt
 
     # convert to bytes
@@ -142,9 +129,10 @@ def test_api_compare_face_embedding(known_embedding, realtime_embedding):
     # # ensure the request was successful
     if response["success"]:
         print(response)
-
+        return response
     else:
         print("Request failed")
+        return False
 
 
 def test_api_match_known_face_embedding(np_array_known_embedding, image_path):
@@ -202,7 +190,7 @@ def test_api_match_known_face_embedding(np_array_known_embedding, image_path):
         print("Request failed")
 
 
-def test_api_highlight_recognized_faces(image_path):
+def test_api_highlight_recognized_faces(image_path, recognized_faces=[]):
     from matplotlib import pyplot as plt
 
     # load the input image and construct the payload for the request
@@ -210,13 +198,14 @@ def test_api_highlight_recognized_faces(image_path):
 
     FACE_HIGHTLIGHT_RECOGNIZED_API_URL = urljoin(BASE_API_URL, '/hightlight-recognized-faces')
 
-    recognized_faces = [
-        {
-            "name": "Nivratti",
-            "probability": 0.95,
-            "box": (50, 50, 60, 50)
-        }
-    ]
+    if recognized_faces == []:
+        recognized_faces = [
+            {
+                "name": "Nivratti",
+                "probability": 0.95,
+                "box": (50, 50, 60, 50)
+            }
+        ]
 
     data_json = {
         "recognized_faces": recognized_faces
@@ -246,20 +235,40 @@ def test_api_highlight_recognized_faces(image_path):
 
 if __name__ == "__main__":
     from numpy import asarray, loadtxt
+    from matplotlib import pyplot as plt
+
+    from timeit import default_timer as timer
+    from datetime import timedelta
+
+    start = timer()
 
     IMAGE_PATH = "media/images/own_grady.jpg"
     
-    #### 1 ###############
-    # response = test_api_get_face_count(IMAGE_PATH)
-    # print(response)
+    # #### 1 ###############
+    response = test_api_get_face_count(IMAGE_PATH)
+    print(response)
 
-    #### 2 ###############
+    # #### 2 ###############
     # test_api_highlight_faces(IMAGE_PATH)
 
-    #### 3 ###############
-    # test_api_extract_faces_and_embeddings(IMAGE_PATH)
+    # ### 3 ###############
+    detected_faces, extracted_faces = test_api_extract_faces_and_embeddings(IMAGE_PATH)
+    # # show detected faces
+    # i = 1
+    # for face in extracted_faces:
+    #     # convert list type to numpy
+    #     np_face_array = asarray(face)
+        
+    #     # plot
+    #     plt.subplot(2, 2, i)
+    #     plt.axis('off')
+    #     plt.imshow(np_face_array)
 
-    #### 4 ###############
+    #     # plt.imshow(np_face_array, interpolation='nearest')
+    #     i += 1
+    # plt.show()
+
+    # ### 4 ###############
     # file_single_face_embedding = os.path.join(
     #     settings.MEDIA_ROOT, 'face_embedding/single_face_embedding.txt'
     # )
@@ -268,9 +277,19 @@ if __name__ == "__main__":
     # print(np_array_known_embedding.dtype) # float64
     # test_api_match_known_face_embedding(np_array_known_embedding, IMAGE_PATH)
 
-    #### 5 ###############
+    # #### 5 ###############
     # known_embedding = loadtxt('media/face_embedding/single_face_embedding.txt').view(float)
-    # test_api_compare_face_embedding(known_embedding, known_embedding)
+    # response = test_api_compare_face_embedding(known_embedding, known_embedding)
 
-    #### 6 ###############
-    test_api_highlight_recognized_faces(IMAGE_PATH)
+    # #### 6 ###############
+    # recognized_faces = []
+    # for detected_face in detected_faces:
+    #     recognized_faces.append({
+    #         "name": "Nivratti",
+    #         "probability": response['probability'],
+    #         "box": detected_face
+    #     })
+    # test_api_highlight_recognized_faces(IMAGE_PATH, recognized_faces)
+
+    end = timer()
+    print(timedelta(seconds=end-start))

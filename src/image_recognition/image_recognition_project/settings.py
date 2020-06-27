@@ -169,7 +169,6 @@ else:
     STATIC_ROOT = './static/'
 
 # Media files( Uploaded images )
-
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = '/media/'
 
@@ -256,14 +255,14 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # CELERY_WORKER_MAX_TASKS_PER_CHILD = 300
 
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+# import sentry_sdk
+# from sentry_sdk.integrations.django import DjangoIntegration
 
-sentry_sdk.init(
-    dsn="https://e2932749492e4c00af282eb8f12b4282@sentry.io/1871868",
-    integrations=[DjangoIntegration()],
+# sentry_sdk.init(
+#     dsn="https://e2932749492e4c00af282eb8f12b4282@sentry.io/1871868",
+#     integrations=[DjangoIntegration()],
 
-    # If you wish to associate users to errors (assuming you are using
-    # django.contrib.auth) you may enable sending PII data.
-    send_default_pii=True
-)
+#     # If you wish to associate users to errors (assuming you are using
+#     # django.contrib.auth) you may enable sending PII data.
+#     send_default_pii=True
+# )

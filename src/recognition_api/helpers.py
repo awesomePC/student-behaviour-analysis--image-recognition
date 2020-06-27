@@ -6,6 +6,9 @@ from PIL import Image
 import json
 import sys
  
+from decimal import Decimal
+
+
 def pil_to_base64(pil_image, format="JPEG"):
     """
     Convert PIL image to base64
@@ -75,25 +78,25 @@ def base64_to_np(img_str, dtype=np.uint8):
 
 
 
-class JsonNumpyEncoder(json.JSONEncoder):
-    """
-    If obj is isinstance of ndarray then it convert to list to support json
-    """
-    def default(self, obj):
-        if isinstance(obj, np.ndarray):
-            return obj.tolist()
-        return json.JSONEncoder.default(self, obj)
+# class JsonNumpyEncoder(json.JSONEncoder):
+#     """
+#     If obj is isinstance of ndarray then it convert to list to support json
+#     """
+#     def default(self, obj):
+#         if isinstance(obj, np.ndarray):
+#             return obj.tolist()
+#         return json.JSONEncoder.default(self, obj)
 
 # more advanced encoder - with float and integer
 # implement it later as separate package
 # use - json.dumps(data, cls=MyEncoder)
 class MyEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, numpy.integer):
+        if isinstance(obj, np.integer):
             return int(obj)
-        elif isinstance(obj, numpy.floating):
+        elif isinstance(obj, np.floating):
             return float(obj)
-        elif isinstance(obj, numpy.ndarray):
+        elif isinstance(obj, np.ndarray):
             return obj.tolist()
 
         elif isinstance(obj, Decimal):

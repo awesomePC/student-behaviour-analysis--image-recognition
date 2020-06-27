@@ -613,47 +613,53 @@ def ajax_validate_user(request):
         idx_candidate_face_embedding = None # used to remove entry from realtime_face_embeddings and check who is other
         recognized_persons = []
 
-        for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
-            is_matched = False
-            for single_obj in candidate_img_dataset:
-                known_face_embedding = single_obj.face_embedding
+        if len(realtime_face_embeddings) == 1:
+            for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
+                is_matched = False
+                for single_obj in candidate_img_dataset:
+                    known_face_embedding = single_obj.face_embedding
 
-                is_matched, probability = compare_face_embedding(
-                    known_face_embedding, realtime_face_embedding
-                )
+                    is_matched, probability = compare_face_embedding(
+                        known_face_embedding, realtime_face_embedding
+                    )
+                    if is_matched:
+                        name = single_obj.user.email
+                        break
+                
                 if is_matched:
-                    name = single_obj.user.email
-                    break
-            
-            if is_matched:
-                is_authorized_candidate_present = True
-                idx_candidate_face_embedding = idx
-            else:
-                # check is proctor 
-                # temporarily set to unknown
-                name = "unknown"
-                probability = random.uniform(0.6, 0.8)
+                    is_authorized_candidate_present = True
+                    idx_candidate_face_embedding = idx
+                    message = "Candidate present.."
+                else:
+                    # check is proctor 
+                    # temporarily set to unknown
+                    name = "unknown"
+                    probability = random.uniform(0.6, 0.8)
 
-            recognized_persons.append({
-                "name": name,
-                "probability": probability,
-                "box": realtime_detected_faces[idx]['box']
-            })
-
-        if len(recognized_persons) >= 1:
-            hightlighted_image = highlight_recognized_faces(
-                img_path, recognized_persons
-            )
-
-            # save pil image
-            hightlighted_image.save(res_file_name_with_path, "PNG")
-
+                recognized_persons.append({
+                    "name": name,
+                    "probability": probability,
+                    "box": realtime_detected_faces[idx]
+                })
+        elif len(realtime_face_embeddings) > 1:
+            message = f"Authentication error: multiple persons detected."
         else:
-            # if no face found save source file as result
-            # later in javascript handle this situation
-            # if no face detected show current frame from camera
-            source_pil_image = Image.open(img_path).convert("RGB")
-            source_pil_image.save(res_file_name_with_path)
+            message = f"Authentication error: candidate not detected."
+
+        # if len(recognized_persons) >= 1:
+        #     hightlighted_image = highlight_recognized_faces(
+        #         img_path, recognized_persons
+        #     )
+
+        #     # save pil image
+        #     hightlighted_image.save(res_file_name_with_path, "PNG")
+
+        # else:
+        #     # if no face found save source file as result
+        #     # later in javascript handle this situation
+        #     # if no face detected show current frame from camera
+        #     source_pil_image = Image.open(img_path).convert("RGB")
+        #     source_pil_image.save(res_file_name_with_path)
 
         # detected_person_ids = []
         # # modify recognized name
@@ -684,15 +690,13 @@ def ajax_validate_user(request):
         #     res_file_name_with_path=res_file_name_with_path,
         # )
         
-        # substract base path -- keep only media path
-        media_path_only = res_file_name_with_path.replace(settings.BASE_DIR, '')
-        print(f"media_path_only : {media_path_only}")
+        # # substract base path -- keep only media path
+        # media_path_only = res_file_name_with_path.replace(settings.BASE_DIR, '')
+        # print(f"media_path_only : {media_path_only}")
 
         return JsonResponse({
-            'success':1,
-            'img': media_path_only,
-            'detected_person_ids': [],
-            'detected_face_count': detected_face_count,
+            'success': True,
+            'message': message,
             'is_authorized_candidate_present': is_authorized_candidate_present, # return value depending on user detected
         })
 
@@ -801,18 +805,18 @@ def save_recognize_exam_photo(request, exam_id):
             recognized_persons.append({
                 "name": name,
                 "probability": probability,
-                "box": realtime_detected_faces[idx]['box']
+                "box": realtime_detected_faces[idx]  # ['box']
             })
 
         # trigger detect emotions background task
         recognize_candidate_emotion.delay(exam_candidate_data.id)
         
-        if len(recognized_persons) >= 1:
-            hightlighted_image = highlight_recognized_faces(
-                img_path, recognized_persons,
-                # write_result_2_disk=True,
-                # res_file_name_with_path=res_file_name_with_path,
-            )
+        # if len(recognized_persons) >= 1:
+        #     hightlighted_image = highlight_recognized_faces(
+        #         img_path, recognized_persons,
+        #         # write_result_2_disk=True,
+        #         # res_file_name_with_path=res_file_name_with_path,
+        #     )
 
         # first level suspicious checking
         # is valid candidate available

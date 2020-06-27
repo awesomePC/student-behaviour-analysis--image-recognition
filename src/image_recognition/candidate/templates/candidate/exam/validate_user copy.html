@@ -1,0 +1,108 @@
+{% extends "common/base.html" %}
+
+{% load static %}
+
+{% block title %} User validation before exam start {% endblock %}
+
+<!-- no navbar and sidebar -->
+{% block navbar %}{% endblock %}
+{% block sidebar %}{% endblock %}
+
+
+<!--
+    page code must be start in block content
+    inside block content
+-->
+{% block content %}
+<div class="row">
+    <!-- exam instructions-->
+    <div class="col-md-12" id="exam-instructions">
+        <div class="panel panel-flat">
+            <div class="panel-heading">
+                <h6 class="panel-title">User validation</h6>
+                <div class="heading-elements">
+                    <ul class="icons-list">
+                        <li><a data-action="collapse"></a></li>
+                        <li><a data-action="reload"></a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="panel-body">
+                <div class="col-md-12 hidden">
+                    <div id="camera">
+                    </div>
+                    <img id="video-snapshot"></img>
+                </div>
+                <div class="col-md-12 result-box">
+                    <img id="result_photo"> </img>
+                </div>
+
+                <div class="valid-candidate hidden">
+                    <h3 class="text-green-800">You are valid candiate.</h3>
+                    <p>
+                        <span>Email</span>
+                        <span>:</span>
+                        <span>{{ user.email}}</span>
+                    </p>
+                    <p>
+                        <span>User-id</span>
+                        <span>:</span>
+                        <span>{{ user.id}}</span>
+                    </p>                    
+                    
+                    <p>
+                        <span>Username</span>
+                        <span>:</span>
+                        <span>{{ user.first_name}}&nbsp;{{ user.last_name}}</span>
+                    </p>
+
+                    <h6 class="text-green-800"> Now you can procced to exam </h6> 
+                    
+                    <a href="{% url 'candidate:exam_instructions' exam.id %}">
+                        <button type="button" class="btn btn-success btn-xs legitRipple mt-20"><i class="icon-pen position-left"></i> Proceed</button>
+                    </a>
+                </div>
+
+                <div class="in-valid-candidate hidden">
+                    <h3 class="text-danger">You are not a valid candiate.</h3>
+
+                    <a href="#">
+                        <button type="button" class="btn btn-default btn-xs legitRipple mt-20"><i class="icon-pen position-left"></i> Re-validate</button>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <!-- /exam instructions-->   
+</div>
+{% endblock %}
+
+
+<!-- ============================ -->
+<!--        page level scripts    -->
+<!-- =========================== -->
+{% block page_level_scripts %}
+<script>
+    $(function () {
+        /*change li active*/
+        /*add active class to li*/
+        $("#exam").addClass("active");
+    });
+
+    var exam_id = "{{ exam.id }}";
+    var csrf_token = '{{ csrf_token }}';
+    var validation_url = "{% url 'candidate:ajax_validate_user' %}";
+    // alert(validation_url)
+</script>
+
+<!-- Webcam.min.js -->
+<script src="{% static 'assets/js/plugins/webcam/webcam.js' %}?v=2.1"></script>
+
+<script src="{% static 'candidate/js/exam_validate_user.js' %}?ver=2.0" type="text/javascript"></script>
+
+{% endblock %}
+<!--       page level scripts    -->
+<!-- /=========================== -->

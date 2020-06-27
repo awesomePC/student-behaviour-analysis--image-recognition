@@ -36,7 +36,7 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 sentry_sdk.init(
-    dsn="https://74dd13493d6342be85d7f279e2fa6fbd@sentry.io/1866536",
+    dsn="https://8d26f88b68514b468461247a6c09c57b@o387239.ingest.sentry.io/5222221",
     integrations=[FlaskIntegration()]
 )
 
@@ -68,6 +68,7 @@ def get_face_count():
             )
             
             data["face_count"] = len(detected_faces)
+            data["detected_faces"] = detected_faces
 
             # indicate that the request was a success
             data["success"] = True
@@ -79,7 +80,7 @@ def get_face_count():
         data["reason"] = "Error .. only 'POST' method allowed"
 
     # return the data dictionary as a JSON response
-    return flask.jsonify(data)
+    return json.dumps(data, cls=helpers.MyEncoder)
 
 
 @app.route("/hightlight-faces", methods=["POST"])
@@ -212,7 +213,7 @@ def api_extract_faces_and_embeddings():
         data["reason"] = "Error .. only 'POST' method allowed"
         
     # return the data dictionary as a JSON response
-    return json.dumps(data, cls=helpers.JsonNumpyEncoder)
+    return json.dumps(data, cls=helpers.MyEncoder)
 
 
 @app.route("/compare-face-embedding", methods=["POST"])
@@ -237,7 +238,7 @@ def api_compare_face_embedding():
             np_realtime_face_embedding = np.frombuffer(str_realtime_embedding, dtype='float64')
 
             is_matched, probability, _, _ = verify_face_matching(
-                np_known_face_embedding, np_realtime_face_embedding
+                np_known_face_embedding, np_realtime_face_embedding, thresh=0.31
             )
             
             data["is_matched"] = is_matched
@@ -287,7 +288,7 @@ def api_match_known_face_embedding():
             for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
 
                 is_matched, probability, _, _ = verify_face_matching(
-                    np_known_face_embedding, realtime_face_embedding
+                    np_known_face_embedding, realtime_face_embedding, thresh=0.31
                 )
                 
                 result = {
@@ -312,7 +313,7 @@ def api_match_known_face_embedding():
         data["reason"] = "Error .. only 'POST' method allowed"
         
     # return the data dictionary as a JSON response
-    return json.dumps(data, cls=helpers.JsonNumpyEncoder)
+    return json.dumps(data, cls=helpers.MyEncoder)
 
 
 # if this is the main thread of execution first load the model and

@@ -6,23 +6,31 @@ from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import numpy as np
 
 from keras.models import load_model # loading model
-from mtcnn.mtcnn import MTCNN
+# from mtcnn.mtcnn import MTCNN
 
 import io
 import json
 
-import settings
+from settings import (
+    DETECTOR_NUMBER,
+    MODEL_DIR,
+    
+    facenet_model_file,
+    face_verification_model_file,
+)
 import helpers
 
+from detector import FaceDetectorModels, FaceDetector
 
-detector = None
+face_detector = None
 facenet_model = None
 face_verification_model = None
 
-
 def init_face_detector():
-    global detector
-    detector = MTCNN()
+    global face_detector
+    model_detector = FaceDetectorModels(DETECTOR_NUMBER)
+    face_detector = FaceDetector(model=model_detector, path=MODEL_DIR)
+    # face_detector = MTCNN()
     return True
 
 def load_models():
@@ -34,11 +42,11 @@ def load_models():
 
     # face embedding extractor model
     facenet_model = load_model(
-        settings.facenet_model_file, compile=False
+        facenet_model_file, compile=False
     )
 
     face_verification_model = load_model(
-        settings.face_verification_model_file, compile=False
+        face_verification_model_file, compile=False
     )
     return True
 
@@ -81,21 +89,23 @@ def detect_faces(image_array):
     
     Args:
         image_array (numpy array): Image pixels
-        detector (object): MTCNN face detector
+        face_detector (object): MTCNN face detector
     
     Returns:
         dict: Detected faces dictionary
     """
-    detected_faces = detector.detect_faces(image_array)
+    # detected_faces = face_detector.detect_faces(image_array)
+    detected_faces = face_detector.detect(image_array)
     return detected_faces
 
-def detect_extract_faces(image_array, required_size=(160, 160), convert_2_numpy=True):
+
+def extract_faces(image_array, detected_face_boxes, required_size=(160, 160), convert_2_numpy=True):
     """
     Extract faces from image
     
     Args:
-        image_array (array): Image pixels in numpy format
-        detector (object): face detector object
+        detected_face_boxes (list): detected face boxes
+        face_detector (object): face detector object
         required_size (tuple, optional): Final image resolution. Defaults to (160, 160).
         convert_2_numpy (bool, optional): convert pil face image to numpy. Defaults to True.
     
@@ -103,15 +113,12 @@ def detect_extract_faces(image_array, required_size=(160, 160), convert_2_numpy=
         tuple: If convert_2_numpy flag set to true then it returns list of faces in numpy format 
               otherwise it returns faces in pillow format
     """
-    detected_faces = detector.detect_faces(image_array)
-
     extracted_faces = []
 
-    for face in detected_faces:
+    for detected_face in detected_face_boxes:
         # extract the bounding box from the first face
-        x1, y1, width, height = face['box']
-        x1, y1 = abs(x1), abs(y1)
-        x2, y2 = x1 + width, y1 + height
+        x1, y1, x2, y2 = detected_face
+        # x1, y1 = abs(x1), abs(y1)
 
         # extract the face
         face_boundary = image_array[y1:y2, x1:x2]
@@ -124,7 +131,30 @@ def detect_extract_faces(image_array, required_size=(160, 160), convert_2_numpy=
         else:
             extracted_faces.append(face_image)
 
-    return (detected_faces, extracted_faces)
+    return (detected_face_boxes, extracted_faces)
+
+def detect_extract_faces(image_array, required_size=(160, 160), convert_2_numpy=True):
+    """
+    Detect and Extract faces from image
+    
+    Args:
+        image_array (array): Image pixels in numpy format
+        face_detector (object): face detector object
+        required_size (tuple, optional): Final image resolution. Defaults to (160, 160).
+        convert_2_numpy (bool, optional): convert pil face image to numpy. Defaults to True.
+    
+    Returns:
+        tuple: If convert_2_numpy flag set to true then it returns list of faces in numpy format 
+              otherwise it returns faces in pillow format
+    """
+    detected_face_boxes = face_detector.detect(image_array)
+
+    return extract_faces(
+        image_array,
+        detected_face_boxes, 
+        required_size=required_size, 
+        convert_2_numpy=convert_2_numpy,
+    )
 
 def extract_save_face(src, dest):
     """
@@ -200,7 +230,7 @@ def get_faces_and_embeddings(image_array):
     return (detected_faces, extracted_faces, face_embeddings)
 
 
-def verify_face_matching(known_embedding, real_time_embedding, thresh=0.28):
+def verify_face_matching(known_embedding, real_time_embedding, thresh=0.22):
     """
     Compare and check is known embeding match to real time embedding
     
@@ -248,9 +278,9 @@ def highlight_faces(pil_image, detected_faces, outline_color="red"):
     draw = ImageDraw.Draw(pil_image)
     # for each face, draw a rectangle based on coordinates
     for face in detected_faces:
-        x, y, width, height = face['box']
+        x, y, x2, y2 = face
         rect_start = (x, y)
-        rect_end = ((x + width), (y + height))
+        rect_end = (x2, y2)
         draw.rectangle((rect_start, rect_end), outline=outline_color)
     return pil_image
 
@@ -273,10 +303,12 @@ def highlight_recognized_faces(pil_image, recognized_faces, outline_color="red",
     for recognized_face in recognized_faces:
         name = recognized_face["name"]
         probability = recognized_face["probability"]
-
-        x, y, width, height = recognized_face['box']
+        if 'outline_color' in recognized_face:
+            outline_color = recognized_face.get("outline_color")
+            
+        x, y, x2, y2 = recognized_face['box']
         rect_start = (x, y)
-        rect_end = ((x + width), (y + height))
+        rect_end = (x2, y2)
         draw.rectangle(
             (rect_start, rect_end), outline=outline_color
         )

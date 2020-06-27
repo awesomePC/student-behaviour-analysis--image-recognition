@@ -2,82 +2,112 @@
 
 {% load static %}
 
-{% block title %} User validation before exam start {% endblock %}
+{% block title %} User validation before starting exam {% endblock %}
 
-<!-- no navbar and sidebar -->
-{% block navbar %}{% endblock %}
 {% block sidebar %}{% endblock %}
-
 
 <!--
     page code must be start in block content
     inside block content
 -->
 {% block content %}
-<div class="row">
-    <!-- exam instructions-->
-    <div class="col-md-12" id="exam-instructions">
-        <div class="panel panel-flat">
-            <div class="panel-heading">
-                <h6 class="panel-title">User validation</h6>
-                <div class="heading-elements">
-                    <ul class="icons-list">
-                        <li><a data-action="collapse"></a></li>
-                        <li><a data-action="reload"></a></li>
-                    </ul>
+    <div class="row" id="row-buttons">
+        <div class="col-md-10">
+            <!-- Basic legend -->
+            <div class="panel panel-flat">
+
+                <div class="panel-body">
+                    <fieldset>
+                        <div class="form-group">
+                            
+                            <div class="col-lg-2 hidden">
+                                <button id="btn_view_camera" type="button" class="btn btn-primary legitRipple">
+                                   View Camera<span class="legitRipple-ripple"></span>
+                                </button>
+                            </div>    
+
+                            <div class="col-lg-4">
+                                <button id="btn_capture_snapshot" type="button" class="btn btn-success legitRipple" data-loading-text="<i class='fa fa-spinner fa-spin '></i> Recognizing">
+                                    Capture Snapshot & Validate<span class="legitRipple-ripple"></span>
+                                </button>
+                            </div>                            
+                        
+                            <div class="col-lg-4">
+                                <button id="btn_reset" type="button" class="btn btn-warning legitRipple">
+                                   Reset<span class="legitRipple-ripple"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </fieldset>
+                
                 </div>
             </div>
+            <!-- /basic legend -->
+        </div>
+    </div>
 
-            <div class="panel-body">
-                <div class="col-md-12 hidden">
-                    <div id="camera">
+    <div class="row hidden" id="row-valid-candidate">
+        <div class="col-md-10">
+            <!-- Basic legend -->
+            <div class="panel panel-flat">
+
+                <div class="panel-body">
+
+                    <div class="valid-candidate">
+                        <h3 class="text-green-800">You are valid candiate.</h3>
+                        <p>
+                            <span>Email</span>
+                            <span>:</span>
+                            <span>{{ user.email}}</span>
+                        </p>
+                        <p>
+                            <span>User-id</span>
+                            <span>:</span>
+                            <span>{{ user.id}}</span>
+                        </p>                    
+                        
+                        <p>
+                            <span>Username</span>
+                            <span>:</span>
+                            <span>{{ user.first_name}}&nbsp;{{ user.last_name}}</span>
+                        </p>
+
+                        <h6 class="text-green-800"> Now you can procced to exam </h6> 
+                        
+                        <a href="{% url 'candidate:exam_instructions' exam.id %}">
+                            <button type="button" class="btn btn-success btn-xs legitRipple mt-20"><i class="icon-pen position-left"></i> Proceed</button>
+                        </a>
                     </div>
-                    <img id="video-snapshot"></img>
+
                 </div>
-                <div class="col-md-12 result-box">
-                    <img id="result_photo"> </img>
+            </div>
+            <!-- /basic legend -->
+        </div>
+    </div>
+
+    <div class="row" style="display:none;">
+        <div class="col-md-12">
+            <div class="panel panel-flat">
+                <div class="panel-body">
+                    <div id="my_camera"></div>
+                    <img id="img_camera" class="img-responsive hidden" alt="web camera image">
+
+                    <input type=button value="Take Snapshot" onClick="take_snapshot()">
                 </div>
-
-                <div class="valid-candidate hidden">
-                    <h3 class="text-green-800">You are valid candiate.</h3>
-                    <p>
-                        <span>Email</span>
-                        <span>:</span>
-                        <span>{{ user.email}}</span>
-                    </p>
-                    <p>
-                        <span>User-id</span>
-                        <span>:</span>
-                        <span>{{ user.id}}</span>
-                    </p>                    
-                    
-                    <p>
-                        <span>Username</span>
-                        <span>:</span>
-                        <span>{{ user.first_name}}&nbsp;{{ user.last_name}}</span>
-                    </p>
-
-                    <h6 class="text-green-800"> Now you can procced to exam </h6> 
-                    
-                    <a href="{% url 'candidate:exam_instructions' exam.id %}">
-                        <button type="button" class="btn btn-success btn-xs legitRipple mt-20"><i class="icon-pen position-left"></i> Proceed</button>
-                    </a>
-                </div>
-
-                <div class="in-valid-candidate hidden">
-                    <h3 class="text-danger">You are not a valid candiate.</h3>
-
-                    <a href="#">
-                        <button type="button" class="btn btn-default btn-xs legitRipple mt-20"><i class="icon-pen position-left"></i> Re-validate</button>
-                    </a>
-                </div>
-
             </div>
         </div>
-
     </div>
-    <!-- /exam instructions-->   
-</div>
+
+    <div class="row" id="div-canvas">
+        <div class="col-md-12">
+            <div class="panel panel-flat">
+                <div class="panel-body">
+                    <canvas id="canvas"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+          
 {% endblock %}
 
 
@@ -85,23 +115,256 @@
 <!--        page level scripts    -->
 <!-- =========================== -->
 {% block page_level_scripts %}
-<script>
-    $(function () {
-        /*change li active*/
-        /*add active class to li*/
-        $("#exam").addClass("active");
-    });
 
-    var exam_id = "{{ exam.id }}";
-    var csrf_token = '{{ csrf_token }}';
-    var validation_url = "{% url 'candidate:ajax_validate_user' %}";
-    // alert(validation_url)
-</script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/selects/select2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/plugins/forms/styling/uniform.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'assets/js/pages/form_layouts.js' %}"></script>
+
+<!-- CSS -->
+<style>
+#my_camera{
+ width: auto;
+ height: auto;
+ margin: auto;
+ border: 1px solid black;
+}
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script type="text/javascript" src="{% static 'assets/js/core/libraries/jasny_bootstrap.min.js' %}?v=1.0"></script>
 
 <!-- Webcam.min.js -->
-<script src="{% static 'assets/js/plugins/webcam/webcam.js' %}?v=2.1"></script>
+<script src="{% static 'assets/js/webcam.min.js' %}"></script>
 
-<script src="{% static 'candidate/js/exam_validate_user.js' %}?ver=2.0" type="text/javascript"></script>
+
+<script defer src="{% static 'assets/js/face-detection/face-api.min.js' %}"></script>
+
+<!-- Configure a few settings and attach camera -->
+<script language="JavaScript">
+
+// global variables
+var url = "";
+
+// webcam width and height
+var width  = 640;
+var height = 480;
+
+var is_webcam_live = false;
+var is_show_camera_output = false;
+
+
+$(document).ready(function(){
+
+    Webcam.set({
+        width: width,
+        height: height,
+        image_format: 'jpeg',
+        jpeg_quality: 90,
+        // flip_horiz: true,
+    });
+    Webcam.attach( '#my_camera' );
+
+
+    $(document).on("click", "#btn_view_camera", function(){
+        console.log("btn_auto_capture click event triggered..");
+        is_show_camera_output = true;
+    });
+
+    $(document).on("click", "#btn_capture_snapshot", function(){
+        console.log("btn_capture_snapshot click event triggered..");
+
+        // reset after call
+        is_show_camera_output = false;
+
+        capture_snapshot_recognize();
+    });
+
+    /** btn btn_capture_snapshot show loading */
+    $(document).on("click", "#btn_capture_snapshot", function(){
+        console.log("#btn_capture_snapshot click event triggered.")
+        var $this = $(this);
+        $this.button('loading'); // show processing icon on submit
+
+        // make sure to reset button after processing end
+    });
+
+    $(document).on("click", "#btn_reset", function(){
+        console.log("btn_reset click event triggered..");
+        is_show_camera_output = true;
+
+        // reset recognition button
+        $('#btn_capture_snapshot').button('reset');
+    });
+
+});
+
+
+Webcam.on( 'load', function() {
+    // library is loaded
+    console.log("Webcam loaded");
+});
+
+Webcam.on( 'live', function() {
+    // camera is live, showing preview image
+    console.info("Webcam live");
+    is_webcam_live = true;
+
+    /*** set inside loop **/
+    setInterval(function(){
+        if (is_show_camera_output){
+            capture_show_camera();
+        }
+    }, 100);
+
+
+    models_path = "{% static 'assets/js/face-detection/models' %}"
+    Promise.all([
+        faceapi.nets.tinyFaceDetector.loadFromUri(models_path),
+        // faceapi.nets.ssdMobilenetv1.loadFromUri(models_path)
+        // faceapi.nets.faceLandmark68Net.loadFromUri(models_path),
+    ]).then(function(){
+        is_show_camera_output = true;
+        console.log("setting is_show_camera_output flag true to capture camera input")
+    })
+
+    setTimeout(function(){
+        const input = document.getElementById('img_camera')
+        var canvas = document.getElementById('canvas');
+        console.log(canvas)
+
+        const displaySize = { width: width, height: height }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        var context = canvas.getContext('2d');
+
+        setInterval(async () => {
+            if (is_show_camera_output){
+                context.drawImage(input, 0, 0);
+
+                faceapi.matchDimensions(context, displaySize)
+
+                const detections = await faceapi.detectAllFaces(input, new faceapi.TinyFaceDetectorOptions()) // .withFaceLandmarks().withFaceExpressions()
+                //const detections = await faceapi.detectAllFaces(input, new faceapi.SsdMobilenetv1Options())
+
+                const resizedDetections = faceapi.resizeResults(detections, displaySize)
+                faceapi.draw.drawDetections(context, resizedDetections)
+            }
+        }, 100)
+    });
+
+} );
+
+Webcam.on( 'error', function(err) {
+    // an error occurred (see 'err')
+} );
+
+function capture_show_camera() {
+    // take snapshot and get image data
+    Webcam.snap( function(data_uri) {
+        // display results in page
+         $("#img_camera").attr("src", data_uri);
+
+    });
+}
+
+function capture_snapshot_recognize(){
+    // take snapshot and get image data
+    Webcam.snap( function(data_uri) {
+        realtime_recognize_photo(data_uri);
+    });
+}
+
+function realtime_recognize_photo(data_uri){
+
+    /*
+    var form_data = new FormData();
+    form_data.append("photo", data_uri); // image
+    form_data.append("csrfmiddlewaretoken", '{{ csrf_token }}');
+
+    $.ajax({
+        type: "POST",
+        url: "{% url 'candidate:ajax_validate_user' %}",
+        data: form_data,
+        processData: false,
+        contentType: false,
+    })
+    .done(function (data) {  
+        // success function 
+        console.log("Photo Saved Successfully!");
+        console.log(data);
+        
+            // $("#img_camera").attr("src", data.hightlighted_encoded_image);
+            var canvas = document.getElementById('canvas');
+            var context = canvas.getContext('2d');
+            var img = new Image();
+
+            img.onload = function() {
+                // context.drawImage(this, 0, 0, canvas.width, canvas.height);
+                context.drawImage(this, 0, 0);
+            }
+            img.src = data.hightlighted_encoded_image  // base-64 data
+
+            //reset button
+            $('#btn_capture_snapshot').button('reset');
+
+            if ('message' in data){
+                if ('text' in data.message){
+                new PNotify({
+                    title: data.message.title,
+                    text: data.message.text,
+                    addclass: 'alert alert-styled-left alert-arrow-left',
+                    type: data.message.type
+                })
+                }
+            }
+    })
+    .fail(function(xhr, status, error){
+        // report that there is problem
+        var err = eval("(" + xhr.responseText + ")");
+        console.error(err);
+    });
+    */
+
+    var validation_url = "{% url 'candidate:ajax_validate_user' %}";
+
+    Webcam.upload( data_uri, validation_url, function(code, data) {
+      console.log(data);
+
+
+      var obj_data = JSON.parse(data)
+
+      if(code == 200){
+        if(obj_data.is_authorized_candidate_present == true)
+        {
+          // proceed to exam
+          $("#row-buttons").addClass("hidden");
+          $("#div-canvas").addClass("hidden");
+
+          $("#row-valid-candidate").removeClass("hidden");
+        }
+        else
+        {
+          new PNotify({
+              title: "Warning",
+              text: obj_data.message,
+              addclass: 'alert alert-styled-left alert-arrow-left',
+              type: "warning"
+          });
+           
+           // reset recognition button
+           $('#btn_capture_snapshot').button('reset');
+        }
+      }
+      else
+      {
+        console.log(code);
+        console.log("Error ... Problem while uploading file.")
+      }
+    });  
+}
+</script>
 
 {% endblock %}
 <!--       page level scripts    -->

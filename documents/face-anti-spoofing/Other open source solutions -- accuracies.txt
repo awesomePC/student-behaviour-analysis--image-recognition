@@ -1,0 +1,21 @@
+
+
+I had tested 15+ open source face anti spoofing repositories. I have cross checked their model accuracies. And top 5 other repository accuracies:
+
+1) VGG Model -- https://github.com/Oreobird/Face-Anti-Spoofing 
+	Accuracy: 95.25%
+
+2) ExtraTreesClassifier -- https://github.com/ee09115/spoofing_detection
+	Accuracy -- 80 %
+
+3) https://github.com/JinghuiZhou/awesome_face_antispoofing
+   VGG-19      -- 90.13
+   Res-18      -- 98.13
+   InceptionV3 -- 81.78
+   DetNet	   -- 90.72
+
+4) https://github.com/AhmetHamzaEmra/Intelegent_Lock
+   CNN -- 95%
+
+5) https://github.com/FaceGg/Face-Anti-Spoofing-RGB
+   XCEPTION -- 92 %
