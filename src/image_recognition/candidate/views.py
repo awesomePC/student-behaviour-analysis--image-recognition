@@ -15,6 +15,8 @@ from django.core.files import File
 
 from django.conf import settings
 
+from django.utils import timezone
+
 from lazysignup.decorators import allow_lazy_user
 
 import random
@@ -324,21 +326,30 @@ def exam_instructions(request, exam_id):
     return render(request, 'candidate/exam/instructions.html', context)
 
 def exam(request, exam_id):
-    candidate = ExamCandidate.objects.get(
+    candi_exam = ExamCandidate.objects.get(
         candidate=request.user,
         exam__id=exam_id
     )
 
     # if exam already submitted
-    if candidate.is_completed == True:
+    if candi_exam.is_completed == True:
         return redirect(reverse("candidate:exam_list"))
 
+    if candi_exam.is_started == False:
+        candi_exam.is_started = True
+        candi_exam.start_time = timezone.localtime(timezone.now())
+        candi_exam.save()
+    else:
+        candi_exam.is_restarted = True
+        candi_exam.restart_time = timezone.localtime(timezone.now())
+        candi_exam.save()
+    
     questions = ExamQuestion.objects.filter(
         exam__id=exam_id
     )
 
     context = {
-        "candidate": candidate,
+        "candidate": candi_exam,
         "questions": questions,
     }
     return render(request, 'candidate/exam/exam.html', context)
@@ -425,6 +436,7 @@ def submit_exam(request):
             candidate=request.user,
         )
         exam_candidate.is_completed = True
+        exam_candidate.end_time = timezone.localtime(timezone.now())
         exam_candidate.save()
 
         notify.send(
@@ -590,6 +602,8 @@ def ajax_validate_user(request):
     # exam = get_object_or_404(Exam, pk=self.kwargs["pk"])
     photo_data = request.FILES.get('webcam')
 
+    message = ""
+    
     try:
         # save photo
         obj_candidate_validation = ExamCandidateValidation.objects.create(
@@ -640,6 +654,7 @@ def ajax_validate_user(request):
                     # temporarily set to unknown
                     name = "unknown"
                     probability = random.uniform(0.6, 0.8)
+                    message = "Candidate not present. Unknown person detected."
 
                 recognized_persons.append({
                     "name": name,
@@ -707,7 +722,7 @@ def ajax_validate_user(request):
 
     except Exception as e:
         print(trace_error())
-        return JsonResponse({'success': 0})
+        return JsonResponse({'success': False, 'message': str(e)})
 
 
 def check_proctor__superadmin(detected_persons):
@@ -874,6 +889,34 @@ def stop_exam(request):
     exam = Exam.objects.get(
         id=exam_id
     )
+
+    candi_exam = ExamCandidate.objects.get(
+        candidate=request.user,
+        exam__id=exam_id
+    )
+    
+    prev_exam_remaining_time = candi_exam.exam_remaining_time
+
+    # get exam last start time
+    if candi_exam.is_restarted == True:
+        start_time = candi_exam.restart_time
+    else:
+        start_time = candi_exam.start_time
+    
+    now = timezone.localtime(timezone.now())
+
+    # recalculate remaining time
+    # first_ check-the-difference-in-seconds-between-two-dates
+    current_exam_seconds = (now-start_time).total_seconds()
+
+    # substract current exam seconds from previous
+    if current_exam_seconds > 0:
+        new_exam_remaining_time = prev_exam_remaining_time - int(current_exam_seconds)
+        candi_exam.exam_remaining_time = new_exam_remaining_time
+        candi_exam.save()
+    else:
+        print(f"current exam run seconds must be greater than zero")
+
 
     verb = f'Exam "{exam.name}" stopped due to suspicious activity.\nReason - ' + reason
     

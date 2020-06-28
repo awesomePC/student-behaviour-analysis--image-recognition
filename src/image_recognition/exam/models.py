@@ -81,6 +81,7 @@ class ExamCandidate(models.Model):
         help_text="Exam remaining time in seconds",
         blank=True, null=True
     )
+    is_started = models.BooleanField(default=False)
     start_time = models.DateTimeField(
         null=True, blank=True, auto_now=False
     )
@@ -89,6 +90,10 @@ class ExamCandidate(models.Model):
     )
     is_completed = models.BooleanField(default=False)
     is_restarted = models.BooleanField(default=False)
+    restart_time = models.DateTimeField(
+        null=True, blank=True, auto_now=False,
+        help_text="Last restart time."
+    )
     restarted_info = ArrayField(
         models.CharField(max_length=200),
         blank=True,
