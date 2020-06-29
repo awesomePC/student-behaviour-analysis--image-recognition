@@ -8,6 +8,8 @@ django-lazysignup
 django-widget-tweaks
 django_cleanup
 
+django-extensions
+
 celery==4.3.0
 django-celery-beat==1.5.0
 redis

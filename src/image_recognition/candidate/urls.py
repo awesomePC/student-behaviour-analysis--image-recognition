@@ -37,4 +37,7 @@ urlpatterns = [
     path('stop_exam/', views.stop_exam, name="stop_exam"),
     path('stop_exam_reason/<int:exam_id>/', views.stop_exam_reason, name="stop_exam_reason"),
 
+    # 
+    path('get_candidate_exam_que_pallet/', views.get_candidate_exam_que_pallet, name="get_candidate_exam_que_pallet"),
+    path('get_que_selected_answers/', views.get_que_selected_answers, name="get_que_selected_answers"),
 ]

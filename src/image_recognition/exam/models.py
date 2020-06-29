@@ -225,6 +225,9 @@ class CandidateAnswer(models.Model):
         default=False,
         help_text="Marked question for review"
     )
+    overwrite_count = models.PositiveSmallIntegerField(default=0, blank=True)
+    # log overwrite time
+    # overwrite_info = 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -392,6 +392,13 @@ def save_candidate_answer(request):
         question=question
     )
 
+    if created:
+        pass
+    else:
+        # answer overwritten
+        exam_candidate.overwrite_count = exam_candidate.overwrite_count + 1
+        exam_candidate.save()
+
     if lst_sel_opt_values:
         lst_sel_opt_values = list(map(int, lst_sel_opt_values))
 
@@ -962,3 +969,54 @@ def stop_exam_reason(request, exam_id):
     template_name = 'candidate/exam/stop_reason.html'
     return render(request, template_name, context)
 
+
+def get_candidate_exam_que_pallet(request):
+    """
+    get candidate exam question pallet
+    """
+    exam_id =  int(request.GET.get('exam_id'))
+
+    # get exam quesion id and sequence number
+    exam_questions = ExamQuestion.objects.filter(exam__id=exam_id).values("id", "sequence").order_by("sequence")
+    
+    data = [] # candidate question pallet
+    for exam_question in exam_questions:
+        que_id = exam_question["id"]
+        que_sequence = exam_question["sequence"]
+
+        cnt = CandidateAnswer.objects.filter(
+            candidate__candidate__id=request.user.id, question__id=que_id
+        ).count()
+
+        if cnt > 0:
+            is_answered = True
+        else:
+            is_answered = False
+
+        data.append({
+            "que_id": que_id,
+            "que_sequence": que_sequence,
+            "is_answered": is_answered,
+        })
+
+    return JsonResponse(data, safe=False)
+
+
+def get_que_selected_answers(request):
+    """
+    Get exam question answers selected by candidate
+    """
+    que_id =  int(request.GET.get('que_id'))
+
+    candidate_selected_answer = CandidateAnswer.objects.filter(
+        candidate__candidate__id=request.user.id,  # 112
+        question__id=que_id
+    ).values("selected_option").first()
+
+    data = {}
+    if candidate_selected_answer:
+        data["selected_option"] = candidate_selected_answer["selected_option"]
+    else:
+        data["selected_option"] = []
+
+    return JsonResponse(data, safe=False)

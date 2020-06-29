@@ -110,10 +110,7 @@
                             
                             <div class="col-md-12 mt-20 col-border-grey">
                                 <div id="question_pallete">
-                                    <span class="nbadge">1</span>
-                                    <span class="nbadge">2</span>
-                                    <span class="nbadge">3</span>
-                                    <span class="nbadge">44</span>
+                                    <!--<span class="nbadge">1</span>-->
                                 </div>
                             </div>
 
@@ -207,6 +204,11 @@
     border: 2px grey solid;
     letter-spacing: 1px;
     cursor: pointer;
+}
+
+.bg_light_green
+{
+    background-color: #24ff5dad;
 }
 </style>
 
@@ -305,6 +307,78 @@
             }
         });
     });
+</script>
+
+
+<script>
+function handleAjaxError(jqXHR, textStatus, errorThrown) {
+    if (jqXHR.status == 500) {
+        console.log("server error")
+    } 
+    else if (jqXHR.status == 404) {
+        console.log("url not found..")
+    }
+    else{
+        console.log(jqXHR)
+    }
+}
+
+function get_question_pallet(){
+    $.ajax({
+        url: "/candidate/get_candidate_exam_que_pallet/",
+        type: "GET",
+        data: {
+            exam_id : exam_id,
+        },
+        success: function(data){
+            console.log("get_question_pallet response");
+            console.log(data);
+            //console.log("setting top books fetched data to chart");
+
+            // iterate in array
+            data.forEach(function (item, index) {
+                console.log(item, index);
+
+                if (item.is_answered == true){
+                    bg_class = "bg_light_green"
+                }
+                else
+                {
+                    bg_class = ""
+                }
+
+                $("#question_pallete").append(
+                    `<span class="nbadge ${bg_class}"
+                        data-que-id="${item.que_id}"
+                        data-que-sequence="${item.que_sequence}"
+                        data-que-isanswered="${item.is_answered}"
+                        >
+                        ${item.que_sequence}
+                    </span>`
+                );
+            });
+        },
+        error: handleAjaxError
+    });
+}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    get_question_pallet();
+});
+
+// on pallet question click
+$(document).on( "click", "#question_pallete .nbadge", function() {
+  console.log("nbadge clicked.");
+
+  que_id = $(this).data("que-id");
+  que_sequence = $(this).data("que-sequence");
+  que_isanswered = $(this).data("que-isanswered");
+
+  // get question info defined in exam.js
+  get_question_info(que_sequence);
+});
 </script>
 
 {% endblock %}

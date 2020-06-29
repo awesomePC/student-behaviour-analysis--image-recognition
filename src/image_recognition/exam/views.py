@@ -52,13 +52,14 @@ def get_exam_record(exam_id):
     return exam
 
 
-def is_opt_selected(exam_id, user_id, question_id, option_id):
+def is_opt_selected(exam_id, user_id, question_id, option_sequence):
     """
     Is option selected by user or not
     
     Returns:
         Bool -- [description]
     """
+    # import pdb;pdb.set_trace()
     candidate_answer = CandidateAnswer.objects.filter(
         candidate__exam__id= exam_id,
         candidate__candidate__id=user_id,
@@ -66,8 +67,8 @@ def is_opt_selected(exam_id, user_id, question_id, option_id):
         is_answered=True,
     ).first()
     if candidate_answer:
-        selected_opt_list = candidate_answer.selected_option.split(",")
-        if option_id in selected_opt_list:
+        selected_opt_list = candidate_answer.selected_option
+        if option_sequence in selected_opt_list:
             return True
         else:
             return False
@@ -170,7 +171,7 @@ def get_question_info(request):
                 exam_id=question.exam.id,
                 user_id=request.user.id,
                 question_id=question.id,
-                option_id=option.id
+                option_sequence=option.sequence
             )
 
             options_data.append({

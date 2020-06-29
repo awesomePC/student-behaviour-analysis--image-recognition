@@ -1,10 +1,4 @@
 
-$(document).ready(function() {
-
-// set inside exam.html as global value
-// var exam_id = parseInt("{{ candidate.exam.id }}");
-// var exam_id = 1;
-
 // question id from table
 var current_question_id = null;
 // question sequence number
@@ -14,13 +8,13 @@ var prev_question_index = null;
 var question = null;
 var is_continue_exam = true;
 
-var ele_question_title = $("#question-title").get(0)
-var ele_question_number =$("#question-number").get(0)
-var ele_question_options = $("#question-options").get(0)
 
 function handle_question_info(data)
 {
     // debugger;
+    var ele_question_title = $("#question-title").get(0)
+    var ele_question_number =$("#question-number").get(0)
+    var ele_question_options = $("#question-options").get(0)
 
     if (data.success == true){
         question = data.question;
@@ -160,7 +154,7 @@ function get_next_question_index(param_data)
         {
             next_question_index = data.next_question_index
 
-            get_question_info(question_id=next_question_index)
+            get_question_info(question_sequence=next_question_index)
         }
         else
         {
@@ -176,6 +170,9 @@ function get_next_question_index(param_data)
 
 function save_and_next()
 {
+    var ele_question_number =$("#question-number").get(0)
+    var ele_question_options = $("#question-options").get(0)
+    
     current_question_index = parseInt($(ele_question_number).text())
 
     var arr_sel_opt_values = [];
@@ -291,13 +288,15 @@ $(document).on("click", "#submit-exam", function(){
     submit_exam()
 });
 
-// ------------------------------------------------------
-// run as default 
-var param_data = {
-    "exam_id": exam_id
-}
-get_next_question_index(
-    param_data
-)
+
+$(document).ready(function() {
+    // ------------------------------------------------------
+    // run as default 
+    var param_data = {
+        "exam_id": exam_id
+    }
+    get_next_question_index(
+        param_data
+    )
 
 });
