@@ -121,14 +121,14 @@
                                         <div class="panel-body">
                                             <div id="conclusion">
 
-                                                {% if suspicious_cnt %}
+                                                {% if is_suspicious %}
                                                     <h3> 
                                                         <span> Activity: </span>
                                                         <span class="text-danger"> Suspicious </span>
                                                     </h3>
                                                     <p> 
-                                                        <span> Suspicious Activity Count: </span>
-                                                        <span> {{ suspicious_cnt }} </span>
+                                                        <span> Suspicious Activity Percentage: </span>
+                                                        <span> {{ suspicious_per }}% </span>
                                                     </p>
                                                 {% else %}
                                                     <h3> 

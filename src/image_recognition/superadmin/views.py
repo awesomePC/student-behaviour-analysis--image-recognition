@@ -356,13 +356,25 @@ class CandidateAnalysis(View):
             user__id=candidate_id, exam__id=exam_id
         ).order_by('-created_at')
 
-        suspicious_cnt, normal_cnt = 0, 0
+        suspicious_cnt, normal_cnt, total_cnt = 0, 0, 0
 
         for idx, candidate_photo in enumerate(candidate_photos):
+            total_cnt += 1
             if candidate_photo.is_suspicious:
                 suspicious_cnt = suspicious_cnt + 1
             else:
                 normal_cnt = normal_cnt + 1
+
+        if total_cnt > 0:
+            suspicious_per = round((suspicious_cnt *100) / total_cnt, 2)
+        else:
+            suspicious_per = 0
+
+        threshold = 4
+        if suspicious_per > threshold:
+            is_suspicious = True
+        else:
+            is_suspicious = False
 
         answered = 0
         not_visited = 0
@@ -375,6 +387,8 @@ class CandidateAnalysis(View):
             "candidate_id": candidate_id,
             "exam_id": exam_id,
             "suspicious_cnt": suspicious_cnt,
+            "suspicious_per": suspicious_per,
+            "is_suspicious": is_suspicious,
             "normal_cnt": normal_cnt,
 
             "answered": answer_report.get("answered"),
@@ -383,7 +397,6 @@ class CandidateAnalysis(View):
             "total_score": answer_report.get("total_score"),
             "correct_answers": answer_report.get("correct_answers"),
         }
-        # print(context)
         template_name = 'superadmin/analysis/candidate_analysis.html'
         return render(request, template_name, context)
 
@@ -808,4 +821,5 @@ class OverAllSuspiciousActivity(View):
             "y": normal_cnt,
             "color": "rgba(49, 183, 54, 0.72)"
         }]
+        print(f"suspicious activity graph data: {response}")
         return JsonResponse(response, safe=False)
