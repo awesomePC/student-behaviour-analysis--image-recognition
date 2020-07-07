@@ -172,7 +172,7 @@ function save_and_next()
 {
     var ele_question_number =$("#question-number").get(0)
     var ele_question_options = $("#question-options").get(0)
-    
+
     current_question_index = parseInt($(ele_question_number).text())
 
     var arr_sel_opt_values = [];
@@ -193,7 +193,7 @@ function save_and_next()
             }
             else
             {
-                console.log("Error .. Pushing value in array .. the value is not numric")
+                console.log("Error .. Pushing value in array .. the value is not numeric")
                 console.log(selected_value)
             }
         }
@@ -205,7 +205,8 @@ function save_and_next()
 
     console.log("arr_sel_opt_values :", arr_sel_opt_values)
     // alert(arr_sel_opt_values)
-    if (arr_sel_opt_values){
+    
+    if (typeof arr_sel_opt_values !== 'undefined' && arr_sel_opt_values.length > 0) {
 
         // str_selected_options = arr_sel_opt_values.toString()
 
@@ -231,6 +232,9 @@ function save_and_next()
             get_next_question_index(
                 param_data
             )
+
+            // Mark question pallet number as saved // add green bg
+            $("#question_pallete").find(`span[data-que-sequence='${current_question_index}']`).addClass("bg_light_green");
     
         }).fail(function(jqXHR, textStatus, errorThrown) {
             // If fail
@@ -239,7 +243,11 @@ function save_and_next()
     }
     else
     {
-
+        // get next question without saving
+        var ele_question_number =$("#question-number").get(0);
+        current_question_index = parseInt($(ele_question_number).text());
+    
+        get_question_info(current_question_index + 1);
     }
 }
 
@@ -276,6 +284,14 @@ $(document).on("click", "#clear-response", function(){
     });
 });
 
+
+$(document).on("click", "#next", function(){
+    var ele_question_number =$("#question-number").get(0);
+    current_question_index = parseInt($(ele_question_number).text());
+
+    get_question_info(current_question_index + 1);
+});
+
 $(document).on("click", "#save-and-next", function(){
     save_and_next();
 
@@ -285,7 +301,7 @@ $(document).on("click", "#save-and-next", function(){
 });
 
 $(document).on("click", "#submit-exam", function(){
-    submit_exam()
+    submit_exam();
 });
 
 

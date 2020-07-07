@@ -6,7 +6,6 @@ from PIL import Image, ImageFont, ImageDraw, ImageEnhance
 import numpy as np
 
 from keras.models import load_model # loading model
-# from mtcnn.mtcnn import MTCNN
 
 import io
 import json
@@ -22,9 +21,13 @@ import helpers
 
 from detector import FaceDetectorModels, FaceDetector
 
+from keras_vggface.utils import preprocess_input
+from keras_vggface.vggface import VGGFace
+from scipy.spatial.distance import cosine
+
 face_detector = None
-facenet_model = None
-face_verification_model = None
+face_embedding_model = None
+# face_verification_model = None
 
 def init_face_detector():
     global face_detector
@@ -37,16 +40,13 @@ def load_models():
     """
     Load facenet and our own model
     """
-    global facenet_model
-    global face_verification_model
+    global face_embedding_model
 
-    # face embedding extractor model
-    facenet_model = load_model(
-        facenet_model_file, compile=False
-    )
-
-    face_verification_model = load_model(
-        face_verification_model_file, compile=False
+    # create a vggface model object
+    face_embedding_model = VGGFace(model='resnet50',
+        include_top=False,
+        input_shape=(224, 224, 3),
+        pooling='avg'
     )
     return True
 
@@ -99,14 +99,14 @@ def detect_faces(image_array):
     return detected_faces
 
 
-def extract_faces(image_array, detected_face_boxes, required_size=(160, 160), convert_2_numpy=True):
+def extract_faces(image_array, detected_face_boxes, required_size=(224, 224), convert_2_numpy=True):
     """
     Extract faces from image
     
     Args:
         detected_face_boxes (list): detected face boxes
         face_detector (object): face detector object
-        required_size (tuple, optional): Final image resolution. Defaults to (160, 160).
+        required_size (tuple, optional): Final image resolution. Defaults to (224, 224).
         convert_2_numpy (bool, optional): convert pil face image to numpy. Defaults to True.
     
     Returns:
@@ -133,14 +133,14 @@ def extract_faces(image_array, detected_face_boxes, required_size=(160, 160), co
 
     return (detected_face_boxes, extracted_faces)
 
-def detect_extract_faces(image_array, required_size=(160, 160), convert_2_numpy=True):
+def detect_extract_faces(image_array, required_size=(224, 224), convert_2_numpy=True):
     """
     Detect and Extract faces from image
     
     Args:
         image_array (array): Image pixels in numpy format
         face_detector (object): face detector object
-        required_size (tuple, optional): Final image resolution. Defaults to (160, 160).
+        required_size (tuple, optional): Final image resolution. Defaults to (224, 224).
         convert_2_numpy (bool, optional): convert pil face image to numpy. Defaults to True.
     
     Returns:
@@ -191,18 +191,25 @@ def get_embedding(face_pixels):
     Returns:
         array: one dimensional feature vector
     """
-    # scale pixel values
-    face_pixels = face_pixels.astype('float32')
-    # face_pixels.shape # (160, 160, 3)
-    # standardize pixel values across channels (global)
-    mean, std = face_pixels.mean(), face_pixels.std()
-    face_pixels = (face_pixels - mean) / std
-    # transform face into one sample
-    samples = np.expand_dims(face_pixels, axis=0)
-    # make prediction to get embedding
-    yhat = facenet_model.predict(samples)
-    # yhat[0].shape # (128,)
-    return yhat[0]
+    # # scale pixel values
+    # face_pixels = face_pixels.astype('float32')
+    # # face_pixels.shape # (224, 224, 3)
+    # # standardize pixel values across channels (global)
+    # mean, std = face_pixels.mean(), face_pixels.std()
+    # face_pixels = (face_pixels - mean) / std
+    # # transform face into one sample
+    # samples = np.expand_dims(face_pixels, axis=0)
+    # # make prediction to get embedding
+    # yhat = facenet_model.predict(samples)
+    # # yhat[0].shape # (128,)
+    # return yhat[0]
+
+    sample = np.asarray(face_pixels, 'float32')
+    # prepare the data for the model
+    sample = preprocess_input(sample, version=2)
+    sample = np.expand_dims(sample, axis=0)
+    # perform prediction
+    return face_embedding_model.predict(sample)[0]
 
 
 def get_faces_and_embeddings(image_array):
@@ -242,16 +249,18 @@ def verify_face_matching(known_embedding, real_time_embedding, thresh=0.22):
     Returns:
         tuple: tuple containing is_matched, probability, y_pred, distance
     """
-    # convert to input format
-    known_embedding_reshaped = known_embedding.reshape(1, 128, 1)
-    real_time_embedding_reshaped = real_time_embedding.reshape(1, 128, 1)
+    # # convert to input format
+    # known_embedding_reshaped = known_embedding.reshape(1, 128, 1)
+    # real_time_embedding_reshaped = real_time_embedding.reshape(1, 128, 1)
 
-    y_pred = face_verification_model.predict(
-        [known_embedding_reshaped, real_time_embedding_reshaped]
-    )
-    # print(f"y_pred : {y_pred}")
+    # y_pred = face_verification_model.predict(
+    #     [known_embedding_reshaped, real_time_embedding_reshaped]
+    # )
+    # # print(f"y_pred : {y_pred}")
 
-    distance = y_pred[0][0] # matching_score
+    # distance = y_pred[0][0] # matching_score
+
+    distance = cosine(known_embedding, real_time_embedding)
 
     probability = 1 - distance
 
@@ -260,7 +269,7 @@ def verify_face_matching(known_embedding, real_time_embedding, thresh=0.22):
     else:
         is_matched = False
     
-    return (is_matched, probability, y_pred, distance)
+    return (is_matched, probability, [], distance)
 
 
 def highlight_faces(pil_image, detected_faces, outline_color="red"):

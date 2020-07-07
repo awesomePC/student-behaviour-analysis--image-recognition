@@ -119,7 +119,7 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 col-border-grey text-center">
+                    <div class="col-md-3 col-border-grey text-center">
                         <button 
                             id="clear-response"
                             type="button"
@@ -127,8 +127,19 @@
                             <i class="icon-pen position-left"></i> 
                             Clear Response
                         </button>
-                    </div>                        
-                    <div class="col-md-4 col-border-grey text-center">
+                    </div>
+
+                    <div class="col-md-3 col-border-grey text-center">
+                        <button 
+                            id="next"
+                            type="button"
+                            class="btn btn-success legitRipple">
+                            <i class="icon-pen position-left"></i> 
+                            Next
+                        </button>
+                    </div>
+
+                    <div class="col-md-3 col-border-grey text-center">
                         <button 
                             id="save-and-next"
                             type="button"
@@ -138,7 +149,7 @@
                         </button>
                     </div>
 
-                    <div class="col-md-4 col-border-grey text-center">
+                    <div class="col-md-3 col-border-grey text-center">
                         <button 
                             id="submit-exam"
                             type="button"
@@ -226,6 +237,8 @@
 
     // global variables
     var stop_exam = false;
+    var is_capture_recognize_snap = true; // capture recognize snapshot
+
     var authenticity_status = [];
     var capture_image_time = parseInt("{{ candidate.exam.capture_image_time }}") * 1000; // convert seconds to milliseconds
     // alert(capture_image_time);
@@ -264,13 +277,13 @@
 
 
 <!-- Webcam.min.js -->
-<script src="{% static 'candidate/plugin/webcam/webcam.js' %}?v=2.2"></script>
-<script type="text/javascript" src="{% static 'candidate/js/capture_exam_live_photo.js' %}?v=2.0"></script>
+<script src="{% static 'candidate/plugin/webcam/webcam.js' %}?v=3.0"></script>
+<script type="text/javascript" src="{% static 'candidate/js/capture_exam_live_photo.js' %}?v=3.0"></script>
 
 
-<script type="text/javascript" src="{% static 'candidate/js/exam.js' %}?v=2.0"></script>
+<script type="text/javascript" src="{% static 'candidate/js/exam.js' %}?v=3.0"></script>
 
-<script src="{% static 'candidate/plugin/Simple-Timer/jquery.simple.timer.js' %}?v=2.0"></script>
+<script src="{% static 'candidate/plugin/Simple-Timer/jquery.simple.timer.js' %}?v=3.0"></script>
 <style>
   .timer div {
       float: left !important;

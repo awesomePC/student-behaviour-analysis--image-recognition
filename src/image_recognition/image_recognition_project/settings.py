@@ -254,6 +254,11 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # CELERY_SEND_TASK_ERROR_EMAILS = True
 # CELERY_WORKER_MAX_TASKS_PER_CHILD = 300
 
+# Django Debug Toolbar
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda r: False,  # False will Disable django-debug-toolbar when DEBUG = True
+}
+
 
 # import sentry_sdk
 # from sentry_sdk.integrations.django import DjangoIntegration

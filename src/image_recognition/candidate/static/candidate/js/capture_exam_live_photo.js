@@ -58,7 +58,7 @@ function handle_suspicious_activity(reason)
       setTimeout(function(){
         // similar behavior as an HTTP redirect
         window.location.replace(url_stop_exam_reason);
-      }, 2000);
+      }, 500);
   }
 
 }
@@ -74,6 +74,16 @@ var height = 480;     // This will be computed based on the input stream
 
 var base64image = null;
 
+// delay function
+var delay = ( function() {
+  var timer = 0;
+  return function(callback, ms) {
+      clearTimeout (timer);
+      timer = setTimeout(callback, ms);
+  };
+})();
+
+
   // Save Image
   /*
   The method takes 3 parameters –
@@ -82,6 +92,9 @@ var base64image = null;
   Action URL ( for handling the value and saving to the directory )
   Callback function ( For handling response )
   */
+
+
+
  function takeSaveRecognizeSnap(){
 
   // take snapshot and get image data
@@ -127,6 +140,7 @@ document.addEventListener("DOMContentLoaded", function() {
   Webcam.attach( '#camera' );
 
 
+  /*
   async function process_recognition()
   {
     await sleep(capture_image_time);
@@ -139,6 +153,7 @@ document.addEventListener("DOMContentLoaded", function() {
       await sleep(capture_image_time);
     }
   }
+  */
 
   /**
    *  Capture and send image to server 
@@ -151,7 +166,16 @@ document.addEventListener("DOMContentLoaded", function() {
     console.log("webcam started");
 
     // start processing
-    process_recognition();
+    // process_recognition();
+
+    while (is_capture_recognize_snap){
+      delay(function(){
+         console.log(`capturing and recognizing snap after ${capture_image_time}`)
+          // do stuff
+          takeSaveRecognizeSnap();
+      }, 100 ); // end delay
+    }
+
   });
 
   /**
