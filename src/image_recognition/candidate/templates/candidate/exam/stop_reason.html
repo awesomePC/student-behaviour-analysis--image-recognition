@@ -43,13 +43,13 @@
 
 <div class="panel-group panel-group-control panel-group-control-right content-group-lg" id="accordion-control-right">
     {% for exam_candidate_photo in exam_candidate_photos %}
+    {% if exam_candidate_photo.is_suspicious %}
     <div class="panel panel-white">
         <div class="panel-heading">
             <h6 class="panel-title">
                 <a data-toggle="collapse" data-parent="#accordion-control-right" href="#accordion-control-right-group{{forloop.counter}}">Activity #{{forloop.counter}}</a>
-                {% if exam_candidate_photo.is_suspicious %}
                 <span class="text-danger">suspicious</span>
-                {% endif %}
+                
             </h6>
             
         </div>
@@ -87,6 +87,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
     {% empty %}
     <p> No images found </p>
     {% endfor %}

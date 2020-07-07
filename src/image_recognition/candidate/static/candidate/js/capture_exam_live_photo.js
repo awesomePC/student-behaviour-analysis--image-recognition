@@ -64,25 +64,10 @@ function handle_suspicious_activity(reason)
 }
 
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-
 var width = 640;    // We will scale the photo width to this
 var height = 480;     // This will be computed based on the input stream
 
 var base64image = null;
-
-// delay function
-var delay = ( function() {
-  var timer = 0;
-  return function(callback, ms) {
-      clearTimeout (timer);
-      timer = setTimeout(callback, ms);
-  };
-})();
-
 
   // Save Image
   /*
@@ -139,22 +124,6 @@ document.addEventListener("DOMContentLoaded", function() {
   });
   Webcam.attach( '#camera' );
 
-
-  /*
-  async function process_recognition()
-  {
-    await sleep(capture_image_time);
-
-    // infinite loop
-    while (true) {
-      takeSaveRecognizeSnap();
-
-      console.log('Taking a break...');
-      await sleep(capture_image_time);
-    }
-  }
-  */
-
   /**
    *  Capture and send image to server 
    *  Recognize image
@@ -165,15 +134,11 @@ document.addEventListener("DOMContentLoaded", function() {
     // and user has allowed access
     console.log("webcam started");
 
-    // start processing
-    // process_recognition();
-
-    while (is_capture_recognize_snap){
-      delay(function(){
-         console.log(`capturing and recognizing snap after ${capture_image_time}`)
-          // do stuff
-          takeSaveRecognizeSnap();
-      }, 100 ); // end delay
+    if (is_capture_recognize_snap){
+      setInterval(function(){
+        console.log(`capturing and recognizing snap after ${capture_image_time}`);
+        takeSaveRecognizeSnap();
+      }, capture_image_time); // 5000
     }
 
   });
@@ -188,7 +153,8 @@ document.addEventListener("DOMContentLoaded", function() {
         // display results in page
         $("#live-img").attr("src", data_uri);
       });
-    }, 200);
+    }, 100);
+    
   });
   
 
