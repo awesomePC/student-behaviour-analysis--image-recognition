@@ -103,6 +103,43 @@
                                         </div>
                                     </div>
                                     
+                                    <div id="final-result-table" class="panel panel-flat border-top-info border-bottom-info mt-20">
+                                        <div class="panel-heading">
+                                            <h5 class="panel-title">
+                                                Overall Result<a class="heading-elements-toggle"><i class="icon-more"></i></a>
+                                            </h5>
+                                            <div class="heading-elements">
+                                                <ul class="icons-list">
+                                                    <li><a data-action="collapse"></a></li>
+                                                    <li><a data-action="reload"></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div class="panel-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-framed">
+                                                    <thead>
+                                                        <tr>
+                                                            <th></th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!--
+                                                        <tr>
+                                                            <td>Correct answer</td>
+                                                            <td>2</td>
+                                                            <td>1</td>
+                                                            <td>5</td>
+                                                        </tr>
+                                                        -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
                                     <div class="panel panel-flat border-top-info border-bottom-info mt-20">
                                         <div class="panel-heading">
                                             <h5 class="panel-title">Overall Suspicious activity</h5>
@@ -204,6 +241,13 @@
     });
 </script>
 
+<script>
+  // global variables
+  var data_answer_correctness = undefined;
+  var data_answer_solving_speed = undefined;
+
+</script>
+
 <script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/interactions.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'assets/js/core/libraries/jquery_ui/touch.min.js' %}"></script>
 
@@ -298,7 +342,7 @@
         $.getJSON(url,  function(data) {
             console.log(data);
             options.series[0].data = data;  // set as first element
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
         });
     
@@ -380,12 +424,12 @@
             options.series = data.emotions_overtime;
             options.xAxis.categories = data.emotions_list
 
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
             */
             console.log(data);
             options.series[0].data = data;  // set as first element
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
         });
     
@@ -555,18 +599,60 @@
         var url = `/superadmin/emotion/answer/correctness/?candidate_id={{ candidate_id }}&exam_id={{exam_id}}`;
 
         $.getJSON(url,  function(data) {
+            console.log("answer correctness graph data");
             console.log(data);
             // debugger
             options.series = data.emotions_overtime;
             options.xAxis.categories = data.emotions_list
 
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
+
+
+            // also draw overall result in table format
+            data_answer_correctness = data;
+            setTimeout(function(){ 
+                render_final_result_table();
+            }, 2000);
         });
     
     });
 </script>
 
+
+<script type="text/javascript">
+function render_final_result_table(){
+    // debugger;
+
+    // 1. Answer correctness over time
+    $.each(data_answer_correctness.emotions_list, function( index, value ) {
+        //console.log( index + ": " + value );
+        $("#final-result-table table thead tr").append(`<th>${value}</th>`)
+    });
+
+    // emotions
+    var arr_emotions_overtime = data_answer_correctness.emotions_overtime;
+    $.each(arr_emotions_overtime, function( index, emo_data ) {
+        label = emo_data.name; // i.e. data_answer_correctness.emotions_overtime[0].name;
+
+        var row = $(`<tr><td>${label}</td></tr>`);
+
+        $.each(emo_data.data, function( index, value ) {
+            $(row).append(`<td>${value}</td>`);
+        });
+
+        $("#final-result-table table tbody").append(row);
+    });
+
+
+    // 2. overall answer solving speed
+    var row = $(`<tr><td>Solving speed</td></tr>`);
+    $.each(data_answer_solving_speed, function( index, speed_data ) {
+        $(row).append(`<td>${speed_data.y}</td>`);
+    });
+    $("#final-result-table table tbody").append(row);
+}
+</script>
 
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
@@ -656,8 +742,12 @@
         $.getJSON(url,  function(data) {
             console.log(data);
             options.series[0].data = data;  // set as first element
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
+
+            // also draw overall result in table format
+            // set data in global var
+            data_answer_solving_speed = data;
         });
     });
 </script>
@@ -776,7 +866,7 @@
             console.log(data);
 
             options.series[0].data = data;  // set as first element
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
         });
     });
@@ -890,7 +980,7 @@
         $.getJSON(url,  function(data) {
             console.log(data);
             // options.series[0].data = data;  // set as first element
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
         });
     });
@@ -938,7 +1028,7 @@
         $.getJSON(url,  function(data) {
             console.log(data);
             options.series[0].data = data;  // set as first element
-            console.log(options)
+            // console.log(options)
             var chart = new Highcharts.Chart(options);
         });
     
