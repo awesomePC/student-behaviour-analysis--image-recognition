@@ -478,7 +478,7 @@ class EmotionTimelineData(View):
                         "center": "left" if (idx % 2 != 0) else "right" # position
                     })
 
-        print(emotions_overtime)
+        # print(emotions_overtime)
 
         return JsonResponse(emotions_overtime, safe=False)
 
@@ -618,7 +618,7 @@ class AnswerCorrectnessOverEmotion(View):
         lst_answers_with_emotions = CandidateAnswerNearestEmotion.candidate_answer_last_emotion(
             exam_id, candidate_id, lst_answers
         )
-        print(f"lst_answers_with_emotions : {lst_answers_with_emotions}")
+        # print(f"lst_answers_with_emotions : {lst_answers_with_emotions}")
         
         # emotions_overtime = lst_answers_with_emotions
 
@@ -746,21 +746,33 @@ class AnswerOverwritingEmotion(View):
             candidate__id=candidate_id,
         )
 
-        emotions_list = EmotionClasses._get_labels_list()
+        # emotions_list = EmotionClasses._get_labels_list()
 
-        # init
-        emotion_dict = { key: 0 for key in emotions_list }
+        # # init
+        # emotion_dict = { key: 0 for key in emotions_list }
 
-        response = []
-        for key, value in emotion_dict.items():
-            response.append({
-                "name": key,
-                "y": value
-            })
+        # response = []
+        # for key, value in emotion_dict.items():
+        #     response.append({
+        #         "name": key,
+        #         "y": value
+        #     })
 
-        response = EmotionClasses().add_colors(response)
+        # response = EmotionClasses().add_colors(response)
 
-        return JsonResponse(response, safe=False)
+        # CandidateAnswer.objects.filter(candidate=exam_candidate).order_by('question__sequence')
+
+        queryset = CandidateAnswer.objects.filter(candidate=exam_candidate).values("question__sequence","overwrite_count").order_by('question__sequence')
+
+        data = list(queryset)
+
+        # rename dict keys as per hicharts requirements
+        # map question__sequence -> name & overwrite_count -> y
+        for d in data:
+            d['name'] = d.pop('question__sequence')
+            d['y'] = d.pop('overwrite_count')
+            
+        return JsonResponse(data, safe=False)
 
 
 class OverAllSuspiciousActivity(View):
