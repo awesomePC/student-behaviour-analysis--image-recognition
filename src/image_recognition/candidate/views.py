@@ -818,7 +818,10 @@ def save_recognize_exam_photo(request, exam_id):
             if is_matched:
                 is_authorized_candidate_present = True
                 idx_candidate_face_embedding = idx
-
+                
+                # save extracted face in db
+                exam_candidate_data.np_face = realtime_extracted_faces[idx]
+                exam_candidate_data.save()
             else:
                 is_second_person_suspicious = check_proctor__superadmin(realtime_detected_faces)
 
@@ -837,7 +840,7 @@ def save_recognize_exam_photo(request, exam_id):
 
         # trigger detect emotions background task
         recognize_candidate_emotion.delay(exam_candidate_data.id)
-        
+
         # if len(recognized_persons) >= 1:
         #     hightlighted_image = highlight_recognized_faces(
         #         img_path, recognized_persons,

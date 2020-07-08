@@ -40,7 +40,7 @@ def recognize_emotion(image__path):
         face_detection = cv2.CascadeClassifier(detection_model_path)
         emotion_classifier = load_model(emotion_model_path, compile=False)
         EMOTIONS = [
-            "angry" ,"disgust","scared", "happy", "sad",
+            "anger" ,"disgust","scared", "happy", "sadness",
             "surprised", "neutral"
         ]
 

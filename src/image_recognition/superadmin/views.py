@@ -252,24 +252,26 @@ class EmotionClasses:
     Emotion classes
     """
     labels = {
-        0: "angry",
+        0: "anger",
         1: "disgust",
-        2: "fear",
-        3: "happy",
-        4: "sad",
-        5: "surprise",
-        6: "neutral",
+        2: "contempt",
+        3: "fear",
+        4: "happy",
+        5: "sadness",
+        6: "surprise",
+        # 6: "neutral",
         7: "unknown", # empty
     }
 
     color_mapping = {
-        "angry": "rgba(244, 67, 54, 0.87)",
+        "anger": "rgba(244, 67, 54, 0.87)",
+        "contempt": "rgb(124, 181, 236)",
         "disgust": "rgba(230, 127, 220, 0.85)",
         "fear": "rgb(67, 67, 72)",
         "happy": "rgba(49, 183, 54, 0.72)",
-        "sad": "rgb(247, 163, 92)",
+        "sadness": "rgb(247, 163, 92)",
         "surprise": "rgb(241, 92, 128)",
-        "neutral": "rgb(124, 181, 236)",
+        # "contempt": "rgb(124, 181, 236)",
         "unknown": "rgb(144, 124, 124)",
     }
 

@@ -79,7 +79,7 @@ class Migration(migrations.Migration):
                 ('detected_persons', django.contrib.postgres.fields.ArrayField(base_field=models.CharField(max_length=200), blank=True, default=list, help_text='Detected persons list', size=None)),
                 ('matching_percentages', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=list, help_text='list of Face matching percentage with person name as key')),
                 ('detected_objects', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=list, help_text='list of detected objects such as mobile -- used to detect suspicious activity')),
-                ('emotions', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=list, help_text='person face with emotions -- happy, sad, fear')),
+                ('emotions', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=list, help_text='person face with emotions -- happy, sadness, fear')),
                 ('liveness', django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=list, help_text='Liveness to avoid spoofing')),
                 ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

@@ -18,12 +18,12 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='examcandidatephoto',
             name='all_emotions',
-            field=picklefield.fields.PickledObjectField(blank=True, editable=False, help_text='person face with emotions -- happy, sad, fear', null=True),
+            field=picklefield.fields.PickledObjectField(blank=True, editable=False, help_text='person face with emotions -- happy, sadness, fear', null=True),
         ),
         migrations.AddField(
             model_name='examcandidatephoto',
             name='top_emotion',
-            field=picklefield.fields.PickledObjectField(blank=True, editable=False, help_text='person face with emotions -- happy, sad, fear', null=True),
+            field=picklefield.fields.PickledObjectField(blank=True, editable=False, help_text='person face with emotions -- happy, sadness, fear', null=True),
         ),
         migrations.AlterField(
             model_name='examcandidatephoto',

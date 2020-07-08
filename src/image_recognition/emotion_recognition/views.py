@@ -5,10 +5,8 @@ import requests
 from urllib.parse import urljoin
 
 
-def detect_image_emotions(image_path):
-    files = {
-        'image_file': open(image_path, "rb"), # image buffer
-    }
+def detect_image_emotions(face_array):
+    data = {'face': face_array.tolist()}
 
     EMOTIONS_API_URL = urljoin(
         settings.EMOTION_DETECTION_BASE_API_URL,
@@ -16,7 +14,7 @@ def detect_image_emotions(image_path):
     )
 
     response = requests.post(
-        EMOTIONS_API_URL, files=files
+        EMOTIONS_API_URL, json=data
     )
 
     if response.status_code == 200:

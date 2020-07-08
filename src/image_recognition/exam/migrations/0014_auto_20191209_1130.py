@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='examcandidatephoto',
             name='emotions',
-            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=dict, help_text='person face with emotions -- happy, sad, fear'),
+            field=django.contrib.postgres.fields.jsonb.JSONField(blank=True, default=dict, help_text='person face with emotions -- happy, sadness, fear'),
         ),
     ]

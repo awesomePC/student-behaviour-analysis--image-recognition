@@ -51,7 +51,8 @@ def recognize_candidate_emotion(id_exam_candidate_photo):
     ).first() # is_emotion_calc_done=False
 
     if exam_candidate_data:
-        file_candidate_image = exam_candidate_data.photo.path
+        # file_candidate_image = exam_candidate_data.photo.path
+        file_candidate_image = exam_candidate_data.np_face # face image array
         all_emotions, topmost_emotion = detect_image_emotions(
             file_candidate_image
         )

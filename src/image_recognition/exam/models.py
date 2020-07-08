@@ -289,11 +289,11 @@ class ExamCandidatePhoto(models.Model):
 
     all_emotions = PickledObjectField(
         blank=True, null=True, 
-        help_text="person face with emotions -- happy, sad, fear"
+        help_text="person face with emotions -- happy, sadness, fear"
     )
     top_emotion = PickledObjectField(
         blank=True, null=True, 
-        help_text="person face with emotions -- happy, sad, fear"
+        help_text="person face with emotions -- happy, sadness, fear"
     )
     is_emotion_calc_done = models.BooleanField(
         default=False,
