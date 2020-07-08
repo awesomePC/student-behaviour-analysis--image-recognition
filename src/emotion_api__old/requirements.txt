@@ -1,0 +1,13 @@
+flask
+flask-restful
+requests
+
+numpy
+
+tensorflow==1.15.0
+Keras==2.2.4
+
+mtcnn==0.0.9
+opencv-python==4.2.0.*
+
+pandas
