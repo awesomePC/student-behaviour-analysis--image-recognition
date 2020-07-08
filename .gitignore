@@ -105,3 +105,6 @@ db.sqlite3
 # flask api media
 recognition_api/media/
 
+# checkpoint -- saved models
+ckpt
+
