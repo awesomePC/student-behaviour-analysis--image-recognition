@@ -33,9 +33,11 @@ labelencoder.classes_ = np.load(le_filename)
 
 
 if FAKE_DETECTION_MODEL == "vgg16":
-    model_file = os.path.join(CKPT_DIR, "vgg16_model.best.hdf5")
+    model_file = os.path.join(CKPT_DIR, "vgg16_model.best_2.hdf5")
+    print("\n Loadding vgg model .. \n")
 else:
     model_file = os.path.join(CKPT_DIR, "resnet50_model_model.best.hdf5")
+    print("\n Loadding resnet50 model ..\n")
 
 model = load_model(model_file)
 
