@@ -1,0 +1,19 @@
+Flask==1.1.1
+Flask-RESTful==0.3.7
+
+numpy==1.18.3
+tensorflow==1.15.*
+Keras==2.3.1
+
+opencv-python==4.2.0.*
+
+Pillow==6.2.1
+
+# yolo v3
+cvlib
+
+# ratina net
+imageai
+
+
+sentry-sdk[flask]==0.14.3
