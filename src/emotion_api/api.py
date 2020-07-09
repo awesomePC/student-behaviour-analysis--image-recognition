@@ -1,9 +1,3 @@
-#https://blog.keras.io/building-a-simple-keras-deep-learning-rest-api.html
-
-# advanced 
-# https://www.pyimagesearch.com/2018/01/29/scalable-keras-deep-learning-rest-api/
-# https://www.pyimagesearch.com/2018/02/05/deep-learning-production-keras-redis-flask-apache/
-
 # import the necessary packages
 import os, random
 import io
@@ -49,8 +43,11 @@ le_filename =  os.path.join(CKPT_DIR, "label_encoder_classes.npy")
 labelencoder = LabelEncoder()
 labelencoder.classes_ = np.load(le_filename)
 
-# model_file = os.path.join(CKPT_DIR, "inceptionresnetv2_model.best.hdf5")
-model_file = os.path.join(CKPT_DIR, "mobilenet_model.best.hdf5")
+if settings.EMOTION_MODEL == "inceptionresnetv2":
+    model_file = os.path.join(CKPT_DIR, "inceptionresnetv2_model.best.hdf5")
+else:
+    model_file = os.path.join(CKPT_DIR, "mobilenet_model.best.hdf5")
+
 model = load_model(model_file)
 
 

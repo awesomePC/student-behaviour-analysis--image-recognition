@@ -2,43 +2,38 @@
 
 # import the necessary packages
 import os
-import requests
-from urllib.parse import urljoin
 import json
-from PIL import Image
+import requests
 
-import helpers
-import settings
+from urllib.parse import urljoin
+# from PIL import Image
+import cv2
+
+# import settings
 
 # initialize the Keras REST API endpoint URL along with the input
 # image path
 BASE_API_URL = "http://localhost:5003/"
-# BASE_API_URL = "http://10.128.0.11:5003/"
 
 
-def test_api_verify_genuine(image_path):
-    # load the input image and construct the payload for the request
-    image = open(image_path, "rb").read()
+def test_api_verify_genuine(face_array):
+    data = {'face': face_array.tolist()}
 
-    payload = {
-        "image": image
-    }
+    EMOTIONS_API_URL = urljoin(BASE_API_URL, '/verify-genuine')
 
-    API_URL = urljoin(BASE_API_URL, '/verify-genuine')
-
-    # submit the request
-    response = requests.post(
-        API_URL, files=payload
-    ).json()
-
-    return response
+    return requests.post(
+        EMOTIONS_API_URL, json=data
+    )
 
 
 if __name__ == "__main__":
-    from numpy import asarray, loadtxt
+    # from numpy import asarray, loadtxt
 
-    IMAGE_PATH = "media/images/own_grady.jpg"
+    img_face = cv2.imread("media/cropped-faces/happy.png")
+    img_face = cv2.resize(img_face, (224, 224), interpolation = cv2.INTER_NEAREST)
     
-    ### 1 ###############
-    response = test_api_verify_genuine(IMAGE_PATH)
-    print(response)
+    #### 1 ###############
+    response = test_api_verify_genuine(img_face)
+    print(f"Response status code: {response.status_code}")
+    print(response.json())
+    # print(type(response.json()))
