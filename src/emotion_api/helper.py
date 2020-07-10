@@ -8,5 +8,6 @@ def download_drive_checkpoint(file_id, output):
         download(url, output, quiet=False)
         return True
     except Exception as e:
+        print(e)
         print("Error while downloading file from google drive. Manually add model checkpoint.")
         return False
