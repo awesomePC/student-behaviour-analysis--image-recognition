@@ -38,6 +38,9 @@ api = Api(app)
 parse = reqparse.RequestParser()
 
 le_filename =  os.path.join(CKPT_DIR, "label_encoder_classes.npy")
+if not os.path.exists(le_filename):
+    download_drive_checkpoint(file_id="1-AAwFmOvxg1CnH_EFSSZo-uH3T8amG21", output=le_filename)
+
 labelencoder = LabelEncoder()
 labelencoder.classes_ = np.load(le_filename)
 
