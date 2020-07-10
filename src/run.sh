@@ -102,3 +102,26 @@ xdotool type --delay 1.8 --clearmodifiers "python api.py"
 xdotool key Return;
 # Restore the original clipboard content
 echo $original_clipboard | xclip
+
+
+##################################################################
+# 5) start fake detection api
+##################################################################
+WID=$(xprop -root | grep "_NET_ACTIVE_WINDOW(WINDOW)"| awk '{print $5}')
+xdotool windowfocus $WID
+xdotool key ctrl+shift+t
+wmctrl -i -a $WID
+
+# Activate your virtualenv
+xdotool type --delay 0.8 --clearmodifiers "conda $(xclip -o) activate env_face_recognition"
+xdotool key Return;
+
+# move inside api_recognition folder
+xdotool type --delay 1.1 --clearmodifiers "cd ${0%/*}/fake_detection_api"
+xdotool key Return;
+
+# run python script
+xdotool type --delay 1.8 --clearmodifiers "python api.py"
+xdotool key Return;
+# Restore the original clipboard content
+echo $original_clipboard | xclip
