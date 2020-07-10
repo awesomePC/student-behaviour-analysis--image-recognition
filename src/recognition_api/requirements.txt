@@ -4,6 +4,8 @@ Flask-RESTful==0.3.7
 tensorflow==1.15.0
 Keras==2.2.4
 
+keras-vggface==0.6
+
 mtcnn==0.0.9
 opencv-python==4.2.0.*
 
