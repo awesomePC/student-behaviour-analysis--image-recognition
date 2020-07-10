@@ -16,7 +16,8 @@ from tensorflow.keras.models import load_model
 
 import operator
 
-import settings
+from settings import CKPT_DIR, EMOTION_MODEL
+from helper import download_drive_checkpoint
 
 # # error logging
 # import sentry_sdk
@@ -36,17 +37,18 @@ api = Api(app)
 # init request parser
 parse = reqparse.RequestParser()
 
-# init Emotion detector
-CKPT_DIR = "ckpt"
-
 le_filename =  os.path.join(CKPT_DIR, "label_encoder_classes.npy")
 labelencoder = LabelEncoder()
 labelencoder.classes_ = np.load(le_filename)
 
-if settings.EMOTION_MODEL == "inceptionresnetv2":
+if EMOTION_MODEL == "inceptionresnetv2":
     model_file = os.path.join(CKPT_DIR, "inceptionresnetv2_model.best.hdf5")
+    if not os.path.exists(model_file):
+        download_drive_checkpoint(file_id="1y_nkIQPp2g9yPxDlJ7SfKwRA32FWYNyv", output=model_file)
 else:
     model_file = os.path.join(CKPT_DIR, "mobilenet_model.best.hdf5")
+    if not os.path.exists(model_file):
+        download_drive_checkpoint(file_id="1HDtb9mON8U3g5eDv-nuB5LTxDTGO8YDD", output=model_file)
 
 model = load_model(model_file)
 
