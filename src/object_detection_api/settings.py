@@ -7,7 +7,7 @@ DIR_MEDIA = os.path.join(
 )
 os.makedirs(DIR_MEDIA, exist_ok=True)
 
-DETECTOR_NUMBER = os.getenv("DETECTOR_NUMBER", 0)  # 0
+DETECTOR_NUMBER = os.getenv("DETECTOR_NUMBER", 1)  # 0
 DIR_MODEL_DETECTION = os.path.join(
     BASE_DIR, "model/detection/"
 )

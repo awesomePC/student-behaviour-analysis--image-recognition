@@ -26,9 +26,9 @@ class ObjectDetector:
         elif model == ObjectDetectorModels.MobileNetSSD:
             self._base = ObjectDetector_MobileNetSSD(path)
 
-    def detect(self, input_image_path, output_image_path):
+    def detect(self, input_image_path):
         return self._base.detect(
-            input_image_path, output_image_path
+            input_image_path
         )
 
 
@@ -37,14 +37,18 @@ class ObjectDetector_YOLOv3:
         # self._detector = _detector
         pass
 
-    def detect(self, input_image_path, output_image_path):
+    def detect(self, input_image_path):
         import cvlib as cv
         from cvlib.object_detection import draw_bbox
         frame = cv2.imread(input_image_path)
-        bbox, label, conf = cv.detect_common_objects(frame)
-        output_image = draw_bbox(frame, bbox, label, conf)
-        cv2.imwrite(output_image_path, output_image)
-        return label
+
+        # new_size = (300, 300)
+        # frame = cv2.resize(frame, new_size)
+
+        bbox, label, conf = cv.detect_common_objects(frame, confidence=0.50, model='yolov3-tiny')
+        # output_image = draw_bbox(frame, bbox, label, conf)
+        # cv2.imwrite(output_image_path, output_image)
+        return (bbox, label, conf)
 
 
 class ObjectDetector_MobileNetSSD:
@@ -102,7 +106,7 @@ class ObjectDetector_MobileNetSSD:
                 })
         return (frame, detections_final)
 
-    def detect(self, input_image_path, output_image_path):
+    def detect(self, input_image_path):
         input_image = cv2.imread(input_image_path)
 
         input_image = imutils.resize(input_image, width=400)
@@ -116,8 +120,8 @@ class ObjectDetector_MobileNetSSD:
         # predictions
         self._detector.setInput(blob)
         detections = self._detector.forward()
-        output_image, detections_final = self.visualize_objects(input_image, detections)
-        cv2.imwrite(output_image_path, output_image)
+        # output_image, detections_final = self.visualize_objects(input_image, detections)
+        # cv2.imwrite(output_image_path, output_image)
         return detections_final
 
 
@@ -131,10 +135,9 @@ class ObjectDetector_RESNET50COCO:
         self._detector.loadModel()
 
 
-    def detect(self, input_image_path, output_image_path):
+    def detect(self, input_image_path):
         detections = self._detector.detectObjectsFromImage(
             input_image=input_image_path,
-            output_image_path=output_image_path
         )
         # for eachObject in detections:
         #     print(

@@ -61,20 +61,14 @@ def api_detect_objects():
 
             input_image_path = save_image(pil_image)
             output_image_path = generate_filename(extension=".jpg", base_folder=DIR_MEDIA)
-            detections = object_detector.detect(
+            bbox, labels, conf = object_detector.detect(
                 input_image_path,
-                output_image_path
             )
 
-            highlighted_image = Image.open(output_image_path)
-            
-            encoded_img = helpers.pil_to_base64(
-                highlighted_image
-            )
-
-            data["detection_count"] = len(detections)
-            data["detections"] = detections
-            data["encoded_img"] = encoded_img
+            data["detection_count"] = len(labels)
+            data["bbox"] = bbox
+            data["labels"] = labels
+            data["conf"] = conf
 
             # indicate that the request was a success
             data["success"] = True

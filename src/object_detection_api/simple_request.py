@@ -32,18 +32,7 @@ def test_api_detect_objects(image_path):
         API_DETECT_OBJECTS, files=payload
     ).json()
 
-    # # ensure the request was successful
-    if response["success"]:
-        print(response["detections"])
-        encoded_img = response["encoded_img"]
-        np_image_array = helpers.base64_to_pil(encoded_img)
-        
-        # show
-        plt.imshow(np_image_array, interpolation='nearest')
-        plt.show()
-    else:
-        print("Request failed")
-
+    return response
 
 if __name__ == "__main__":
     from numpy import asarray, loadtxt
@@ -58,7 +47,14 @@ if __name__ == "__main__":
     
 
     # #### 2 ###############
-    test_api_detect_objects(IMAGE_PATH)
+    response = test_api_detect_objects(IMAGE_PATH)
 
     end = timer()
     print(timedelta(seconds=end-start))
+
+    # # ensure the request was successful
+    if response["success"]:
+        print(response["labels"])
+        print(response["conf"])
+    else:
+        print("Request failed")
