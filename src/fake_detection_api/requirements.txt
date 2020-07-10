@@ -1,12 +1,13 @@
 flask
 flask-restful
 
-#git+https://github.com/Nivratti/image_features
-
 scikit-learn==0.22.2.post1
 
-# image features extraction dependancy
-pretrainedmodels
-torch
-torchvision
-tqdm
+# downloading files from drive
+gdown
+
+tensorflow==1.15.0
+
+Pillow==6.2.1
+opencv-python==4.2.0.32 
+# opencv-contrib-python==4.1.2.30           
