@@ -44,7 +44,7 @@ def post_register_extract_save_face_and_embeddings(id_candidate_img_dataset_obj)
 
 @task()
 def recognize_candidate_emotion(id_exam_candidate_photo):
-    from emotion_recognition.views import detect_image_emotions
+    from api_consumer.views import detect_face_emotion
 
     exam_candidate_data = ExamCandidatePhoto.objects.filter(
         id=id_exam_candidate_photo
@@ -52,19 +52,20 @@ def recognize_candidate_emotion(id_exam_candidate_photo):
 
     if exam_candidate_data:
         # file_candidate_image = exam_candidate_data.photo.path
-        file_candidate_image = exam_candidate_data.np_face # face image array
-        all_emotions, topmost_emotion = detect_image_emotions(
-            file_candidate_image
-        )
-        if all_emotions:
-            exam_candidate_data.all_emotions = all_emotions
-            exam_candidate_data.top_emotion = topmost_emotion
-            emotion_message = "Emotion calculated successfully"
-            exam_candidate_data.emotion_message = emotion_message
-            exam_candidate_data.is_emotion_calc_done = True
-            exam_candidate_data.save()
-        else:
-            pass
+        candidate_face_array = exam_candidate_data.np_face # face image array
+        if candidate_face_array:
+            all_emotions, topmost_emotion = detect_face_emotion(
+                candidate_face_array
+            )
+            if all_emotions:
+                exam_candidate_data.all_emotions = all_emotions
+                exam_candidate_data.top_emotion = topmost_emotion
+                emotion_message = "Emotion calculated successfully"
+                exam_candidate_data.emotion_message = emotion_message
+                exam_candidate_data.is_emotion_calc_done = True
+                exam_candidate_data.save()
+            else:
+                pass
     else:
         pass
     return True
