@@ -668,6 +668,7 @@ def ajax_validate_user(request):
                     "probability": probability,
                     "box": realtime_detected_faces[idx]
                 })
+
         elif len(realtime_face_embeddings) > 1:
             message = f"Authentication error: multiple persons detected."
         else:
@@ -938,20 +939,20 @@ def stop_exam(request):
         icon_class="icon-stop"
     )
 
-    verb = f"Exam of candidate with id {request.user.id} stopped.\nReason - " + reason
-   
+    verb = f"Exam '{exam.name}' of candidate '{request.user.email}' stopped due to {reason}"
+
     # send to all superadmins and proctor
     send_notification_2_user_types(
         sender=request.user,
         verb=verb,
         icon_class="icon-stop",
-        user_types=["superadmin", "proctor"]
+        user_types=["super_admin", "proctor"]
     )
     response = {
         "message": {
             "type": "info",
             "title": "Info",
-            "text": "All users notified successfully",
+            "text": "All super users notified successfully",
         },
     }
     return JsonResponse(response, safe=True)

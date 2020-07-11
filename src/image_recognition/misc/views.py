@@ -37,7 +37,7 @@ def mark_noti_as_read(request):
     return JsonResponse(response, safe=False)
 
 
-def send_notification_2_user_types(sender, verb, icon_class, user_types=["superadmin"]):
+def send_notification_2_user_types(sender, verb, icon_class, user_types=["super_admin"]):
     users = CustomUser.objects.filter(
         user_type__contains=user_types
     )
