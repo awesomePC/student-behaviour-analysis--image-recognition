@@ -19,10 +19,10 @@ BASE_API_URL = "http://localhost:5003/"
 def test_api_verify_genuine(face_array):
     data = {'face': face_array.tolist()}
 
-    EMOTIONS_API_URL = urljoin(BASE_API_URL, '/verify-genuine')
+    FAKE_DETECTION_API_URL = urljoin(BASE_API_URL, '/verify-genuine')
 
     return requests.post(
-        EMOTIONS_API_URL, json=data
+        FAKE_DETECTION_API_URL, json=data
     )
 
 
