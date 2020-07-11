@@ -15,6 +15,9 @@ def detect_face_emotion(face_array):
     Returns:
         tuple: all emotion and top most emotion
     """
+    if face_array is None:
+        return ([], [])
+
     data = {'face': face_array.tolist()}
 
     EMOTIONS_API_URL = urljoin(
@@ -48,6 +51,9 @@ def verify_genuine(face_array):
     Returns:
         dict: dictionary containing face anti spoofing result
     """
+    if face_array is None:
+        return {}
+        
     data = {'face': face_array.tolist()}
 
     FAKE_DETECTION_API_URL = urljoin(settings.FAKE_DETECTION_BASE_API_URL, '/verify-genuine')
