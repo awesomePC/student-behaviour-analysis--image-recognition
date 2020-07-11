@@ -1,5 +1,9 @@
 #!/bin/bash 
 
+# to run file 
+# ./run.sh 
+
+
 # https://askubuntu.com/questions/791351/run-virtualenv-in-new-terminal-tab-automatically
 # sudo apt install xclip, xdotool, wmctrl
 
@@ -100,9 +104,6 @@ xdotool key Return;
 # run python script
 xdotool type --delay 1.8 --clearmodifiers "python api.py"
 xdotool key Return;
-# Restore the original clipboard content
-echo $original_clipboard | xclip
-
 
 ##################################################################
 # 5) start fake detection api
@@ -123,5 +124,10 @@ xdotool key Return;
 # run python script
 xdotool type --delay 1.8 --clearmodifiers "python api.py"
 xdotool key Return;
+
+
+##########################################################################
+# finally
+##########################################################################
 # Restore the original clipboard content
 echo $original_clipboard | xclip
