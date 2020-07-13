@@ -53,7 +53,9 @@ def recognize_candidate_emotion(id_exam_candidate_photo):
     if exam_candidate_data:
         # file_candidate_image = exam_candidate_data.photo.path
         candidate_face_array = exam_candidate_data.np_face # face image array
-        if candidate_face_array:
+        
+        # check is variable-is-none-or-numpy-array
+        if candidate_face_array is not None:
             all_emotions, topmost_emotion = detect_face_emotion(
                 candidate_face_array
             )

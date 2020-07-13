@@ -15,6 +15,7 @@ def detect_face_emotion(face_array):
     Returns:
         tuple: all emotion and top most emotion
     """
+    # check is variable-is-none-or-numpy-array
     if face_array is None:
         return ([], [])
 
