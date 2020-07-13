@@ -394,6 +394,29 @@ $(document).on( "click", "#question_pallete .nbadge", function() {
 });
 </script>
 
+
+<script type="text/javascript">
+// disable f5 button
+function disableF5(e) { if ((e.which || e.keyCode) == 116 || (e.which || e.keyCode) == 82) e.preventDefault(); };
+
+function warn_user_page_unload(){
+   console.log("HI")
+   alert("HI")
+}
+
+$(document).ready(function(){
+    // disable f5
+    $(document).on("keydown", disableF5);
+
+     // page unload
+    $(window).on('beforeunload', function ()
+    {
+        return false;
+    });
+
+});
+</script>
+
 {% endblock %}
 <!--       page level scripts    -->
 <!-- /=========================== -->
