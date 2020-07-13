@@ -335,6 +335,14 @@ def exam(request, exam_id):
     if candi_exam.is_completed == True:
         return redirect(reverse("candidate:exam_list"))
 
+    # check is already stopped due to suspicious activity and is restart allowed or not
+    if candi_exam.is_exam_stopped == True:
+        if candi_exam.is_restart_allowed == True:
+            pass
+        else:
+            # render contact admin page
+            return render(request, 'candidate/exam/contact_admin_2_restart.html', {})
+
     if candi_exam.is_started == False:
         candi_exam.is_started = True
         candi_exam.start_time = timezone.localtime(timezone.now())
@@ -924,6 +932,8 @@ def stop_exam(request):
     if current_exam_seconds > 0:
         new_exam_remaining_time = prev_exam_remaining_time - int(current_exam_seconds)
         candi_exam.exam_remaining_time = new_exam_remaining_time
+        candi_exam.is_exam_stopped = True
+        candi_exam.exam_stop_count += 1
         candi_exam.save()
     else:
         print(f"current exam run seconds must be greater than zero")

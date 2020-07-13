@@ -88,7 +88,11 @@ class ExamCandidate(models.Model):
     end_time = models.DateTimeField(
         null=True, blank=True, auto_now=False
     )
-    is_completed = models.BooleanField(default=False)
+    # suspicious activity stopped exam info
+    is_exam_stopped = models.BooleanField(default=False)
+    exam_stop_count = models.IntegerField(null=True, blank=True, default=0)
+
+    is_restart_allowed = models.BooleanField(default=False) # if exam stopped check this flag before re-starting exam
     is_restarted = models.BooleanField(default=False)
     restart_time = models.DateTimeField(
         null=True, blank=True, auto_now=False,
@@ -100,6 +104,7 @@ class ExamCandidate(models.Model):
         default=list,
         help_text="Exam if restarted store it in array"
     )
+    is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
