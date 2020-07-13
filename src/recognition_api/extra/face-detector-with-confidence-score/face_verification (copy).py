@@ -230,7 +230,7 @@ def get_faces_and_embeddings(image_array):
     return (detected_faces, extracted_faces, face_embeddings)
 
 
-def verify_face_matching(known_embedding, real_time_embedding, thresh=0.22):
+def verify_face_matching(known_embedding, real_time_embedding, thresh=0.40):
     """
     Compare and check is known embeding match to real time embedding
     

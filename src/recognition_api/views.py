@@ -238,7 +238,7 @@ def api_compare_face_embedding():
             np_realtime_face_embedding = np.frombuffer(str_realtime_embedding, dtype='float64')
 
             is_matched, probability, _, _ = verify_face_matching(
-                np_known_face_embedding, np_realtime_face_embedding, thresh=0.31
+                np_known_face_embedding, np_realtime_face_embedding, thresh=0.40
             )
             
             data["is_matched"] = is_matched
@@ -288,7 +288,7 @@ def api_match_known_face_embedding():
             for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
 
                 is_matched, probability, _, _ = verify_face_matching(
-                    np_known_face_embedding, realtime_face_embedding, thresh=0.31
+                    np_known_face_embedding, realtime_face_embedding, thresh=0.40
                 )
                 
                 result = {
