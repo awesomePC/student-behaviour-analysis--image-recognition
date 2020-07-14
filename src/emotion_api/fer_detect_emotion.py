@@ -14,7 +14,7 @@ le_filename =  os.path.join(CKPT_DIR, "label_encoder_classes.npy")
 labelencoder = LabelEncoder()
 labelencoder.classes_ = np.load(le_filename)
 
-model_file = os.path.join(CKPT_DIR, "inceptionresnetv2_model.best.hdf5")
+model_file = os.path.join(CKPT_DIR, "mobilenet_model.best.hdf5")
 inception_resnet_v2_model = load_model(model_file)
 
 
@@ -67,6 +67,8 @@ def test_single_image(model, img_single_face, normalize=True):
 
 ## testing
 img_face = cv2.imread("media/cropped-faces/happy.png")
+img_face_gray = cv2.cvtColor(img_face, cv2.COLOR_BGR2GRAY)
+img_face_rgb = cv2.cvtColor(img_face_gray, cv2.COLOR_GRAY2RGB)
 
-detected_emotions = test_single_image(inception_resnet_v2_model, img_face, normalize=False)
+detected_emotions = test_single_image(inception_resnet_v2_model, img_face_rgb, normalize=False)
 print(detected_emotions)

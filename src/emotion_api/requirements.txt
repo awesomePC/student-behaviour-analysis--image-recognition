@@ -6,6 +6,7 @@ scikit-learn==0.22.2.post1
 
 tensorflow==1.15.0
 
+Pillow==6.2.1
 opencv-python==4.2.0.*
 
 pandas

@@ -14,6 +14,8 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.keras.models import load_model
 
+from PIL import Image
+
 import operator
 
 from settings import CKPT_DIR, EMOTION_MODEL
@@ -138,6 +140,11 @@ def test_single_image(img_single_face, normalize=True):
 def detect_emotions():
     data = request.json
     face_array = np.array(data['face'])
+
+    # we have trained model from ck+ -- gray images loaded as RGB for transfer learning
+    # for testing we need to convert RGB => GRAY=> RGB Again
+    pil_img = Image.fromarray(face_array).convert('L').convert('RGB')
+    face_array = np.array(pil_img)
 
     # import pdb;pdb.set_trace()
 
