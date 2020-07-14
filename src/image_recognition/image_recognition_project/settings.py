@@ -29,11 +29,8 @@ if(sys.argv[1] == 'runserver'):
 else:
     IS_DEV_SERVER = False
 
-if IS_DEV_SERVER:
-    DEBUG = True
-else:
-    # SECURITY WARNING: don't run with debug turned on in production!
-    DEBUG = os.environ.get("DEBUG", default=True)
+
+DEBUG = True if os.getenv('DEBUG', IS_DEV_SERVER)  in ["True", True] else False
 
 ALLOWED_HOSTS = ['127.0.0.1', '*']
 
