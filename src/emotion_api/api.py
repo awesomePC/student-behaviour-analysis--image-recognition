@@ -141,12 +141,12 @@ def detect_emotions():
     data = request.json
     face_array = np.array(data['face'])
 
-    # we have trained model from ck+ -- gray images loaded as RGB for transfer learning
-    # for testing we need to convert RGB => GRAY=> RGB Again
-    pil_img = Image.fromarray(face_array).convert('L').convert('RGB')
-    face_array = np.array(pil_img)
-
     # import pdb;pdb.set_trace()
+
+    # # we have trained model from ck+ -- gray images loaded as RGB for transfer learning
+    # # for testing we need to convert RGB => GRAY=> RGB Again
+    im = Image.fromarray((face_array * 255).astype(np.uint8)).convert("L").convert("RGB")
+    face_array = np.array(im)
 
     prob_per_class_dict, topmost_emotion = test_single_image(face_array, normalize=False)
     
