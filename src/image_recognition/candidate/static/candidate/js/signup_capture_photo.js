@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
     height: height,
     image_format: 'jpeg',
     jpeg_quality: 90,
-    flip_horiz: true,
+    // flip_horiz: true,
   });
   Webcam.attach( '#camera' );
   
