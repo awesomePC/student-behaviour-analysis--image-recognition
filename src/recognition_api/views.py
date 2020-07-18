@@ -59,7 +59,7 @@ def get_face_count():
         if flask.request.files.get("image"):
             # read the image in PIL format
             image = flask.request.files["image"].read()
-            pil_image = Image.open(io.BytesIO(image)).convert('RGB')
+            pil_image = Image.open(io.BytesIO(image))
             
             np_image_array = np.asarray(pil_image)
 
@@ -97,7 +97,7 @@ def api_highlight_faces():
         if flask.request.files.get("image"):
             # read the image in PIL format
             image = flask.request.files["image"].read()
-            pil_image = Image.open(io.BytesIO(image)).convert('RGB')
+            pil_image = Image.open(io.BytesIO(image))
 
             np_image_array = np.asarray(pil_image)
 
@@ -141,7 +141,7 @@ def api_hightlight_recognized_faces():
         if flask.request.files.get("image"):
             # read the image in PIL format
             realtime_image = flask.request.files["image"].read()
-            realtime_pil_image = Image.open(io.BytesIO(realtime_image)).convert('RGB')
+            realtime_pil_image = Image.open(io.BytesIO(realtime_image))
             # np_realtime_image_array = np.asarray(realtime_pil_image)
 
 
@@ -190,7 +190,7 @@ def api_extract_faces_and_embeddings():
         if flask.request.files.get("image"):
             # read the image in PIL format
             image = flask.request.files["image"].read()
-            pil_image = Image.open(io.BytesIO(image)).convert('RGB')
+            pil_image = Image.open(io.BytesIO(image))
 
             np_image_array = np.asarray(pil_image)
 
@@ -270,7 +270,7 @@ def api_match_known_face_embedding():
         if flask.request.files.get("image"):
             # read the image in PIL format
             realtime_image = flask.request.files["image"].read()
-            realtime_pil_image = Image.open(io.BytesIO(realtime_image)).convert('RGB')
+            realtime_pil_image = Image.open(io.BytesIO(realtime_image))
             np_realtime_image_array = np.asarray(realtime_pil_image)
 
             # read the face embedding
