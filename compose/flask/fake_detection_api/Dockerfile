@@ -25,4 +25,4 @@ COPY ./requirements.txt $APP_HOME/requirements.txt
 RUN pip install --no-cache-dir -r $APP_HOME/requirements.txt
 
 # CMD will run when this dockerfile is running
-CMD ["sh", "-c", "python views.py"]
+CMD ["sh", "-c", "python app.py"]
