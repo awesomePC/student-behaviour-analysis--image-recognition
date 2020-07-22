@@ -20,4 +20,4 @@ MODEL_DIR = os.path.join(
     BASE_DIR, 'models'
 )
 
-DETECTOR_NUMBER = os.getenv("DETECTOR_NUMBER", 6)  # 0
+DETECTOR_NUMBER = int(os.getenv("DETECTOR_NUMBER", 5))  # 0

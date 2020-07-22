@@ -7,6 +7,8 @@ import numpy as np
 
 from keras.models import load_model # loading model
 
+import cv2
+
 import io
 import json
 
@@ -43,7 +45,7 @@ def load_models():
     global face_embedding_model
 
     # create a vggface model object
-    face_embedding_model = VGGFace(model='resnet50',
+    face_embedding_model = VGGFace(model='senet50',
         include_top=False,
         input_shape=(224, 224, 3),
         pooling='avg'
@@ -122,13 +124,13 @@ def extract_faces(image_array, detected_face_boxes, required_size=(224, 224), co
 
         # extract the face
         face_boundary = image_array[y1:y2, x1:x2]
-        # resize pixels to the model size
-        face_image = Image.fromarray(face_boundary)
-        face_image = face_image.resize(required_size)
+
         if convert_2_numpy:
-            face_array = np.asarray(face_image)
+            face_array = cv2.resize(face_boundary, required_size) # default - inter linear -- given best results to resize and face match given more percentage
             extracted_faces.append(face_array)
         else:
+            face_image = Image.fromarray(face_boundary)
+            face_image = face_image.resize(required_size)
             extracted_faces.append(face_image)
 
     return (detected_face_boxes, extracted_faces)
@@ -208,6 +210,7 @@ def get_embedding(face_pixels):
     # prepare the data for the model
     sample = preprocess_input(sample, version=2)
     sample = np.expand_dims(sample, axis=0)
+    
     # perform prediction
     return face_embedding_model.predict(sample)[0]
 

@@ -16,6 +16,7 @@ class FaceDetectorModels(Enum):
     FACENET             = 4    # [DL] Tensorflow FaceNet's Multi-task Cascaded CNN (MTCNN)
     MTCNN               = 5    # [DL] Tensorflow Multi-task Cascaded CNN (MTCNN)
     ULTRALIGHTFAST      = 6    # [DL] Ultra Light Fast
+    RETINA_FACE         = 7    # RetinaFace
     DEFAULT = MTCNN
 
 
@@ -42,6 +43,9 @@ class FaceDetector:
             self._base = FaceDetector_FACENET(path, optimize, minfacesize)
         elif model == FaceDetectorModels.ULTRALIGHTFAST:
             self._base = FaceDetector_UltraLightFast(path, optimize, minfacesize)
+
+        elif model == FaceDetectorModels.RETINA_FACE:
+            self._base = FaceDetector_RetinaFace(path, optimize, minfacesize)
 
     def detect(self, frame):
         return self._base.detect(frame)
@@ -183,8 +187,8 @@ class FaceDetector_UltraLightFast:
         from ultrafast.vision.ssd.config.fd_config import define_img_size
         args = SimpleNamespace(
             net_type="RFB", # The network architecture ,optional: RFB (higher precision) or slim (faster)
-            input_size=320, # define network input size,default optional value 128/160/320/480/640/1280
-            threshold=0.9,  # score threshold
+            input_size=640, # define network input size,default optional value 128/160/320/480/640/1280
+            threshold=0.8,  # score threshold
             candidate_size=1500,    # nms candidate size
             test_device="cpu", # cuda:0 or cpu
         )
@@ -236,3 +240,24 @@ class FaceDetector_UltraLightFast:
             detected_faces.append((x, y, x2, y2))
         return detected_faces
 
+
+
+class FaceDetector_RetinaFace:
+
+    def __init__(self, path, optimize, minfacesize):
+        from  fdet import io, RetinaFace
+        self._optimize = optimize
+        self._minfacesize = minfacesize
+        self._detector = RetinaFace(backbone=os.getenv("RETINA_FACE_BACKBONE", 'MOBILENET')) # backbone='MOBILENET' or RESNET50
+
+    def detect(self, frame):
+        detections = self._detector.detect(frame)
+        detected_face_boxes = []
+        for detection in detections:
+            box = detection['box']
+            (x, y, w, h) = (box[0], box[1], box[2], box[3])
+            (x, y, x2, y2) = (x, y, x + w, y + h)
+            detected_face_boxes.append((x, y, x2, y2))
+
+        print(f"detected_face_boxes: {detected_face_boxes}")
+        return detected_face_boxes
