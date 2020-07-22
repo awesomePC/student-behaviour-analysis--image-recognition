@@ -2,6 +2,8 @@ import os
 import cv2
 import numpy as np
 
+import operator
+
 import json
 from deepface import DeepFace
 from deepface.extendedmodels import Emotion
@@ -59,11 +61,11 @@ def post_process_emotions(detected_emotions):
             # rename keyname
             modified_emotions[modified_keyname] = emotions[key]
 
-    if dominant_emotion == "neutral":
-        dominant_emotion = "happy"
-
     if "contempt" not in emotions:
         emotions["contempt"] = 0.00
+
+    # get key with max value
+    dominant_emotion = max(modified_emotions.items(), key=operator.itemgetter(1))[0]
 
     return (modified_emotions, dominant_emotion)
 

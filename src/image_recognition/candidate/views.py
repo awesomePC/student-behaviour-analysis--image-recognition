@@ -869,7 +869,7 @@ def save_recognize_exam_photo(request, exam_id):
             })
 
         # trigger detect emotions background task
-        recognize_candidate_emotion.apply_async(args=[exam_candidate_data.id])
+        recognize_candidate_emotion.apply_async(args=[exam_candidate_data.id], contdown=1)
 
         # if len(recognized_persons) >= 1:
         #     hightlighted_image = highlight_recognized_faces(

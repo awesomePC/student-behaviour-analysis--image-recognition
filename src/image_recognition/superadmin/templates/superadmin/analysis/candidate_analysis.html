@@ -2,7 +2,7 @@
 
 {% load static %}
 
-{% block title %} Student list {% endblock %}
+{% block title %} Candidate exam analysis {% endblock %}
 
 <!--
     page code must be start in block content
@@ -29,6 +29,11 @@
                 </div>
                 <div id="collapsible-control-group{{ forloop.counter }}" class="panel-collapse collapse in">
                     <div class="panel-body">
+                        <div class='candidate_info'>
+                            <h6>Candidate Info:</h6>
+                            <h6 class="" style="text-transform: capitalize;">Username :  {{candidate_exam.candidate.username}}</h6>
+                            <h6>Email :  {{candidate_exam.candidate.email}}</h6>
+                        </div>
 
                         <div class="tabbable pt-20 pb-20">
                             <ul class="nav nav-tabs nav-tabs-highlight">
