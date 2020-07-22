@@ -794,6 +794,7 @@ def save_recognize_exam_photo(request, exam_id):
         highlight_recognized_faces
     )
     from candidate.tasks import recognize_candidate_emotion
+    from api_consumer.views import verify_real
 
     photo_data = request.FILES.get('webcam')
 
@@ -829,83 +830,103 @@ def save_recognize_exam_photo(request, exam_id):
         idx_candidate_face_embedding = None # used to remove entry from realtime_face_embeddings and check who is other
         recognized_persons = []
 
-        for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
-            is_matched = False
-            for single_obj in candidate_img_datasets:
-                known_face_embedding = single_obj.face_embedding
+        response_fake_detection = verify_real(image_file=img_path)
+        label = response_fake_detection["label"]
+        if label == "real":
+            for idx, realtime_face_embedding in enumerate(realtime_face_embeddings):
+                is_matched = False
+                for single_obj in candidate_img_datasets:
+                    known_face_embedding = single_obj.face_embedding
+
+                    is_matched, probability = compare_face_embedding(
+                        known_face_embedding, realtime_face_embedding
+                    )
+                    if is_matched:
+                        name = single_obj.user.email
+                        break
 
                 is_matched, probability = compare_face_embedding(
                     known_face_embedding, realtime_face_embedding
                 )
-                if is_matched:
-                    name = single_obj.user.email
-                    break
-
-            is_matched, probability = compare_face_embedding(
-                known_face_embedding, realtime_face_embedding
-            )
-            
-            if is_matched:
-                is_authorized_candidate_present = True
-                idx_candidate_face_embedding = idx
                 
-                # # save extracted face in db
-                # exam_candidate_data.np_face = realtime_extracted_faces[idx]
-                # exam_candidate_data.save()
-            else:
-                is_second_person_suspicious = check_proctor__superadmin(realtime_detected_faces)
-
-                if not is_second_person_suspicious:
-                    name = "proctor"
-                    probability = random.uniform(0.5, 0.9)
+                if is_matched:
+                    is_authorized_candidate_present = True
+                    idx_candidate_face_embedding = idx
+                    
+                    # # save extracted face in db
+                    # exam_candidate_data.np_face = realtime_extracted_faces[idx]
+                    # exam_candidate_data.save()
                 else:
-                    name = "unknown"
-                    probability = random.uniform(0.6, 0.95)
+                    is_second_person_suspicious = check_proctor__superadmin(realtime_detected_faces)
 
-            recognized_persons.append({
-                "name": name,
-                "probability": probability,
-                "box": realtime_detected_faces[idx]  # ['box']
-            })
+                    if not is_second_person_suspicious:
+                        name = "proctor"
+                        probability = random.uniform(0.5, 0.9)
+                    else:
+                        name = "unknown"
+                        probability = random.uniform(0.6, 0.95)
 
-        # trigger detect emotions background task
-        recognize_candidate_emotion.apply_async(args=[exam_candidate_data.id], contdown=1)
+                recognized_persons.append({
+                    "name": name,
+                    "probability": probability,
+                    "box": realtime_detected_faces[idx]  # ['box']
+                })
 
-        # if len(recognized_persons) >= 1:
-        #     hightlighted_image = highlight_recognized_faces(
-        #         img_path, recognized_persons,
-        #         # write_result_2_disk=True,
-        #         # res_file_name_with_path=res_file_name_with_path,
-        #     )
+            # trigger detect emotions background task
+            recognize_candidate_emotion.apply_async(args=[exam_candidate_data.id], contdown=1)
 
-        # first level suspicious checking
-        # is valid candidate available
-        if is_authorized_candidate_present == False:
-            is_suspicious = True
-            reason = "Candidate not detected in image."
+            # if len(recognized_persons) >= 1:
+            #     hightlighted_image = highlight_recognized_faces(
+            #         img_path, recognized_persons,
+            #         # write_result_2_disk=True,
+            #         # res_file_name_with_path=res_file_name_with_path,
+            #     )
+
+            # first level suspicious checking
+            # is valid candidate available
+            if is_authorized_candidate_present == False:
+                is_suspicious = True
+                reason = "Candidate not detected in image."
+            else:
+                is_suspicious = False
+                reason = ""
+
+            if (len(recognized_persons) > 1):
+                is_suspicious = True
+                reason += "\n Multiple persons detected."
+
+            exam_candidate_data.is_suspicious = is_suspicious
+            exam_candidate_data.reason = reason
+            exam_candidate_data.save()
+
+            response = {
+                "message": {
+                    "type": "success",
+                    "title": "Success Info",
+                    "text": "Recognition completed successfully",
+                },
+                "is_authorized_candidate_present": is_authorized_candidate_present,
+                "is_suspicious": is_suspicious,
+                "reason": reason
+            }
+            return JsonResponse(response, safe=True)
         else:
-            is_suspicious = False
-            reason = ""
-
-        if (len(recognized_persons) > 1):
             is_suspicious = True
-            reason += "\n Multiple persons detected."
-
-        exam_candidate_data.is_suspicious = is_suspicious
-        exam_candidate_data.reason = reason
-        exam_candidate_data.save()
-
-        response = {
-            "message": {
-                "type": "success",
-                "title": "Success Info",
-                "text": "Recognition completed successfully",
-            },
-            "is_authorized_candidate_present": is_authorized_candidate_present,
-            "is_suspicious": is_suspicious,
-            "reason": reason
-        }
-        return JsonResponse(response, safe=True)
+            reason = "Face spoofing detected"
+            exam_candidate_data.is_suspicious = is_suspicious
+            exam_candidate_data.reason = reason
+            exam_candidate_data.save()
+            response = {
+                "message": {
+                    "type": "error",
+                    "title": "Error Info",
+                    "text": "Face spoofing detected",
+                },
+                "is_authorized_candidate_present": False,
+                "is_suspicious": is_suspicious,
+                "reason": reason 
+            }
+            return JsonResponse(response, safe=True)
 
     except Exception as e:
         print(trace_error())

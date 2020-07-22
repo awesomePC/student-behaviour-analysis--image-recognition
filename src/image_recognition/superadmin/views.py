@@ -373,7 +373,7 @@ class CandidateAnalysis(View):
         else:
             suspicious_per = 0
 
-        threshold = 4
+        threshold = 10
         if suspicious_per > threshold:
             is_suspicious = True
         else:
@@ -579,20 +579,25 @@ class CandidateAnswerNearestEmotion:
             answer_created_at = answer_info["created_at"]
             # print(f"answer_created_at: {answer_created_at}")
 
-            candidate_photo = ExamCandidatePhoto.objects.filter(
+            candidate_photos = ExamCandidatePhoto.objects.filter(
                 user__id=candidate_id, exam__id=exam_id,
                 created_at__gt=answer_created_at
-            ).order_by('created_at').first()
+            ).order_by('created_at') # .first()
 
             emotion_label = "unknown"
 
             # print(f"candidate_photo: {candidate_photo}")
 
-            if candidate_photo:
-                emotion_label = candidate_photo.top_emotion
-            else:
-                pass
-            
+            # get first photo emotion after answer
+            # if first emotion null get second and so on
+            for candidate_photo in candidate_photos:
+                if candidate_photo:
+                    if candidate_photo.top_emotion:
+                        emotion_label = candidate_photo.top_emotion
+                        break
+                else:
+                    pass
+
             answer_info["emotion"] = emotion_label
         return lst_answers
 
@@ -637,6 +642,9 @@ class AnswerCorrectnessOverEmotion(View):
 
         for answer_info in lst_answers_with_emotions:
             emotion = answer_info["emotion"]
+            if emotion == None:
+                emotion = "unknown"
+
             is_correctly_answered = answer_info["is_correctly_answered"]
 
             if is_correctly_answered:
@@ -698,11 +706,17 @@ class AnswerSpeedOverEmotion(View):
 
         emotions_list = EmotionClasses._get_labels_list()
 
+        # import ipdb;ipdb.set_trace()
+
         # init
         emotion_dict = { key: [] for key in emotions_list }
 
         for idx, answer_info in enumerate(lst_answers_with_emotions):
             emotion = answer_info["emotion"]
+
+            if emotion == None:
+                emotion = "unknown"
+
             is_correctly_answered = answer_info["is_correctly_answered"]
 
             if idx == 1:
