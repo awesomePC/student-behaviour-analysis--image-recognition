@@ -759,7 +759,11 @@ def ajax_validate_user(request):
 
     except Exception as e:
         print(trace_error())
-        return JsonResponse({'success': False, 'message': str(e)})
+        return JsonResponse({
+            'success': False,
+            'message': "Can't perform verification on this image. Pass diffrent image to verify.."
+            # 'message': str(e)
+        })
 
 
 def check_proctor__superadmin(detected_persons):
