@@ -16,24 +16,42 @@ import cv2
 BASE_API_URL = "http://localhost:5003/"
 
 
-def test_api_verify_genuine(face_array):
-    data = {'face': face_array.tolist()}
+def test_api_verify_real(image_path):
+    # load the input image and construct the payload for the request
+    image = open(image_path, "rb").read()
 
-    FAKE_DETECTION_API_URL = urljoin(BASE_API_URL, '/verify-genuine')
+    payload = {
+        "image": image
+    }
+
+    FAKE_DETECTION_API_URL = urljoin(BASE_API_URL, '/verify-real')
 
     return requests.post(
-        FAKE_DETECTION_API_URL, json=data
+        FAKE_DETECTION_API_URL, files=payload
     )
 
 
 if __name__ == "__main__":
     # from numpy import asarray, loadtxt
 
-    img_face = cv2.imread("media/cropped-faces/happy.png")
-    img_face = cv2.resize(img_face, (224, 224), interpolation = cv2.INTER_NEAREST)
-    
-    #### 1 ###############
-    response = test_api_verify_genuine(img_face)
+    # image_file="media/images/own_grady.jpg"
+    image_file  = "media/images/h.png"
+
+    response = test_api_verify_real(image_file)
     print(f"Response status code: {response.status_code}")
     print(response.json())
-    # print(type(response.json()))
+
+    # label, score, image_bbox = verify_real(image, model_dir="./resources/anti_spoof_models", device_id="0")
+    
+    # if label == 1:
+    #     print("Real Face. Score: {:.2f}.".format(score))
+    #     result_text = "RealFace Score: {:.2f}".format(score)
+    #     color = (255, 0, 0)
+    # else:
+    #     print("Fake Face. Score: {:.2f}.".format(score))
+    #     result_text = "FakeFace Score: {:.2f}".format(score)
+    #     color = (0, 0, 255)
+
+    # print("\n")
+    # print(f"Face box: {image_bbox}")
+

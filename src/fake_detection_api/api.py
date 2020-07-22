@@ -11,12 +11,11 @@ import werkzeug
 
 import cv2
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
-from tensorflow.keras.models import load_model
-
+from PIL import Image
 import operator
 
-from settings import CKPT_DIR, FAKE_DETECTION_MODEL
+from test import verify_real
+import helpers
 
 # initialize our Flask application and the Keras model
 app = flask.Flask(__name__)
@@ -24,74 +23,54 @@ app = flask.Flask(__name__)
 # init Flask-RESTful API
 api = Api(app)
 
-# init request parser
-parse = reqparse.RequestParser()
 
-le_filename =  os.path.join(CKPT_DIR, "label_encoder_classes.npy")
-labelencoder = LabelEncoder()
-labelencoder.classes_ = np.load(le_filename)
-
-
-if FAKE_DETECTION_MODEL == "vgg16":
-    model_file = os.path.join(CKPT_DIR, "vgg16_model.best_2.hdf5")
-    print("\n Loadding vgg model .. \n")
-else:
-    model_file = os.path.join(CKPT_DIR, "resnet50_model_model.best.hdf5")
-    print("\n Loadding resnet50 model ..\n")
-
-model = load_model(model_file)
-
-
-def truncate_float(value, digits_after_point=2):
+@app.route("/verify-real", methods=["POST"])
+def api_verify_real():
     """
-    Truncate long float numbers
-    >>> truncate_float(1.1477784, 2)
-       1.14
+    API to check is real or fake image
     """
-    pow_10 = 10 ** digits_after_point
-    return (float(int(value * pow_10))) / pow_10
+    data = {}
+    # print(flask.request.data)
 
-def test_single_image(img_single_face, normalize=True):
+    # ensure an image was properly uploaded to our endpoint
+    if flask.request.method == "POST":
+        if flask.request.files.get("image"):
+            # read the image in PIL format
+            realtime_image = flask.request.files["image"].read()
+            realtime_pil_image = Image.open(io.BytesIO(realtime_image)).convert('RGB')
+            np_realtime_image_array = np.asarray(realtime_pil_image)
 
-    if img_single_face.any():
-        # vgg16 model requires normalized image
-        # whereas resnet50, xception dosnot work properly on normalized image -- it may give wrong result if image is normalized
-        if normalize:
-            img_single_face = img_single_face.astype(float) / 255
+            np_realtime_image_array = cv2.cvtColor(np_realtime_image_array, cv2.COLOR_RGB2BGR) 
 
-        expanded_img_single_face = np.expand_dims(img_single_face, axis=0)
-        pred = model.predict(expanded_img_single_face)
+            label, score, image_bbox = encoded_img = verify_real(
+                np_realtime_image_array,
+                model_dir="./resources/anti_spoof_models",
+            )
 
-        # import pdb; pdb.set_trace()
+            if label == 1:
+                label = "real"
+            else:
+                label = "fake"
+            
+            data["label"] = label
+            data["score"] = score
+            data["image_bbox"] = image_bbox
 
-        prob_result = [truncate_float(value, 3) for value in pred[0]]
-        # get a dictionary of {'classname', 'probability'}
-        prob_per_class_dict = dict(zip(labelencoder.classes_, prob_result))
-        # print(f"\n prob_per_class_dict : {prob_per_class_dict}")
-        
-        # get max class name
-        predicted_class = max(prob_per_class_dict.items(), key=operator.itemgetter(1))[0]
-        # print(f'\n predicted_class : {predicted_class}')
+            # indicate that the request was a success
+            data["success"] = True
 
-        predicted_prob = prob_per_class_dict[predicted_class]
-        # print(f'\n predicted probability : {predicted_prob}')
-
-        return {
-            "prob_per_class_dict": prob_per_class_dict,
-            "predicted_class": predicted_class,
-            "predicted_prob": predicted_prob,
-        }
-
+            # app.logger.info("Recognized faces highlighted successfully.")
+        else:
+            data["success"] = False
+            data["reason"] = "Error .. reading uploaded image"
     else:
-        print(f"Skipping.. No face found ")
-        return {}
-
-
-@app.route('/verify-genuine', methods=['POST'])
-def detect_emotions():
-    data = request.json
-    face_array = np.array(data['face'])
-    return test_single_image(face_array, normalize=False)
+        data["success"] = False
+        reason = "Error .. only 'POST' method allowed"
+        data["reason"] = reason
+        app.logger.error(reason)
+        
+    # return the data dictionary as a JSON response
+    return json.dumps(data, cls=helpers.MyEncoder)
 
 
 # if this is the main thread of execution first load the model and
