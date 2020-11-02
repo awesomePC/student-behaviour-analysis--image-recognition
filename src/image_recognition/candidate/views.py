@@ -761,7 +761,7 @@ def ajax_validate_user(request):
         print(trace_error())
         return JsonResponse({
             'success': False,
-            'message': "Can't perform verification on this image. Pass diffrent image to verify.."
+            'message': "Can't perform verification on this image. Pass different image to verify.."
             # 'message': str(e)
         })
 
