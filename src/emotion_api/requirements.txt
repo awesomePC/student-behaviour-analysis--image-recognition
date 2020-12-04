@@ -6,7 +6,6 @@ scikit-learn==0.22.2.post1
 
 # tensorflow==1.15.0
 # emotion detection lib
-dlib==19.20.*  # 19.20.0  -- for loading deepface dlib wrapper
 deepface
 
 Pillow==6.2.1
