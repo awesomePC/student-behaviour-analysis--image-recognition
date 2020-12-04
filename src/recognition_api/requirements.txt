@@ -1,6 +1,9 @@
 Flask==1.1.1
 Flask-RESTful==0.3.7
 
+# to fix Error while loading saved model in docker deployment
+h5py < 3.0.0
+
 tensorflow==1.14.*
 Keras==2.2.4
 
