@@ -45,11 +45,11 @@ def loadModel():
 		#TO-DO: upload weights to google drive
 		
 		#zip
-		try:
-			url = 'https://drive.google.com/uc?id=13iUHHP3SlNg53qSuQZDdHDSDNdBP9nwy'
-			output = home+'/.deepface/weights/facial_expression_model_weights.zip'
-			gdown.download(url, output, quiet=False)
-		except Exception as e:
+		url = 'https://drive.google.com/uc?id=13iUHHP3SlNg53qSuQZDdHDSDNdBP9nwy'
+		output = home+'/.deepface/weights/facial_expression_model_weights.zip'
+		gdown.download(url, output, quiet=False)
+		
+		if not os.path.exists(output):
 			# download from own drive -  nivrattituito@gmail.com
 			# https://drive.google.com/file/d/1ZESc3y8RsJHQZSuaNa6_JBlMvWYQTRjL/view?usp=sharing
 			url = 'https://drive.google.com/uc?id=1ZESc3y8RsJHQZSuaNa6_JBlMvWYQTRjL'
